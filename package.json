@@ -19,6 +19,7 @@
     "licenses": "node scripts/generateThirdPartyLicenses.js",
     "prestart": "npm run licenses",
     "start": "electron .",
+    "test": "vitest run",
     "build:mac": "npm run licenses && electron-builder --mac --publish=never",
     "build:linux": "npm run licenses && electron-builder --linux --publish=never",
     "build:win": "npm run licenses && electron-builder --win --publish=never",
@@ -28,7 +29,8 @@
   },
   "devDependencies": {
     "electron": "^44.5.0",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^26.15.3",
+    "vitest": "^4.1.11"
   },
   "build": {
     "appId": "com.darkdkl.waveamp",
@@ -51,6 +53,7 @@
       "theme.js",
       "hotkeys.js",
       "app.js",
+      "src/main/**/*",
       "assets/**/*"
     ],
     "directories": {

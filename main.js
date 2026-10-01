@@ -1,6 +1,11 @@
 const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, net, session, shell, dialog, globalShortcut, screen } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
+const { isHttpUrl, playlistKind, parsePlaylistStreamUrl } = require("./src/main/streamUrl");
+const { stationSummary } = require("./src/main/radioStations");
+const { comboToAccelerator } = require("./src/main/accelerator");
+const { fixMojibake } = require("./src/main/textEncoding");
+const { isNewerVersion } = require("./src/main/version");
 
 const WINDOW_WIDTH = 480;
 const RESIZE_DURATION_MS = 180;
@@ -155,42 +160,6 @@ async function netRequestJson(url, headers, timeoutMs) {
 
 const PLAYLIST_MAX_BYTES = 256 * 1024;
 
-function isHttpUrl(value) {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === "http:" || protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function playlistKind(url) {
-  const path = new URL(url).pathname.toLowerCase();
-  if (path.endsWith(".pls")) return "pls";
-  if (path.endsWith(".m3u")) return "m3u";
-  return null;
-}
-
-function parsePlaylistStreamUrl(text, kind, baseUrl) {
-  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).map((line) => line.trim());
-  const isPls = kind === "pls" || /^\[playlist\]$/i.test(lines[0] || "");
-  for (const line of lines) {
-    let candidate = null;
-    if (isPls) {
-      const match = /^File\d+\s*=\s*(.+)$/i.exec(line);
-      if (match) candidate = match[1].trim();
-    } else if (line && !line.startsWith("#")) {
-      candidate = line;
-    }
-    if (!candidate) continue;
-    try {
-      const resolved = new URL(candidate, baseUrl).href;
-      if (isHttpUrl(resolved)) return resolved;
-    } catch {}
-  }
-  return null;
-}
-
 async function resolveStreamUrl(url) {
   if (typeof url !== "string" || !isHttpUrl(url)) return { ok: false, error: "invalid" };
   const kind = playlistKind(url);
@@ -218,21 +187,6 @@ async function radioApiFetch(pathAndQuery) {
   }
   writeLog("error", "radio-api", `All mirrors failed for ${pathAndQuery}: ${lastErr?.message}`);
   throw lastErr;
-}
-
-function stationSummary(s) {
-  return {
-    stationuuid: s.stationuuid,
-    name: s.name,
-    url: s.url_resolved || s.url,
-    favicon: s.favicon || "",
-    tags: s.tags || "",
-    country: s.country || "",
-    countrycode: s.countrycode || "",
-    state: s.state || "",
-    bitrate: s.bitrate || 0,
-    codec: s.codec || "",
-  };
 }
 
 // The API's tag filter is case-sensitive (pop ≠ Pop), so filter by tag locally.
@@ -548,26 +502,6 @@ function registerMediaKeys() {
 
 let registeredHotkeys = [];
 
-const ACCELERATOR_KEYS = {
-  ArrowUp: "Up", ArrowDown: "Down", ArrowLeft: "Left", ArrowRight: "Right",
-  Comma: ",", Period: ".", Slash: "/", Backslash: "\\", Semicolon: ";", Quote: "'",
-  BracketLeft: "[", BracketRight: "]", Minus: "-", Equal: "=", Backquote: "`",
-};
-
-function comboToAccelerator(combo) {
-  const parts = combo.split("+");
-  const code = parts.pop();
-  const mods = parts.map((mod) =>
-    ({ Ctrl: "Control", Alt: "Alt", Shift: "Shift", Meta: process.platform === "darwin" ? "Command" : "Super" })[mod]
-  );
-  let key = ACCELERATOR_KEYS[code];
-  if (!key && /^Key[A-Z]$/.test(code)) key = code.slice(3);
-  if (!key && /^Digit\d$/.test(code)) key = code.slice(5);
-  if (!key && /^Numpad\d$/.test(code)) key = "num" + code.slice(6);
-  if (!key && /^(F\d{1,2}|Space|Home|End|PageUp|PageDown|Insert|Delete|Tab|Enter|Escape|Backspace)$/.test(code)) key = code;
-  return key && !mods.includes(undefined) ? [...mods, key].join("+") : null;
-}
-
 function applyGlobalHotkeys({ enabled, bindings } = {}) {
   for (const accelerator of registeredHotkeys) globalShortcut.unregister(accelerator);
   registeredHotkeys = [];
@@ -725,23 +659,6 @@ ipcMain.on("config-save", (event, config) => {
   }
 });
 
-// Tags decoded as latin1 may really be UTF-8 ("FÃ¼r") or old Russian cp1251 ("Êèíî").
-// Valid UTF-8 wins; cp1251 only when high-byte characters outnumber ASCII letters.
-const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
-const cp1251Decoder = new TextDecoder("windows-1251");
-function fixMojibake(text) {
-  if (!text || /[^\x00-\xff]/.test(text)) return text;
-  const high = (text.match(/[\x80-\xff]/g) || []).length;
-  if (high === 0) return text;
-  const bytes = Buffer.from(text, "latin1");
-  try {
-    return utf8Decoder.decode(bytes);
-  } catch {
-    const asciiLetters = (text.match(/[a-z]/gi) || []).length;
-    return high < asciiLetters ? text : cp1251Decoder.decode(bytes);
-  }
-}
-
 // music-metadata is ESM-only.
 let musicMetadata = null;
 async function readTrackTags(filePath) {
@@ -822,15 +739,6 @@ const UPDATE_STRINGS = {
     skip: "Skip this version",
   },
 };
-
-function isNewerVersion(candidate, current) {
-  const a = candidate.split(".").map(Number);
-  const b = current.split(".").map(Number);
-  for (let i = 0; i < 3; i++) {
-    if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
-  }
-  return false;
-}
 
 async function fetchLatestRelease() {
   const data = await netRequestJson(
