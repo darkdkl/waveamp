@@ -1,14 +1,17 @@
-import { describe, expect, it } from "vitest";
-import { loadScript, plain } from "../loadScript.js";
+import { describe, expect, it, vi } from "vitest";
 
-function loadHotkeys(platform) {
-  return loadScript("hotkeys.js", { navigator: { platform } }).window.hotkeys;
+async function loadHotkeys(platform: string) {
+  vi.resetModules();
+  vi.stubGlobal("navigator", { platform, userAgent: "" });
+  const { hotkeys } = await import("../../src/renderer/hotkeys");
+  vi.unstubAllGlobals();
+  return hotkeys;
 }
 
-const linux = loadHotkeys("Linux x86_64");
-const mac = loadHotkeys("MacIntel");
+const linux = await loadHotkeys("Linux x86_64");
+const mac = await loadHotkeys("MacIntel");
 
-function keyEvent(code, mods = {}) {
+function keyEvent(code: string, mods: Partial<KeyboardEvent> = {}) {
   return { code, ctrlKey: false, altKey: false, shiftKey: false, metaKey: false, ...mods };
 }
 
@@ -64,7 +67,7 @@ describe("format", () => {
 
 describe("normalize", () => {
   it("keeps saved strings, including cleared ones, and falls back to defaults", () => {
-    const config = linux.normalize({ local: { mute: "KeyN", stop: "" , next: 5 }, globalEnabled: true });
+    const config = linux.normalize({ local: { mute: "KeyN", stop: "", next: 5 as unknown as string }, globalEnabled: true });
     expect(config.local.mute).toBe("KeyN");
     expect(config.local.stop).toBe("");
     expect(config.local.next).toBe(linux.defaults().local.next);
@@ -72,7 +75,7 @@ describe("normalize", () => {
   });
 
   it("disables global hotkeys unless explicitly enabled", () => {
-    expect(linux.normalize({ globalEnabled: "yes" }).globalEnabled).toBe(false);
+    expect(linux.normalize({ globalEnabled: "yes" as unknown as boolean }).globalEnabled).toBe(false);
     expect(linux.normalize(null).globalEnabled).toBe(false);
   });
 });
@@ -81,18 +84,18 @@ describe.each([
   ["Linux", linux],
   ["macOS", mac],
 ])("defaults on %s", (name, hotkeys) => {
-  const defaults = plain(hotkeys.defaults());
+  const defaults = hotkeys.defaults();
 
   it("covers every action", () => {
     expect(Object.keys(defaults.local).sort()).toEqual(hotkeys.ACTIONS.map((a) => a.id).sort());
   });
 
-  it.each(["local", "global"])("has no duplicate %s combos", (scope) => {
+  it.each(["local", "global"] as const)("has no duplicate %s combos", (scope) => {
     const combos = Object.values(defaults[scope]).filter(Boolean);
     expect(new Set(combos).size).toBe(combos.length);
   });
 
-  it.each(["local", "global"])("has only valid %s combos", (scope) => {
+  it.each(["local", "global"] as const)("has only valid %s combos", (scope) => {
     for (const combo of Object.values(defaults[scope]).filter(Boolean)) {
       expect(hotkeys.rejectReason(combo, scope), combo).toBeNull();
     }

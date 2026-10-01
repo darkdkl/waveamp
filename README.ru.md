@@ -79,17 +79,20 @@
 
 ## Сборка из исходников
 
-Чистый HTML/CSS/JS без фреймворков и сборщиков плюс Electron-обвязка.
-Нужен Node.js 20+.
+TypeScript без UI-фреймворков, сборка — [electron-vite](https://electron-vite.org/)
+(Vite), тесты — Vitest. Нужен Node.js 20.19+.
 
 ```bash
 npm install
-npm start
+npm run dev
 ```
 
-Тесты:
+`npm run dev` запускает приложение с горячей перезагрузкой; `npm start` — продакшн-сборку.
+
+Проверки:
 
 ```bash
+npm run typecheck
 npm test
 ```
 
@@ -100,9 +103,6 @@ npm run build:mac
 npm run build:linux
 npm run build:win
 ```
-
-Если открыть `index.html` прямо в браузере, получится урезанная веб-версия
-(без радио и сохранения состояния).
 
 ## Обратная связь
 

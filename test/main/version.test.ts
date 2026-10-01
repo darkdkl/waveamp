@@ -1,7 +1,5 @@
-import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-
-const { isNewerVersion } = createRequire(import.meta.url)("../../src/main/version.js");
+import { isNewerVersion } from "../../src/main/version";
 
 describe("isNewerVersion", () => {
   it("detects a newer patch, minor and major", () => {

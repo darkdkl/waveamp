@@ -1,4 +1,4 @@
-function isNewerVersion(candidate, current) {
+export function isNewerVersion(candidate: string, current: string): boolean {
   const a = candidate.split(".").map(Number);
   const b = current.split(".").map(Number);
   for (let i = 0; i < 3; i++) {
@@ -6,5 +6,3 @@ function isNewerVersion(candidate, current) {
   }
   return false;
 }
-
-module.exports = { isNewerVersion };

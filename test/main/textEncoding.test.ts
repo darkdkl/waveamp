@@ -1,7 +1,5 @@
-import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-
-const { fixMojibake } = createRequire(import.meta.url)("../../src/main/textEncoding.js");
+import { fixMojibake } from "../../src/main/textEncoding";
 
 describe("fixMojibake", () => {
   it("repairs UTF-8 that was read as latin1", () => {

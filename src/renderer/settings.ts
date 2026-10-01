@@ -1,31 +1,36 @@
-const settingsTabInterface = document.getElementById("settingsTabInterface");
-const settingsTabSystem = document.getElementById("settingsTabSystem");
+import { i18n } from "./i18n";
+import { hotkeys } from "./hotkeys";
+import { accentColor as accentColorTheme } from "./theme";
+import type { ProxyConfig, ProxyType, SettingsAction, SettingsActionValue, VizResponse } from "../shared/types";
+
+const settingsTabInterface = document.getElementById("settingsTabInterface") as HTMLButtonElement;
+const settingsTabSystem = document.getElementById("settingsTabSystem") as HTMLButtonElement;
 const settingsInterfaceView = document.getElementById("settingsInterfaceView");
 const settingsSystemView = document.getElementById("settingsSystemView");
-const langSelect = document.getElementById("langSelect");
-const scaleSelect = document.getElementById("scaleSelect");
-const vizResponseSelect = document.getElementById("vizResponseSelect");
-const proxyEnabledBtn = document.getElementById("proxyEnabledBtn");
-const proxyTypeSelect = document.getElementById("proxyTypeSelect");
-const proxyHostInput = document.getElementById("proxyHostInput");
-const proxyPortInput = document.getElementById("proxyPortInput");
-const proxyUsernameInput = document.getElementById("proxyUsernameInput");
-const proxyPasswordInput = document.getElementById("proxyPasswordInput");
-const loggingEnabledBtn = document.getElementById("loggingEnabledBtn");
-const openLogFolderBtn = document.getElementById("openLogFolderBtn");
-const clearLogBtn = document.getElementById("clearLogBtn");
-const autoUpdateEnabledBtn = document.getElementById("autoUpdateEnabledBtn");
-const checkUpdatesBtn = document.getElementById("checkUpdatesBtn");
+const langSelect = document.getElementById("langSelect") as HTMLSelectElement;
+const scaleSelect = document.getElementById("scaleSelect") as HTMLSelectElement;
+const vizResponseSelect = document.getElementById("vizResponseSelect") as HTMLSelectElement;
+const proxyEnabledBtn = document.getElementById("proxyEnabledBtn") as HTMLButtonElement;
+const proxyTypeSelect = document.getElementById("proxyTypeSelect") as HTMLSelectElement;
+const proxyHostInput = document.getElementById("proxyHostInput") as HTMLInputElement;
+const proxyPortInput = document.getElementById("proxyPortInput") as HTMLInputElement;
+const proxyUsernameInput = document.getElementById("proxyUsernameInput") as HTMLInputElement;
+const proxyPasswordInput = document.getElementById("proxyPasswordInput") as HTMLInputElement;
+const loggingEnabledBtn = document.getElementById("loggingEnabledBtn") as HTMLButtonElement;
+const openLogFolderBtn = document.getElementById("openLogFolderBtn") as HTMLButtonElement;
+const clearLogBtn = document.getElementById("clearLogBtn") as HTMLButtonElement;
+const autoUpdateEnabledBtn = document.getElementById("autoUpdateEnabledBtn") as HTMLButtonElement;
+const checkUpdatesBtn = document.getElementById("checkUpdatesBtn") as HTMLButtonElement;
 const updateStatusText = document.getElementById("updateStatusText");
-const trayEnabledBtn = document.getElementById("trayEnabledBtn");
-const closeMinimizesToTrayBtn = document.getElementById("closeMinimizesToTrayBtn");
+const trayEnabledBtn = document.getElementById("trayEnabledBtn") as HTMLButtonElement;
+const closeMinimizesToTrayBtn = document.getElementById("closeMinimizesToTrayBtn") as HTMLButtonElement;
 const accentPresets = document.getElementById("accentPresets");
-const accentHueInput = document.getElementById("accentHueInput");
-const accentSaturationInput = document.getElementById("accentSaturationInput");
-const accentTintInput = document.getElementById("accentTintInput");
-const accentResetBtn = document.getElementById("accentResetBtn");
+const accentHueInput = document.getElementById("accentHueInput") as HTMLInputElement;
+const accentSaturationInput = document.getElementById("accentSaturationInput") as HTMLInputElement;
+const accentTintInput = document.getElementById("accentTintInput") as HTMLInputElement;
+const accentResetBtn = document.getElementById("accentResetBtn") as HTMLButtonElement;
 
-const settingsTabHotkeys = document.getElementById("settingsTabHotkeys");
+const settingsTabHotkeys = document.getElementById("settingsTabHotkeys") as HTMLButtonElement;
 const settingsHotkeysView = document.getElementById("settingsHotkeysView");
 
 function setSettingsView(view) {
@@ -46,8 +51,8 @@ document.addEventListener("keydown", (event) => {
 });
 
 // State is owned by app.js; this window only relays changes and mirrors onSettingsState.
-function sendAction(type, value) {
-  window.electronAPI?.sendSettingsAction?.({ type, value });
+function sendAction<T extends SettingsAction["type"]>(type: T, value: SettingsActionValue<T>) {
+  window.electronAPI?.sendSettingsAction?.({ type, value } as SettingsAction);
 }
 
 let proxyEnabled = false;
@@ -62,7 +67,7 @@ let releaseUrl = "";
 function sendProxyConfig() {
   sendAction("setProxyConfig", {
     enabled: proxyEnabled,
-    type: proxyTypeSelect.value,
+    type: proxyTypeSelect.value as ProxyType,
     host: proxyHostInput.value.trim(),
     port: proxyPortInput.value.trim(),
     username: proxyUsernameInput.value,
@@ -72,7 +77,7 @@ function sendProxyConfig() {
 
 function setProxyEnabled(enabled) {
   proxyEnabled = enabled;
-  proxyEnabledBtn.textContent = enabled ? window.i18n.t("on") : window.i18n.t("off");
+  proxyEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   proxyEnabledBtn.classList.toggle("is-active", enabled);
   [proxyTypeSelect, proxyHostInput, proxyPortInput, proxyUsernameInput, proxyPasswordInput].forEach((el) => {
     el.disabled = !enabled;
@@ -87,7 +92,7 @@ proxyEnabledBtn.addEventListener("click", () => setProxyEnabled(!proxyEnabled));
 
 function setLoggingEnabled(enabled) {
   loggingEnabled = enabled;
-  loggingEnabledBtn.textContent = enabled ? window.i18n.t("on") : window.i18n.t("off");
+  loggingEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   loggingEnabledBtn.classList.toggle("is-active", enabled);
   sendAction("setLoggingEnabled", enabled);
 }
@@ -95,8 +100,8 @@ loggingEnabledBtn.addEventListener("click", () => setLoggingEnabled(!loggingEnab
 openLogFolderBtn.addEventListener("click", () => window.electronAPI?.openLogFolder?.());
 
 const appVersionText = document.getElementById("appVersionText");
-const appLicenseBtn = document.getElementById("appLicenseBtn");
-const thirdPartyLicensesBtn = document.getElementById("thirdPartyLicensesBtn");
+const appLicenseBtn = document.getElementById("appLicenseBtn") as HTMLButtonElement;
+const thirdPartyLicensesBtn = document.getElementById("thirdPartyLicensesBtn") as HTMLButtonElement;
 window.electronAPI?.getAppVersion?.().then((version) => {
   appVersionText.textContent = `WaveAMP ${version}`;
 });
@@ -106,7 +111,7 @@ clearLogBtn.addEventListener("click", () => window.electronAPI?.clearLogs?.());
 
 function setAutoUpdateEnabled(enabled) {
   autoUpdateEnabled = enabled;
-  autoUpdateEnabledBtn.textContent = enabled ? window.i18n.t("on") : window.i18n.t("off");
+  autoUpdateEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   autoUpdateEnabledBtn.classList.toggle("is-active", enabled);
   sendAction("setAutoUpdateEnabled", enabled);
 }
@@ -114,14 +119,14 @@ autoUpdateEnabledBtn.addEventListener("click", () => setAutoUpdateEnabled(!autoU
 
 function setCloseMinimizesToTrayEnabled(enabled) {
   closeMinimizesToTrayEnabled = enabled;
-  closeMinimizesToTrayBtn.textContent = enabled ? window.i18n.t("on") : window.i18n.t("off");
+  closeMinimizesToTrayBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   closeMinimizesToTrayBtn.classList.toggle("is-active", enabled);
   sendAction("setCloseMinimizesToTrayEnabled", enabled);
 }
 
 function setTrayIconEnabled(enabled) {
   trayIconEnabled = enabled;
-  trayEnabledBtn.textContent = enabled ? window.i18n.t("on") : window.i18n.t("off");
+  trayEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   trayEnabledBtn.classList.toggle("is-active", enabled);
   closeMinimizesToTrayBtn.disabled = !enabled;
   if (!enabled && closeMinimizesToTrayEnabled) setCloseMinimizesToTrayEnabled(false);
@@ -130,10 +135,10 @@ function setTrayIconEnabled(enabled) {
 trayEnabledBtn.addEventListener("click", () => setTrayIconEnabled(!trayIconEnabled));
 closeMinimizesToTrayBtn.addEventListener("click", () => setCloseMinimizesToTrayEnabled(!closeMinimizesToTrayEnabled));
 
-const openReleaseBtn = document.getElementById("openReleaseBtn");
+const openReleaseBtn = document.getElementById("openReleaseBtn") as HTMLButtonElement;
 
 function updateStatusMessage() {
-  return updateStatusKey ? window.i18n.t(updateStatusKey).replace("{version}", updateVersion) : "";
+  return updateStatusKey ? i18n.t(updateStatusKey).replace("{version}", updateVersion) : "";
 }
 
 function setUpdateStatusText(key) {
@@ -156,9 +161,9 @@ checkUpdatesBtn.addEventListener("click", async () => {
   setUpdateStatusText(result.upToDate ? "upToDate" : "updateAvailable");
 });
 
-let accentColor = { ...window.accentColor.DEFAULT };
+let accentColor = { ...accentColorTheme.DEFAULT };
 
-const presetButtons = window.accentColor.PRESETS.map((preset) => {
+const presetButtons = accentColorTheme.PRESETS.map((preset) => {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "settings-panel__swatch";
@@ -172,11 +177,11 @@ const presetButtons = window.accentColor.PRESETS.map((preset) => {
 });
 
 function showAccentColor() {
-  window.accentColor.apply(accentColor);
+  accentColorTheme.apply(accentColor);
   accentHueInput.value = String(accentColor.hue);
   accentSaturationInput.value = String(accentColor.saturation);
   accentTintInput.value = String(accentColor.tint);
-  window.accentColor.PRESETS.forEach((preset, i) => {
+  accentColorTheme.PRESETS.forEach((preset, i) => {
     presetButtons[i].classList.toggle(
       "is-active",
       preset.hue === accentColor.hue &&
@@ -187,7 +192,7 @@ function showAccentColor() {
 }
 
 function setAccentColor(color) {
-  accentColor = window.accentColor.normalize(color);
+  accentColor = accentColorTheme.normalize(color);
   showAccentColor();
   sendAction("setAccentColor", accentColor);
 }
@@ -197,43 +202,43 @@ accentSaturationInput.addEventListener("input", () =>
   setAccentColor({ ...accentColor, saturation: accentSaturationInput.value })
 );
 accentTintInput.addEventListener("input", () => setAccentColor({ ...accentColor, tint: accentTintInput.value }));
-accentResetBtn.addEventListener("click", () => setAccentColor(window.accentColor.DEFAULT));
+accentResetBtn.addEventListener("click", () => setAccentColor(accentColorTheme.DEFAULT));
 showAccentColor();
 
 const hotkeysList = document.getElementById("hotkeysList");
-const globalHotkeysBtn = document.getElementById("globalHotkeysBtn");
+const globalHotkeysBtn = document.getElementById("globalHotkeysBtn") as HTMLButtonElement;
 const hotkeysMessage = document.getElementById("hotkeysMessage");
 const hotkeysHint = document.getElementById("hotkeysHint");
 const globalHotkeysHint = document.getElementById("globalHotkeysHint");
-const hotkeysResetBtn = document.getElementById("hotkeysResetBtn");
+const hotkeysResetBtn = document.getElementById("hotkeysResetBtn") as HTMLButtonElement;
 const isLinux = /Linux/.test(navigator.platform || navigator.userAgent);
 
-let hotkeyConfig = window.hotkeys.defaults();
+let hotkeyConfig = hotkeys.defaults();
 let hotkeyFailures = [];
-let capturing = null;
-let hotkeyMessage = null;
+let capturing: { action: string; scope: "local" | "global" } | null = null;
+let hotkeyMessage: { key: string; params?: Record<string, string | number> } | null = null;
 
-function translate(key, params = {}) {
-  return Object.entries(params).reduce((text, [name, value]) => text.replace(`{${name}}`, value), window.i18n.t(key));
+function translate(key: string, params: Record<string, string | number> = {}) {
+  return Object.entries(params).reduce((text, [name, value]) => text.replace(`{${name}}`, String(value)), i18n.t(key));
 }
 
-function setHotkeyMessage(key, params) {
+function setHotkeyMessage(key: string | null, params?: Record<string, string | number>) {
   hotkeyMessage = key ? { key, params } : null;
 }
 
 function actionName(id) {
-  return window.i18n.t(window.hotkeys.ACTIONS.find((action) => action.id === id).nameKey);
+  return i18n.t(hotkeys.ACTIONS.find((action) => action.id === id).nameKey);
 }
 
 function renderHotkeys() {
-  const rows = window.hotkeys.ACTIONS.map((action) => {
+  const rows = hotkeys.ACTIONS.map((action) => {
     const row = document.createElement("div");
     row.className = "hotkeys__row";
     const name = document.createElement("span");
-    name.textContent = window.i18n.t(action.nameKey);
+    name.textContent = i18n.t(action.nameKey);
     row.appendChild(name);
 
-    for (const scope of ["local", "global"]) {
+    for (const scope of ["local", "global"] as const) {
       const combo = hotkeyConfig[scope][action.id];
       const isCapturing = capturing?.action === action.id && capturing.scope === scope;
       const failed = scope === "global" && hotkeyConfig.globalEnabled && hotkeyFailures.includes(action.id);
@@ -244,8 +249,8 @@ function renderHotkeys() {
       field.classList.toggle("is-empty", !combo && !isCapturing);
       field.classList.toggle("is-failed", failed && !isCapturing);
       field.disabled = scope === "global" && !hotkeyConfig.globalEnabled;
-      field.textContent = isCapturing ? window.i18n.t("hotkeyPress") : window.hotkeys.format(combo) || "—";
-      field.title = failed ? window.i18n.t("hotkeyFailed") : "";
+      field.textContent = isCapturing ? i18n.t("hotkeyPress") : hotkeys.format(combo) || "—";
+      field.title = failed ? i18n.t("hotkeyFailed") : "";
       field.addEventListener("click", () => {
         capturing = { action: action.id, scope };
         setHotkeyMessage(null);
@@ -257,16 +262,16 @@ function renderHotkeys() {
   });
   hotkeysList.replaceChildren(...rows);
 
-  globalHotkeysBtn.textContent = window.i18n.t(hotkeyConfig.globalEnabled ? "on" : "off");
+  globalHotkeysBtn.textContent = i18n.t(hotkeyConfig.globalEnabled ? "on" : "off");
   globalHotkeysBtn.classList.toggle("is-active", hotkeyConfig.globalEnabled);
   globalHotkeysHint.hidden = !hotkeyConfig.globalEnabled;
 
-  const failedMessage = hotkeyConfig.globalEnabled && hotkeyFailures.length ? { key: "hotkeyFailedMessage" } : null;
+  const failedMessage: typeof hotkeyMessage = hotkeyConfig.globalEnabled && hotkeyFailures.length ? { key: "hotkeyFailedMessage" } : null;
   const message = hotkeyMessage || failedMessage;
   hotkeysMessage.textContent = message ? translate(message.key, message.params) : "";
   hotkeysHint.textContent =
-    window.i18n.t("hotkeysHint") +
-    (isLinux && hotkeyConfig.globalEnabled ? " " + window.i18n.t("hotkeysHintWayland") : "");
+    i18n.t("hotkeysHint") +
+    (isLinux && hotkeyConfig.globalEnabled ? " " + i18n.t("hotkeysHintWayland") : "");
 }
 
 function sendHotkeys() {
@@ -277,9 +282,9 @@ function assignHotkey(combo) {
   const { action, scope } = capturing;
   capturing = null;
   if (combo) {
-    const reason = window.hotkeys.rejectReason(combo, scope);
+    const reason = hotkeys.rejectReason(combo, scope);
     if (reason) {
-      setHotkeyMessage(reason, { combo: window.hotkeys.format(combo) });
+      setHotkeyMessage(reason, { combo: hotkeys.format(combo) });
       renderHotkeys();
       return;
     }
@@ -288,7 +293,7 @@ function assignHotkey(combo) {
     );
     if (previous) {
       hotkeyConfig[scope][previous] = "";
-      setHotkeyMessage("hotkeyMoved", { combo: window.hotkeys.format(combo), action: actionName(previous) });
+      setHotkeyMessage("hotkeyMoved", { combo: hotkeys.format(combo), action: actionName(previous) });
     }
   }
   hotkeyConfig[scope][action] = combo;
@@ -313,7 +318,7 @@ document.addEventListener(
       assignHotkey("");
       return;
     }
-    const combo = window.hotkeys.comboFromEvent(event);
+    const combo = hotkeys.comboFromEvent(event);
     if (combo) assignHotkey(combo);
   },
   true
@@ -322,7 +327,7 @@ document.addEventListener(
 document.addEventListener(
   "click",
   (event) => {
-    if (capturing && !event.target.closest(".hotkeys__key")) {
+    if (capturing && !(event.target as HTMLElement).closest(".hotkeys__key")) {
       capturing = null;
       renderHotkeys();
     }
@@ -338,7 +343,7 @@ globalHotkeysBtn.addEventListener("click", () => {
 });
 
 hotkeysResetBtn.addEventListener("click", () => {
-  hotkeyConfig = { ...window.hotkeys.defaults(), globalEnabled: hotkeyConfig.globalEnabled };
+  hotkeyConfig = { ...hotkeys.defaults(), globalEnabled: hotkeyConfig.globalEnabled };
   capturing = null;
   setHotkeyMessage("hotkeysResetDone");
   renderHotkeys();
@@ -349,23 +354,23 @@ renderHotkeys();
 
 function refreshTextForLanguage() {
   renderHotkeys();
-  window.accentColor.PRESETS.forEach((preset, i) => {
-    presetButtons[i].title = window.i18n.t(preset.nameKey);
-    presetButtons[i].setAttribute("aria-label", window.i18n.t(preset.nameKey));
+  accentColorTheme.PRESETS.forEach((preset, i) => {
+    presetButtons[i].title = i18n.t(preset.nameKey);
+    presetButtons[i].setAttribute("aria-label", i18n.t(preset.nameKey));
   });
-  proxyEnabledBtn.textContent = proxyEnabled ? window.i18n.t("on") : window.i18n.t("off");
-  loggingEnabledBtn.textContent = loggingEnabled ? window.i18n.t("on") : window.i18n.t("off");
-  autoUpdateEnabledBtn.textContent = autoUpdateEnabled ? window.i18n.t("on") : window.i18n.t("off");
-  trayEnabledBtn.textContent = trayIconEnabled ? window.i18n.t("on") : window.i18n.t("off");
-  closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? window.i18n.t("on") : window.i18n.t("off");
+  proxyEnabledBtn.textContent = proxyEnabled ? i18n.t("on") : i18n.t("off");
+  loggingEnabledBtn.textContent = loggingEnabled ? i18n.t("on") : i18n.t("off");
+  autoUpdateEnabledBtn.textContent = autoUpdateEnabled ? i18n.t("on") : i18n.t("off");
+  trayEnabledBtn.textContent = trayIconEnabled ? i18n.t("on") : i18n.t("off");
+  closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? i18n.t("on") : i18n.t("off");
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
 
 langSelect.addEventListener("change", () => {
-  window.i18n.setLanguage(langSelect.value);
-  langSelect.value = window.i18n.getLanguage();
+  i18n.setLanguage(langSelect.value);
+  langSelect.value = i18n.getLanguage();
   refreshTextForLanguage();
-  sendAction("setLanguage", window.i18n.getLanguage());
+  sendAction("setLanguage", i18n.getLanguage());
 });
 
 scaleSelect.addEventListener("change", () => {
@@ -373,33 +378,33 @@ scaleSelect.addEventListener("change", () => {
 });
 
 vizResponseSelect.addEventListener("change", () => {
-  sendAction("setVizResponse", vizResponseSelect.value);
+  sendAction("setVizResponse", vizResponseSelect.value as VizResponse);
 });
 
 window.electronAPI?.onSettingsState?.((state) => {
   if (!state) return;
 
   if (state.lang) {
-    window.i18n.setLanguage(state.lang);
-    langSelect.value = window.i18n.getLanguage();
+    i18n.setLanguage(state.lang);
+    langSelect.value = i18n.getLanguage();
   }
   if (typeof state.scale === "number") scaleSelect.value = String(state.scale);
   if (typeof state.zoomFactor === "number") window.electronAPI?.setZoomFactor?.(state.zoomFactor);
   if (typeof state.scale === "number") window.electronAPI?.setSettingsWindowScale?.(state.scale);
   if (state.vizResponse) vizResponseSelect.value = state.vizResponse;
   if (state.hotkeys) {
-    hotkeyConfig = window.hotkeys.normalize(state.hotkeys);
+    hotkeyConfig = hotkeys.normalize(state.hotkeys);
     hotkeyFailures = state.globalHotkeyFailures || [];
     if (!capturing) renderHotkeys();
   }
   // Skip echoes of earlier values while a slider is dragged, or the thumb jitters back.
-  const draggingAccent = [accentHueInput, accentSaturationInput, accentTintInput].includes(document.activeElement);
+  const draggingAccent = [accentHueInput, accentSaturationInput, accentTintInput].includes(document.activeElement as HTMLInputElement);
   if (state.accentColor && !draggingAccent) {
-    accentColor = window.accentColor.normalize(state.accentColor);
+    accentColor = accentColorTheme.normalize(state.accentColor);
     showAccentColor();
   }
 
-  const proxy = state.proxy || {};
+  const proxy: Partial<ProxyConfig> = state.proxy || {};
   proxyEnabled = !!proxy.enabled;
   proxyTypeSelect.value = proxy.type === "socks5" ? "socks5" : "http";
   proxyHostInput.value = proxy.host || "";

@@ -1,9 +1,5 @@
-import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-
-const { isHttpUrl, playlistKind, parsePlaylistStreamUrl } = createRequire(import.meta.url)(
-  "../../src/main/streamUrl.js"
-);
+import { isHttpUrl, playlistKind, parsePlaylistStreamUrl } from "../../src/main/streamUrl";
 
 describe("isHttpUrl", () => {
   it("accepts http and https", () => {

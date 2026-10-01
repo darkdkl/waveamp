@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { loadScript, plain } from "../loadScript.js";
-
-const { accentColor } = loadScript("theme.js").window;
+import type { AccentColor } from "../../src/shared/types";
+import { accentColor } from "../../src/renderer/theme";
 
 describe("accentColor.normalize", () => {
   it("wraps hue into 0–359", () => {
@@ -11,7 +10,7 @@ describe("accentColor.normalize", () => {
   });
 
   it("clamps saturation and tint to 0–100", () => {
-    expect(plain(accentColor.normalize({ hue: 10, saturation: 150, tint: -5 }))).toEqual({
+    expect(accentColor.normalize({ hue: 10, saturation: 150, tint: -5 })).toEqual({
       hue: 10,
       saturation: 100,
       tint: 0,
@@ -19,13 +18,13 @@ describe("accentColor.normalize", () => {
   });
 
   it("falls back to the default color for garbage", () => {
-    expect(plain(accentColor.normalize(null))).toEqual(plain(accentColor.DEFAULT));
-    expect(plain(accentColor.normalize({ hue: "red", saturation: "x" }))).toEqual(plain(accentColor.DEFAULT));
+    expect(accentColor.normalize(null)).toEqual(accentColor.DEFAULT);
+    expect(accentColor.normalize({ hue: "red", saturation: "x" } as unknown as AccentColor)).toEqual(accentColor.DEFAULT);
   });
 
   it("leaves presets unchanged", () => {
     for (const { hue, saturation, tint } of accentColor.PRESETS) {
-      expect(plain(accentColor.normalize({ hue, saturation, tint }))).toEqual({ hue, saturation, tint });
+      expect(accentColor.normalize({ hue, saturation, tint })).toEqual({ hue, saturation, tint });
     }
   });
 });

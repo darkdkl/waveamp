@@ -1,4 +1,6 @@
-const translations = {
+import type { Lang } from "../shared/types";
+
+export const translations: Record<Lang, Record<string, string>> = {
   ru: {
     close: "Закрыть",
     minimize: "Свернуть",
@@ -329,37 +331,37 @@ const translations = {
   },
 };
 
-const DEFAULT_LANG = "en";
-let currentLang = DEFAULT_LANG;
+const DEFAULT_LANG: Lang = "en";
+let currentLang: Lang = DEFAULT_LANG;
 
-function t(key) {
+function t(key: string): string {
   return translations[currentLang]?.[key] ?? translations[DEFAULT_LANG][key] ?? key;
 }
 
-function applyTranslations() {
+function applyTranslations(): void {
   document.documentElement.lang = currentLang;
 
-  document.querySelectorAll("[data-i18n]").forEach((el) => {
+  document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((el) => {
     el.textContent = t(el.dataset.i18n);
   });
-  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+  document.querySelectorAll<HTMLElement>("[data-i18n-title]").forEach((el) => {
     el.title = t(el.dataset.i18nTitle);
   });
-  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+  document.querySelectorAll<HTMLElement>("[data-i18n-aria]").forEach((el) => {
     el.setAttribute("aria-label", t(el.dataset.i18nAria));
   });
-  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+  document.querySelectorAll<HTMLInputElement>("[data-i18n-placeholder]").forEach((el) => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
   });
 }
 
-function setLanguage(lang) {
-  currentLang = translations[lang] ? lang : DEFAULT_LANG;
+function setLanguage(lang: string): void {
+  currentLang = lang === "ru" || lang === "en" ? lang : DEFAULT_LANG;
   applyTranslations();
 }
 
-function getLanguage() {
+function getLanguage(): Lang {
   return currentLang;
 }
 
-window.i18n = { t, setLanguage, getLanguage, applyTranslations };
+export const i18n = { t, setLanguage, getLanguage, applyTranslations };

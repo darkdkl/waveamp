@@ -1,7 +1,5 @@
-import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-
-const { comboToAccelerator } = createRequire(import.meta.url)("../../src/main/accelerator.js");
+import { comboToAccelerator } from "../../src/main/accelerator";
 
 describe("comboToAccelerator", () => {
   it("maps modifiers and arrow keys", () => {

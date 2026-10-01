@@ -1,10 +1,10 @@
-const ACCELERATOR_KEYS = {
+const ACCELERATOR_KEYS: Record<string, string> = {
   ArrowUp: "Up", ArrowDown: "Down", ArrowLeft: "Left", ArrowRight: "Right",
   Comma: ",", Period: ".", Slash: "/", Backslash: "\\", Semicolon: ";", Quote: "'",
   BracketLeft: "[", BracketRight: "]", Minus: "-", Equal: "=", Backquote: "`",
 };
 
-function comboToAccelerator(combo, platform = process.platform) {
+export function comboToAccelerator(combo: string, platform: NodeJS.Platform = process.platform): string | null {
   const parts = combo.split("+");
   const code = parts.pop();
   const mods = parts.map((mod) =>
@@ -17,5 +17,3 @@ function comboToAccelerator(combo, platform = process.platform) {
   if (!key && /^(F\d{1,2}|Space|Home|End|PageUp|PageDown|Insert|Delete|Tab|Enter|Escape|Backspace)$/.test(code)) key = code;
   return key && !mods.includes(undefined) ? [...mods, key].join("+") : null;
 }
-
-module.exports = { comboToAccelerator };

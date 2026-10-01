@@ -1,18 +1,37 @@
-const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, net, session, shell, dialog, globalShortcut, screen } = require("electron");
-const path = require("node:path");
-const fs = require("node:fs");
-const { isHttpUrl, playlistKind, parsePlaylistStreamUrl } = require("./src/main/streamUrl");
-const { stationSummary } = require("./src/main/radioStations");
-const { comboToAccelerator } = require("./src/main/accelerator");
-const { fixMojibake } = require("./src/main/textEncoding");
-const { isNewerVersion } = require("./src/main/version");
+import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, net, session, shell, dialog, globalShortcut, screen } from "electron";
+import path from "node:path";
+import fs from "node:fs";
+import { isHttpUrl, playlistKind, parsePlaylistStreamUrl } from "./streamUrl";
+import { stationSummary } from "./radioStations";
+import { comboToAccelerator } from "./accelerator";
+import { fixMojibake } from "./textEncoding";
+import { isNewerVersion } from "./version";
+import type {
+  AppConfig,
+  GlobalHotkeyRequest,
+  LogLevel,
+  ProxyConfig,
+  ResolveStreamResult,
+  SettingsAction,
+  SettingsState,
+  StationSearchParams,
+  StoredConfig,
+  UpdateCheckResult,
+} from "../shared/types";
 
 const WINDOW_WIDTH = 480;
 const RESIZE_DURATION_MS = 180;
-const ICON_PATH = path.join(__dirname, "assets", "icon.png");
+const ICON_PATH = path.join(app.getAppPath(), "assets", "icon.png");
+const PRELOAD_PATH = path.join(__dirname, "../preload/index.js");
+
+function loadRenderer(win: BrowserWindow, page: string): void {
+  const devServerUrl = process.env.ELECTRON_RENDERER_URL;
+  if (!app.isPackaged && devServerUrl) win.loadURL(`${devServerUrl}/${page}`);
+  else win.loadFile(path.join(__dirname, "../renderer", page));
+}
 const CONFIG_PATH = path.join(app.getPath("userData"), "config.json");
 
-function loadConfig() {
+function loadConfig(): StoredConfig | null {
   try {
     return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
   } catch {
@@ -20,7 +39,7 @@ function loadConfig() {
   }
 }
 
-function saveConfig(config) {
+function saveConfig(config: AppConfig): void {
   try {
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
   } catch (err) {
@@ -40,7 +59,7 @@ function logFilePath(date = new Date()) {
   return path.join(LOG_DIR, `waveamp-${y}-${m}-${d}.log`);
 }
 
-function writeLog(level, scope, message, origin = "main") {
+function writeLog(level: LogLevel, scope: string, message: string, origin = "main"): void {
   if (!loggingEnabled) return;
   try {
     fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -73,7 +92,7 @@ function clearLogs() {
 
 let currentProxyAuth = null;
 
-async function applyProxyConfig(proxyConfig) {
+async function applyProxyConfig(proxyConfig: Partial<ProxyConfig> | null): Promise<void> {
   if (!proxyConfig?.enabled || !proxyConfig.host || !proxyConfig.port) {
     await session.defaultSession.setProxy({ proxyRules: "direct://" });
     // setProxy() keeps reusing pooled connections; drop them so the change applies now.
@@ -107,7 +126,7 @@ const RADIO_USER_AGENT = `WaveAMP/${app.getVersion()} (https://github.com/darkdk
 const RADIO_API_TIMEOUT_MS = 8000;
 
 // net.request, not fetch(): only the Chromium network stack honors session.setProxy().
-function netRequestText(url, headers, timeoutMs, maxBytes = Infinity) {
+function netRequestText(url: string, headers: Record<string, string>, timeoutMs: number, maxBytes = Infinity): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = net.request({ url, method: "GET" });
     Object.entries(headers).forEach(([key, value]) => request.setHeader(key, value));
@@ -132,7 +151,7 @@ function netRequestText(url, headers, timeoutMs, maxBytes = Infinity) {
 
     request.on("response", (response) => {
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        response.resume();
+        (response as unknown as NodeJS.ReadableStream).resume();
         finish(reject, new Error(`HTTP ${response.statusCode}`));
         return;
       }
@@ -154,13 +173,13 @@ function netRequestText(url, headers, timeoutMs, maxBytes = Infinity) {
   });
 }
 
-async function netRequestJson(url, headers, timeoutMs) {
+async function netRequestJson(url: string, headers: Record<string, string>, timeoutMs: number): Promise<any> {
   return JSON.parse(await netRequestText(url, headers, timeoutMs));
 }
 
 const PLAYLIST_MAX_BYTES = 256 * 1024;
 
-async function resolveStreamUrl(url) {
+async function resolveStreamUrl(url: string): Promise<ResolveStreamResult> {
   if (typeof url !== "string" || !isHttpUrl(url)) return { ok: false, error: "invalid" };
   const kind = playlistKind(url);
   if (!kind) return { ok: true, url };
@@ -192,7 +211,7 @@ async function radioApiFetch(pathAndQuery) {
 // The API's tag filter is case-sensitive (pop ≠ Pop), so filter by tag locally.
 const TAG_MATCH_SAMPLE_SIZE = 250;
 
-async function searchStations(params = {}) {
+async function searchStations(params: StationSearchParams = {}) {
   const limit = params.limit || 40;
   const q = new URLSearchParams();
   if (params.name) q.set("name", params.name);
@@ -327,7 +346,7 @@ function animateResize(win, targetWidth, targetHeight) {
 function setAppMenu() {
   if (process.platform === "darwin") {
     // App menu only, so Cmd+Q and friends keep working.
-    const template = [
+    const template: Electron.MenuItemConstructorOptions[] = [
       {
         label: app.name,
         submenu: [
@@ -359,7 +378,7 @@ function createWindow() {
     backgroundColor: "#16181c",
     icon: ICON_PATH,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: PRELOAD_PATH,
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -376,10 +395,10 @@ function createWindow() {
     if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.close();
   });
 
-  win.loadFile("index.html");
+  loadRenderer(win, "index.html");
 }
 
-// Settings state is owned by app.js (it also writes the playlist/EQ part of
+// Settings state is owned by player.ts (it also writes the playlist/EQ part of
 // config.json); this window only relays changes, never writes config.
 let settingsWindow = null;
 
@@ -411,7 +430,7 @@ function createSettingsWindow() {
     backgroundColor: "#16181c",
     icon: ICON_PATH,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: PRELOAD_PATH,
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -422,7 +441,7 @@ function createSettingsWindow() {
     if (url !== settingsWindow.webContents.getURL()) event.preventDefault();
   });
 
-  settingsWindow.loadFile("settings.html");
+  loadRenderer(settingsWindow, "settings.html");
   settingsWindow.on("closed", () => {
     settingsWindow = null;
   });
@@ -467,7 +486,7 @@ function openSettingsWindow() {
   createSettingsWindow();
 }
 
-ipcMain.on("settings-action-from-window", (event, action) => {
+ipcMain.on("settings-action-from-window", (_event, action: SettingsAction) => {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("settings-action", action);
 });
 
@@ -475,7 +494,7 @@ ipcMain.on("settings-request-state", () => {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("settings-state-requested");
 });
 
-ipcMain.on("settings-state-from-main", (event, state) => {
+ipcMain.on("settings-state-from-main", (_event, state: SettingsState) => {
   if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.webContents.send("settings-state", state);
 });
 
@@ -502,7 +521,7 @@ function registerMediaKeys() {
 
 let registeredHotkeys = [];
 
-function applyGlobalHotkeys({ enabled, bindings } = {}) {
+function applyGlobalHotkeys({ enabled, bindings }: Partial<GlobalHotkeyRequest> = {}): string[] {
   for (const accelerator of registeredHotkeys) globalShortcut.unregister(accelerator);
   registeredHotkeys = [];
   const failed = [];
@@ -528,7 +547,7 @@ function applyGlobalHotkeys({ enabled, bindings } = {}) {
   return failed;
 }
 
-ipcMain.handle("set-global-hotkeys", (event, config) => applyGlobalHotkeys(config));
+ipcMain.handle("set-global-hotkeys", (_event, config: GlobalHotkeyRequest) => applyGlobalHotkeys(config));
 
 let tray = null;
 let mainLang = "ru";
@@ -649,7 +668,7 @@ ipcMain.on("window-resize-instant", (event, height, width) => {
 
 ipcMain.handle("config-load", () => loadConfig());
 
-ipcMain.on("config-save", (event, config) => {
+ipcMain.on("config-save", (_event, config: AppConfig) => {
   saveConfig(config);
   const lang = config?.settings?.lang === "en" ? "en" : "ru";
   if (lang !== mainLang) {
@@ -679,7 +698,7 @@ ipcMain.handle("read-track-tags", (event, filePath) =>
   })
 );
 
-ipcMain.handle("radio-search", (event, params) => searchStations(params));
+ipcMain.handle("radio-search", (_event, params: StationSearchParams) => searchStations(params));
 ipcMain.handle("radio-countries", () => fetchCountries());
 ipcMain.handle("radio-states", (event, countryName) => fetchStates(countryName));
 ipcMain.handle("radio-tags", () => fetchTags());
@@ -687,7 +706,7 @@ ipcMain.handle("radio-tags-for-filter", (event, countryCode, state) => fetchTags
 ipcMain.handle("radio-click", (event, uuid) => registerStationClick(uuid));
 ipcMain.handle("radio-resolve-stream", (event, url) => resolveStreamUrl(url));
 
-ipcMain.on("apply-proxy-config", (event, proxyConfig) => {
+ipcMain.on("apply-proxy-config", (_event, proxyConfig: ProxyConfig) => {
   applyProxyConfig(proxyConfig).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`));
 });
 
@@ -696,7 +715,7 @@ ipcMain.on("set-logging-enabled", (event, enabled) => {
   writeLog("info", "app", `Logging ${loggingEnabled ? "enabled" : "disabled"}`);
 });
 
-ipcMain.on("log", (event, level, scope, message) => writeLog(level, scope, message, "renderer"));
+ipcMain.on("log", (_event, level: LogLevel, scope: string, message: string) => writeLog(level, scope, message, "renderer"));
 
 ipcMain.handle("open-log-folder", () => {
   fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -710,7 +729,7 @@ const LICENSE_FILES = new Set(["LICENSE", "THIRD_PARTY_LICENSES.txt"]);
 
 ipcMain.handle("open-license-file", async (event, name) => {
   if (!LICENSE_FILES.has(name)) return "unknown file";
-  const file = path.join(app.isPackaged ? process.resourcesPath : __dirname, name);
+  const file = path.join(app.isPackaged ? process.resourcesPath : app.getAppPath(), name);
   const error = await shell.openPath(file);
   if (error) writeLog("error", "app", `Could not open ${file}: ${error}`);
   return error;
@@ -766,7 +785,7 @@ async function checkForUpdatesOnLaunch() {
     if (loadConfig()?.settings?.skippedUpdateVersion === version) return;
     writeLog("info", "updater", `Update available: v${version}`);
     const s = UPDATE_STRINGS[mainLang] || UPDATE_STRINGS.ru;
-    const options = {
+    const options: Electron.MessageBoxOptions = {
       type: "info",
       buttons: [s.download, s.later, s.skip],
       defaultId: 0,
@@ -790,7 +809,7 @@ ipcMain.on("set-auto-update-enabled", (event, enabled) => {
   writeLog("info", "updater", `Check-on-launch ${autoUpdateEnabled ? "enabled" : "disabled"}`);
 });
 
-ipcMain.handle("check-for-updates", async () => {
+ipcMain.handle("check-for-updates", async (): Promise<UpdateCheckResult> => {
   try {
     const { version, url } = await fetchLatestRelease();
     return { ok: true, upToDate: !isNewerVersion(version, app.getVersion()), version, url };

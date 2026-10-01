@@ -78,17 +78,20 @@ about an unknown publisher on first launch:
 
 ## Building from source
 
-Plain HTML/CSS/JS without frameworks or bundlers, plus an Electron shell.
-Requires Node.js 20+.
+TypeScript without UI frameworks, built with [electron-vite](https://electron-vite.org/)
+(Vite) and tested with Vitest. Requires Node.js 20.19+.
 
 ```bash
 npm install
-npm start
+npm run dev
 ```
 
-Tests:
+`npm run dev` starts the app with hot reload; `npm start` runs a production build.
+
+Checks:
 
 ```bash
+npm run typecheck
 npm test
 ```
 
@@ -99,9 +102,6 @@ npm run build:mac
 npm run build:linux
 npm run build:win
 ```
-
-Opening `index.html` directly in a browser gives a limited web version
-(no radio, no saved state).
 
 ## Feedback
 
