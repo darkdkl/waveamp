@@ -1,70 +1,78 @@
-const audio = document.getElementById("audio");
+import { i18n } from "./i18n";
+import { hotkeys } from "./hotkeys";
+import { accentColor as accentColorTheme } from "./theme";
+import appIconUrl from "../../assets/icon.png";
+import type { ProxyType, ResolveStreamResult, Station, VizMode, VizResponse } from "../shared/types";
+
+type RadioView = "search" | "favorites" | "add";
+
+const audio = document.getElementById("audio") as HTMLAudioElement;
 audio.crossOrigin = "anonymous";
 const player = document.getElementById("player");
-const fileInput = document.getElementById("fileInput");
-const folderInput = document.getElementById("folderInput");
+const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+const folderInput = document.getElementById("folderInput") as HTMLInputElement;
 
 const trackTitle = document.getElementById("trackTitle");
 const timeDisplay = document.getElementById("time");
 const durTime = document.getElementById("durTime");
 const liveTag = document.getElementById("liveTag");
 const viz = document.getElementById("viz");
-const seek = document.getElementById("seek");
-const volume = document.getElementById("volume");
+const seek = document.getElementById("seek") as HTMLInputElement;
+const volume = document.getElementById("volume") as HTMLInputElement;
 
-const playBtn = document.getElementById("playBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const stopBtn = document.getElementById("stopBtn");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
+const playBtn = document.getElementById("playBtn") as HTMLButtonElement;
+const pauseBtn = document.getElementById("pauseBtn") as HTMLButtonElement;
+const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
+const prevBtn = document.getElementById("prevBtn") as HTMLButtonElement;
+const nextBtn = document.getElementById("nextBtn") as HTMLButtonElement;
 
-const playlistBtn = document.getElementById("playlistBtn");
+const playlistBtn = document.getElementById("playlistBtn") as HTMLButtonElement;
 const playlist = document.getElementById("playlist");
-const playlistList = document.getElementById("playlistList");
+const playlistList = document.getElementById("playlistList") as HTMLUListElement;
 const playlistListFrame = document.getElementById("playlistListFrame");
 const playlistEmpty = document.getElementById("playlistEmpty");
-const playlistClearBtn = document.getElementById("playlistClearBtn");
+const playlistClearBtn = document.getElementById("playlistClearBtn") as HTMLButtonElement;
 const playlistResizeHandle = document.getElementById("playlistResizeHandle");
 const playlistAddWrap = document.getElementById("playlistAddWrap");
-const playlistAddBtn = document.getElementById("playlistAddBtn");
+const playlistAddBtn = document.getElementById("playlistAddBtn") as HTMLButtonElement;
 const playlistAddMenu = document.getElementById("playlistAddMenu");
-const addFilesMenuItem = document.getElementById("addFilesMenuItem");
-const addFolderMenuItem = document.getElementById("addFolderMenuItem");
+const addFilesMenuItem = document.getElementById("addFilesMenuItem") as HTMLButtonElement;
+const addFolderMenuItem = document.getElementById("addFolderMenuItem") as HTMLButtonElement;
 
-const settingsBtn = document.getElementById("settingsBtn");
+const settingsBtn = document.getElementById("settingsBtn") as HTMLButtonElement;
 
-const eqBtn = document.getElementById("eqBtn");
+const eqBtn = document.getElementById("eqBtn") as HTMLButtonElement;
 const eq = document.getElementById("eq");
-const eqToggleBtn = document.getElementById("eqToggleBtn");
-const eqResetBtn = document.getElementById("eqResetBtn");
-const eqPresetSelect = document.getElementById("eqPresetSelect");
+const eqToggleBtn = document.getElementById("eqToggleBtn") as HTMLButtonElement;
+const eqResetBtn = document.getElementById("eqResetBtn") as HTMLButtonElement;
+const eqPresetSelect = document.getElementById("eqPresetSelect") as HTMLSelectElement;
 const eqPreamp = document.getElementById("eqPreamp");
 const eqBandGroup = document.getElementById("eqBandGroup");
 
-const radioBtn = document.getElementById("radioBtn");
+const radioBtn = document.getElementById("radioBtn") as HTMLButtonElement;
 const radio = document.getElementById("radio");
-const radioTabSearch = document.getElementById("radioTabSearch");
-const radioTabFavorites = document.getElementById("radioTabFavorites");
-const radioTabAdd = document.getElementById("radioTabAdd");
+const radioTabSearch = document.getElementById("radioTabSearch") as HTMLButtonElement;
+const radioTabFavorites = document.getElementById("radioTabFavorites") as HTMLButtonElement;
+const radioTabAdd = document.getElementById("radioTabAdd") as HTMLButtonElement;
 const radioSearchView = document.getElementById("radioSearchView");
 const radioFavoritesView = document.getElementById("radioFavoritesView");
 const radioAddView = document.getElementById("radioAddView");
-const radioAddFrame = document.getElementById("radioAddFrame");
+const radioAddFrame = document.getElementById("radioAddFrame") as HTMLFormElement;
 const radioAddTitle = document.getElementById("radioAddTitle");
-const radioAddName = document.getElementById("radioAddName");
-const radioAddUrl = document.getElementById("radioAddUrl");
+const radioAddName = document.getElementById("radioAddName") as HTMLInputElement;
+const radioAddUrl = document.getElementById("radioAddUrl") as HTMLInputElement;
 const radioAddError = document.getElementById("radioAddError");
-const radioAddCancel = document.getElementById("radioAddCancel");
-const radioAddSubmit = document.getElementById("radioAddSubmit");
+const radioAddCancel = document.getElementById("radioAddCancel") as HTMLButtonElement;
+const radioAddSubmit = document.getElementById("radioAddSubmit") as HTMLButtonElement;
 const radioFavCount = document.getElementById("radioFavCount");
-const radioCountrySelect = document.getElementById("radioCountrySelect");
-const radioStateSelect = document.getElementById("radioStateSelect");
-const radioTagSelect = document.getElementById("radioTagSelect");
-const radioSearchForm = document.getElementById("radioSearchForm");
-const radioSearchInput = document.getElementById("radioSearchInput");
-const radioFavoritesList = document.getElementById("radioFavoritesList");
+const radioCountrySelect = document.getElementById("radioCountrySelect") as HTMLSelectElement;
+const radioStateSelect = document.getElementById("radioStateSelect") as HTMLSelectElement;
+const radioTagSelect = document.getElementById("radioTagSelect") as HTMLSelectElement;
+const radioSearchForm = document.getElementById("radioSearchForm") as HTMLFormElement;
+const radioSearchInput = document.getElementById("radioSearchInput") as HTMLInputElement;
+const radioFavoritesList = document.getElementById("radioFavoritesList") as HTMLUListElement;
 const radioFavoritesFrame = document.getElementById("radioFavoritesFrame");
-const radioResultsList = document.getElementById("radioResultsList");
+const radioResultsList = document.getElementById("radioResultsList") as HTMLUListElement;
 const radioResultsFrame = document.getElementById("radioResultsFrame");
 const radioEmpty = document.getElementById("radioEmpty");
 const radioFavEmpty = document.getElementById("radioFavEmpty");
@@ -85,7 +93,7 @@ let currentStation = null;
 let favoriteStations = [];
 let radioResults = [];
 let radioOpen = false;
-let radioView = "search"; // "search" | "favorites" | "add"
+let radioView: RadioView = "search";
 let radioViewBeforeAdd = "favorites";
 let editingStationId = null;
 let stationFormErrorKey = "";
@@ -191,8 +199,7 @@ const EQ_PRESET_MAX_HEADROOM_DB = 3;
 let eqPreset = "flat";
 let customEq = { bandGains: new Array(EQ_BANDS.length).fill(0), preampDb: 0 };
 
-const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContextClass();
+const audioCtx = new AudioContext();
 const sourceNode = audioCtx.createMediaElementSource(audio);
 const filterNodes = EQ_BANDS.map((freq) => {
   const filter = audioCtx.createBiquadFilter();
@@ -207,7 +214,7 @@ const analyserNode = audioCtx.createAnalyser();
 analyserNode.fftSize = 256;
 analyserNode.smoothingTimeConstant = 0;
 
-let audioNode = sourceNode;
+let audioNode: AudioNode = sourceNode;
 filterNodes.forEach((filter) => {
   audioNode.connect(filter);
   audioNode = filter;
@@ -277,9 +284,9 @@ function buildViz() {
 }
 
 const VIZ_MODES = ["spectrum", "meters", "scope"];
-let vizMode = "spectrum";
+let vizMode: VizMode = "spectrum";
 
-let vizResponse = "smooth";
+let vizResponse: VizResponse = "smooth";
 const SMOOTH_TAU_MS = 65;
 const PEAK_RISE_TAU_MS = 5;
 const NEEDLE_PEAK_FALL_TAU_MS = 650;
@@ -288,7 +295,7 @@ const VU_REFERENCE_DBFS = -12;
 const VU_SCALE_MARKS = [-20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3];
 const VU_MAJOR_MARKS = [-20, -10, -5, 0, 3];
 
-const vizCanvas = document.getElementById("vizCanvas");
+const vizCanvas = document.getElementById("vizCanvas") as HTMLCanvasElement;
 const vizCtx = vizCanvas.getContext("2d");
 const meterSamples = new Float32Array(meterAnalysers[0].fftSize);
 const scopeRight = new Float32Array(meterAnalysers[1].fftSize);
@@ -544,8 +551,8 @@ function buildEqPanel() {
 }
 
 function syncEqControlsFromState() {
-  const sliders = eq.querySelectorAll(".eq__slider");
-  const values = eq.querySelectorAll(".eq__value");
+  const sliders = eq.querySelectorAll<HTMLInputElement>(".eq__slider");
+  const values = eq.querySelectorAll<HTMLElement>(".eq__value");
 
   if (sliders[0]) sliders[0].value = String(preampDb);
   if (values[0]) values[0].textContent = formatDb(preampDb);
@@ -555,7 +562,7 @@ function syncEqControlsFromState() {
     if (values[i + 1]) values[i + 1].textContent = formatDb(db);
   });
 
-  eqToggleBtn.textContent = eqEnabled ? window.i18n.t("eqOn") : window.i18n.t("eqOff");
+  eqToggleBtn.textContent = eqEnabled ? i18n.t("eqOn") : i18n.t("eqOff");
   eqToggleBtn.classList.toggle("is-active", eqEnabled);
 }
 
@@ -588,7 +595,7 @@ function buildEqPresetOptions() {
     const option = document.createElement("option");
     option.value = id;
     option.dataset.i18n = nameKey;
-    option.textContent = window.i18n.t(nameKey);
+    option.textContent = i18n.t(nameKey);
     return option;
   });
   eqPresetSelect.append(...options);
@@ -626,7 +633,7 @@ function updateTrackTitleText() {
   } else if (playbackMode === "local" && queue[currentIndex]) {
     trackTitle.textContent = trackDisplayName(queue[currentIndex]);
   } else {
-    trackTitle.textContent = window.i18n.t("noTrack");
+    trackTitle.textContent = i18n.t("noTrack");
   }
   updateMediaSessionMetadata();
 }
@@ -634,7 +641,7 @@ function updateTrackTitleText() {
 // MediaMetadata artwork rejects file:// URLs, so use a blob: URL.
 let appIconArtworkUrl = null;
 if ("mediaSession" in navigator) {
-  fetch("assets/icon.png")
+  fetch(appIconUrl)
     .then((r) => r.blob())
     .then((blob) => {
       appIconArtworkUrl = URL.createObjectURL(blob);
@@ -678,7 +685,7 @@ function resetToNoTrackState() {
   durTime.hidden = false;
   durTime.textContent = "00:00";
   seek.disabled = true;
-  seek.value = 0;
+  seek.value = "0";
   updateTrackTitleText();
 }
 
@@ -713,7 +720,7 @@ function renderPlaylist() {
     const item = document.createElement("li");
     item.className =
       "playlist__item" + (index === currentIndex ? " is-active" : "") + (track.unplayable ? " is-unplayable" : "");
-    if (track.unplayable) item.title = window.i18n.t("trackUnplayable");
+    if (track.unplayable) item.title = i18n.t("trackUnplayable");
 
     const idx = document.createElement("span");
     idx.className = "playlist__item-index";
@@ -730,8 +737,8 @@ function renderPlaylist() {
     const remove = document.createElement("button");
     remove.className = "playlist__item-remove";
     remove.type = "button";
-    remove.title = window.i18n.t("removeFromPlaylist");
-    remove.setAttribute("aria-label", window.i18n.t("removeFromPlaylist"));
+    remove.title = i18n.t("removeFromPlaylist");
+    remove.setAttribute("aria-label", i18n.t("removeFromPlaylist"));
     remove.textContent = "✕";
     remove.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -819,7 +826,7 @@ function createStationRow(station) {
   favBtn.className = "radio__fav-btn" + (isFav ? " is-fav" : "");
   favBtn.type = "button";
   favBtn.textContent = isFav ? "★" : "☆";
-  favBtn.title = isFav ? window.i18n.t("removeFavorite") : window.i18n.t("addFavorite");
+  favBtn.title = isFav ? i18n.t("removeFavorite") : i18n.t("addFavorite");
   favBtn.setAttribute("aria-label", favBtn.title);
   favBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -832,7 +839,7 @@ function createStationRow(station) {
     editBtn.className = "radio__fav-btn radio__edit-btn";
     editBtn.type = "button";
     editBtn.textContent = "✎";
-    editBtn.title = window.i18n.t("editStation");
+    editBtn.title = i18n.t("editStation");
     editBtn.setAttribute("aria-label", editBtn.title);
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -910,12 +917,12 @@ function isHttpUrl(value) {
 
 function setStationFormError(key) {
   stationFormErrorKey = key;
-  radioAddError.textContent = key ? window.i18n.t(key) : "";
+  radioAddError.textContent = key ? i18n.t(key) : "";
 }
 
 function updateStationFormText() {
-  radioAddTitle.textContent = window.i18n.t(editingStationId ? "editStation" : "newStation");
-  radioAddSubmit.textContent = window.i18n.t(stationFormBusy ? "checking" : editingStationId ? "save" : "add");
+  radioAddTitle.textContent = i18n.t(editingStationId ? "editStation" : "newStation");
+  radioAddSubmit.textContent = i18n.t(stationFormBusy ? "checking" : editingStationId ? "save" : "add");
   setStationFormError(stationFormErrorKey);
 }
 
@@ -927,7 +934,7 @@ function setStationFormBusy(busy) {
   updateStationFormText();
 }
 
-function openStationForm(station = null) {
+function openStationForm(station: Station | null = null) {
   if (radioView !== "add") radioViewBeforeAdd = radioView;
   editingStationId = station ? station.stationuuid : null;
   radioAddName.value = station ? station.name : "";
@@ -938,7 +945,7 @@ function openStationForm(station = null) {
   radioAddName.focus();
 }
 
-function closeStationForm(nextView) {
+function closeStationForm(nextView?: RadioView) {
   editingStationId = null;
   setStationFormError("");
   setRadioView(nextView || radioViewBeforeAdd);
@@ -971,10 +978,10 @@ async function submitStationForm() {
   if (window.electronAPI?.resolveStreamUrl) {
     setStationFormError("");
     setStationFormBusy(true);
-    const result = await window.electronAPI.resolveStreamUrl(sourceUrl).catch(() => ({ ok: false }));
+    const result = await window.electronAPI.resolveStreamUrl(sourceUrl).catch((): ResolveStreamResult => ({ ok: false, error: "playlist" }));
     setStationFormBusy(false);
     if (radioView !== "add") return;
-    if (!result.ok) {
+    if (result.ok === false) {
       setStationFormError(result.error === "invalid" ? "stationUrlInvalid" : "stationPlaylistFailed");
       radioAddUrl.focus();
       return;
@@ -1036,7 +1043,7 @@ function tuneStation(station) {
 
   updateTrackTitleText();
   seek.disabled = true;
-  seek.value = 0;
+  seek.value = "0";
   timeDisplay.textContent = "--:--";
   durTime.hidden = true;
   liveTag.hidden = false;
@@ -1055,7 +1062,7 @@ function tuneStation(station) {
 }
 
 function renderTagOptions(tags) {
-  radioTagSelect.innerHTML = `<option value="" data-i18n="tagAny">${window.i18n.t("tagAny")}</option>`;
+  radioTagSelect.innerHTML = `<option value="" data-i18n="tagAny">${i18n.t("tagAny")}</option>`;
   tags.forEach((t) => {
     const opt = document.createElement("option");
     opt.value = t.name;
@@ -1111,7 +1118,7 @@ let radioStatesToken = 0;
 
 async function loadRadioStates(countryName) {
   const token = ++radioStatesToken;
-  radioStateSelect.innerHTML = `<option value="" data-i18n="stateAny">${window.i18n.t("stateAny")}</option>`;
+  radioStateSelect.innerHTML = `<option value="" data-i18n="stateAny">${i18n.t("stateAny")}</option>`;
   radioStateSelect.hidden = true;
   if (!countryName || !window.electronAPI?.loadStates) return;
   try {
@@ -1139,7 +1146,7 @@ let radioEmptyKey = "enterNameOrFilter";
 
 function setRadioEmptyText(key) {
   radioEmptyKey = key;
-  radioEmpty.textContent = window.i18n.t(key);
+  radioEmpty.textContent = i18n.t(key);
 }
 
 let radioSearchToken = 0;
@@ -1233,7 +1240,7 @@ function syncElectronWindowSize(instant = false) {
 const AUDIO_EXT_RE = /\.(mp3|wav|ogg|oga|flac|m4a|aac|opus|weba)$/i;
 const UNSUPPORTED_EXT_RE = /\.(wma|ape|mid|midi|aif|aiff|amr|wv|mpc)$/i;
 
-function addFiles(fileList) {
+function addFiles(fileList: FileList | File[]) {
   const files = Array.from(fileList).filter(
     (f) => AUDIO_EXT_RE.test(f.name) || (f.type.startsWith("audio/") && !UNSUPPORTED_EXT_RE.test(f.name))
   );
@@ -1337,7 +1344,7 @@ function logEvent(level, scope, message) {
 }
 
 let proxyEnabled = false;
-let proxyType = "http";
+let proxyType: ProxyType = "http";
 let proxyHost = "";
 let proxyPort = "";
 let proxyUsername = "";
@@ -1402,7 +1409,7 @@ function setTrayIconEnabled(enabled) {
 }
 
 function setLanguage(lang) {
-  window.i18n.setLanguage(lang);
+  i18n.setLanguage(lang);
   updateTrackTitleText();
   setRadioEmptyText(radioEmptyKey);
   renderPlaylist();
@@ -1428,11 +1435,11 @@ function setScale(percent) {
   persistConfig();
 }
 
-let accentColor = { ...window.accentColor.DEFAULT };
+let accentColor = { ...accentColorTheme.DEFAULT };
 
 function setAccentColor(color) {
-  accentColor = window.accentColor.normalize(color);
-  window.accentColor.apply(accentColor);
+  accentColor = accentColorTheme.normalize(color);
+  accentColorTheme.apply(accentColor);
   persistConfig();
 }
 
@@ -1483,7 +1490,7 @@ window.electronAPI?.onSettingsStateRequested?.(() => pushSettingsState());
 
 function pushSettingsState() {
   window.electronAPI?.pushSettingsState?.({
-    lang: window.i18n.getLanguage(),
+    lang: i18n.getLanguage(),
     scale: Math.round((uiScale / BASE_ZOOM) * 100),
     zoomFactor: uiScale,
     accentColor,
@@ -1594,7 +1601,7 @@ eqBtn.addEventListener("click", () => {
 
 eqToggleBtn.addEventListener("click", () => {
   eqEnabled = !eqEnabled;
-  eqToggleBtn.textContent = eqEnabled ? window.i18n.t("eqOn") : window.i18n.t("eqOff");
+  eqToggleBtn.textContent = eqEnabled ? i18n.t("eqOn") : i18n.t("eqOff");
   eqToggleBtn.classList.toggle("is-active", eqEnabled);
   applyEqState();
   persistConfig();
@@ -1649,13 +1656,13 @@ radioSearchForm.addEventListener("submit", (e) => {
   runRadioSearch();
 });
 
-fileInput.addEventListener("change", (e) => {
-  addFiles(e.target.files);
+fileInput.addEventListener("change", () => {
+  addFiles(fileInput.files);
   fileInput.value = "";
 });
 
-folderInput.addEventListener("change", (e) => {
-  addFiles(e.target.files);
+folderInput.addEventListener("change", () => {
+  addFiles(folderInput.files);
   folderInput.value = "";
 });
 
@@ -1735,7 +1742,7 @@ function attemptRadioReconnect() {
 
   if (radioReconnectAttempts >= RADIO_MAX_RECONNECT) {
     logEvent("error", "radio", `"${currentStation.name}" giving up after ${RADIO_MAX_RECONNECT} attempts (${errorInfo})`);
-    trackTitle.textContent = currentStation.name + window.i18n.t("noConnection");
+    trackTitle.textContent = currentStation.name + i18n.t("noConnection");
     return;
   }
   radioReconnectAttempts += 1;
@@ -1744,7 +1751,7 @@ function attemptRadioReconnect() {
     "radio",
     `"${currentStation.name}" reconnect attempt ${radioReconnectAttempts}/${RADIO_MAX_RECONNECT} (${errorInfo})`
   );
-  trackTitle.textContent = currentStation.name + window.i18n.t("reconnecting");
+  trackTitle.textContent = currentStation.name + i18n.t("reconnecting");
   radioReconnectTimer = setTimeout(() => {
     if (playbackMode === "radio" && currentStation) {
       audio.src = currentStation.url;
@@ -1848,7 +1855,7 @@ function persistConfig() {
         favorites: favoriteStations,
       },
       settings: {
-        lang: window.i18n.getLanguage(),
+        lang: i18n.getLanguage(),
         scale: Math.round((uiScale / BASE_ZOOM) * 100),
         accentColor,
         vizResponse,
@@ -1893,7 +1900,7 @@ async function restoreConfig() {
     setVizResponse(config.settings.vizResponse);
   }
 
-  hotkeyConfig = window.hotkeys.normalize(config.settings?.hotkeys);
+  hotkeyConfig = hotkeys.normalize(config.settings?.hotkeys);
   applyGlobalHotkeys();
 
   if (typeof config.settings?.volume === "number" && config.settings.volume >= 0 && config.settings.volume <= 100) {
@@ -1985,7 +1992,7 @@ requestAnimationFrame(renderViz);
 
 const BASE_PLAYER_HEIGHT = player.offsetHeight;
 
-window.i18n.applyTranslations();
+i18n.applyTranslations();
 setScale(100);
 updateTrackTitleText();
 setRadioEmptyText(radioEmptyKey);
@@ -1993,7 +2000,7 @@ setRadioEmptyText(radioEmptyKey);
 renderPlaylist();
 restoreConfig();
 
-let hotkeyConfig = window.hotkeys.defaults();
+let hotkeyConfig = hotkeys.defaults();
 let globalHotkeyFailures = [];
 let volumeBeforeMute = null;
 const SEEK_STEP_SECONDS = 5;
@@ -2078,7 +2085,7 @@ function runHotkeyAction(action) {
 }
 
 document.addEventListener("keydown", (e) => {
-  const target = e.target;
+  const target = e.target as HTMLElement;
   if (
     target instanceof HTMLInputElement ||
     target instanceof HTMLTextAreaElement ||
@@ -2087,7 +2094,7 @@ document.addEventListener("keydown", (e) => {
   ) {
     return;
   }
-  const combo = window.hotkeys.comboFromEvent(e);
+  const combo = hotkeys.comboFromEvent(e);
   if (!combo) return;
   // Focused buttons handle Space/Enter natively.
   if (target instanceof HTMLButtonElement && (combo === "Space" || combo === "Enter")) return;
@@ -2099,7 +2106,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 player.addEventListener("mousedown", (e) => {
-  if (e.target.closest("button")) e.preventDefault();
+  if ((e.target as HTMLElement).closest("button")) e.preventDefault();
 });
 
 window.electronAPI?.onHotkey?.((action) => runHotkeyAction(action));
@@ -2119,7 +2126,7 @@ async function applyGlobalHotkeys() {
 }
 
 function setHotkeys(config) {
-  hotkeyConfig = window.hotkeys.normalize(config);
+  hotkeyConfig = hotkeys.normalize(config);
   persistConfig();
   applyGlobalHotkeys();
 }

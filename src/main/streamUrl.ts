@@ -1,4 +1,6 @@
-function isHttpUrl(value) {
+export type PlaylistKind = "pls" | "m3u";
+
+export function isHttpUrl(value: string): boolean {
   try {
     const { protocol } = new URL(value);
     return protocol === "http:" || protocol === "https:";
@@ -7,14 +9,14 @@ function isHttpUrl(value) {
   }
 }
 
-function playlistKind(url) {
+export function playlistKind(url: string): PlaylistKind | null {
   const path = new URL(url).pathname.toLowerCase();
   if (path.endsWith(".pls")) return "pls";
   if (path.endsWith(".m3u")) return "m3u";
   return null;
 }
 
-function parsePlaylistStreamUrl(text, kind, baseUrl) {
+export function parsePlaylistStreamUrl(text: string, kind: PlaylistKind, baseUrl: string): string | null {
   const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).map((line) => line.trim());
   const isPls = kind === "pls" || /^\[playlist\]$/i.test(lines[0] || "");
   for (const line of lines) {
@@ -33,5 +35,3 @@ function parsePlaylistStreamUrl(text, kind, baseUrl) {
   }
   return null;
 }
-
-module.exports = { isHttpUrl, playlistKind, parsePlaylistStreamUrl };

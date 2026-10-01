@@ -1,11 +1,9 @@
-import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-
-const { stationSummary } = createRequire(import.meta.url)("../../src/main/radioStations.js");
+import { stationSummary } from "../../src/main/radioStations";
 
 describe("stationSummary", () => {
   it("prefers the resolved URL and keeps only known fields", () => {
-    const summary = stationSummary({
+    const fromApi = {
       stationuuid: "abc",
       name: "Radio",
       url: "http://r.example/listen.pls",
@@ -18,8 +16,8 @@ describe("stationSummary", () => {
       bitrate: 128,
       codec: "MP3",
       votes: 1000,
-    });
-    expect(summary).toEqual({
+    };
+    expect(stationSummary(fromApi)).toEqual({
       stationuuid: "abc",
       name: "Radio",
       url: "http://s.example/live",

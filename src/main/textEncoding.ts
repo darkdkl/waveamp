@@ -3,7 +3,7 @@ const cp1251Decoder = new TextDecoder("windows-1251");
 
 // Tags decoded as latin1 may really be UTF-8 ("FÃ¼r") or old Russian cp1251 ("Êèíî").
 // Valid UTF-8 wins; cp1251 only when high-byte characters outnumber ASCII letters.
-function fixMojibake(text) {
+export function fixMojibake(text: string | null | undefined): string | null | undefined {
   if (!text || /[^\x00-\xff]/.test(text)) return text;
   const high = (text.match(/[\x80-\xff]/g) || []).length;
   if (high === 0) return text;
@@ -15,5 +15,3 @@ function fixMojibake(text) {
     return high < asciiLetters ? text : cp1251Decoder.decode(bytes);
   }
 }
-
-module.exports = { fixMojibake };

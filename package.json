@@ -14,22 +14,30 @@
   },
   "keywords": ["audio-player", "internet-radio", "equalizer", "electron", "music"],
   "license": "GPL-3.0-or-later",
-  "main": "main.js",
+  "main": "out/main/index.js",
   "scripts": {
     "licenses": "node scripts/generateThirdPartyLicenses.js",
     "prestart": "npm run licenses",
-    "start": "electron .",
+    "start": "electron-vite preview",
+    "predev": "npm run licenses",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck": "tsc",
     "test": "vitest run",
-    "build:mac": "npm run licenses && electron-builder --mac --publish=never",
-    "build:linux": "npm run licenses && electron-builder --linux --publish=never",
-    "build:win": "npm run licenses && electron-builder --win --publish=never",
-    "release:mac": "npm run licenses && electron-builder --mac --publish always",
-    "release:linux": "npm run licenses && electron-builder --linux --publish always",
-    "release:win": "npm run licenses && electron-builder --win --publish always"
+    "build:mac": "npm run licenses && electron-vite build && electron-builder --mac --publish=never",
+    "build:linux": "npm run licenses && electron-vite build && electron-builder --linux --publish=never",
+    "build:win": "npm run licenses && electron-vite build && electron-builder --win --publish=never",
+    "release:mac": "npm run licenses && electron-vite build && electron-builder --mac --publish always",
+    "release:linux": "npm run licenses && electron-vite build && electron-builder --linux --publish always",
+    "release:win": "npm run licenses && electron-vite build && electron-builder --win --publish always"
   },
   "devDependencies": {
+    "@types/node": "^24.19.0",
     "electron": "^44.5.0",
     "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.6",
     "vitest": "^4.1.11"
   },
   "build": {
@@ -42,20 +50,7 @@
       "repo": "waveamp",
       "releaseType": "release"
     },
-    "files": [
-      "main.js",
-      "preload.js",
-      "index.html",
-      "settings.html",
-      "settings.js",
-      "style.css",
-      "i18n.js",
-      "theme.js",
-      "hotkeys.js",
-      "app.js",
-      "src/main/**/*",
-      "assets/**/*"
-    ],
+    "files": ["out/**/*", "assets/**/*"],
     "directories": {
       "output": "dist"
     },
