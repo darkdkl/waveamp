@@ -45,6 +45,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   clearLogs: () => ipcRenderer.invoke("clear-logs"),
   setAutoUpdateEnabled: (enabled) => ipcRenderer.send("set-auto-update-enabled", enabled),
   checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
+  openReleasePage: (url) => ipcRenderer.send("open-release-page", url),
+  onSkipUpdateVersion: (callback) => ipcRenderer.on("skip-update-version", (event, version) => callback(version)),
   onMediaKey: (callback) => ipcRenderer.on("media-key", (event, action) => callback(action)),
   setGlobalHotkeys: (config) => ipcRenderer.invoke("set-global-hotkeys", config),
   onHotkey: (callback) => ipcRenderer.on("hotkey", (event, action) => callback(action)),

@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, net, session, shell, dialog, globalShortcut, screen } = require("electron");
-const { autoUpdater } = require("electron-updater");
 const path = require("node:path");
 const fs = require("node:fs");
 
@@ -746,38 +745,77 @@ ipcMain.handle("clear-logs", () => clearLogs());
 
 let autoUpdateEnabled = true;
 
-function setupAutoUpdater() {
-  if (!app.isPackaged) return;
+const RELEASES_URL = "https://github.com/darkdkl/waveamp/releases/";
+const LATEST_RELEASE_API = "https://api.github.com/repos/darkdkl/waveamp/releases/latest";
 
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+const UPDATE_STRINGS = {
+  ru: {
+    message: (version) => `Доступна новая версия WaveAMP ${version}`,
+    detail: (current) => `У вас установлена версия ${current}. Скачайте установщик для своей системы на странице релиза.`,
+    download: "Скачать",
+    later: "Позже",
+    skip: "Пропустить эту версию",
+  },
+  en: {
+    message: (version) => `WaveAMP ${version} is available`,
+    detail: (current) => `You have version ${current}. Download the installer for your system from the release page.`,
+    download: "Download",
+    later: "Later",
+    skip: "Skip this version",
+  },
+};
 
-  autoUpdater.on("error", (err) => {
-    writeLog("error", "updater", err.message);
-  });
+function isNewerVersion(candidate, current) {
+  const a = candidate.split(".").map(Number);
+  const b = current.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
+  }
+  return false;
+}
 
-  autoUpdater.on("update-available", (info) => {
-    writeLog("info", "updater", `Update available: v${info.version}`);
-  });
+async function fetchLatestRelease() {
+  const data = await netRequestJson(
+    LATEST_RELEASE_API,
+    { "User-Agent": RADIO_USER_AGENT, Accept: "application/vnd.github+json" },
+    RADIO_API_TIMEOUT_MS
+  );
+  const version = String(data.tag_name || "").replace(/^v/, "");
+  const url = String(data.html_url || "");
+  if (!/^\d+\.\d+\.\d+$/.test(version) || !url.startsWith(RELEASES_URL)) {
+    throw new Error("Unexpected release data");
+  }
+  return { version, url };
+}
 
-  autoUpdater.on("update-downloaded", (info) => {
-    writeLog("info", "updater", `Update v${info.version} downloaded, prompting restart`);
-    dialog
-      .showMessageBox({
-        type: "info",
-        buttons: ["Restart now", "Later"],
-        defaultId: 0,
-        cancelId: 1,
-        message: "A new version of WaveAMP is ready.",
-        detail: `Version ${info.version} has been downloaded. Restart to install it.`,
-      })
-      .then((result) => {
-        if (result.response === 0) autoUpdater.quitAndInstall();
-      });
-  });
+function openReleasePage(url) {
+  if (typeof url === "string" && url.startsWith(RELEASES_URL)) shell.openExternal(url);
+}
 
-  if (autoUpdateEnabled) {
-    autoUpdater.checkForUpdates().catch((err) => writeLog("error", "updater", `Launch check failed: ${err.message}`));
+async function checkForUpdatesOnLaunch() {
+  if (!app.isPackaged || !autoUpdateEnabled) return;
+  try {
+    const { version, url } = await fetchLatestRelease();
+    if (!isNewerVersion(version, app.getVersion())) return;
+    if (loadConfig()?.settings?.skippedUpdateVersion === version) return;
+    writeLog("info", "updater", `Update available: v${version}`);
+    const s = UPDATE_STRINGS[mainLang] || UPDATE_STRINGS.ru;
+    const options = {
+      type: "info",
+      buttons: [s.download, s.later, s.skip],
+      defaultId: 0,
+      cancelId: 1,
+      message: s.message(version),
+      detail: s.detail(app.getVersion()),
+    };
+    const hasWindow = mainWindow && !mainWindow.isDestroyed();
+    const { response } = await (hasWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options));
+    if (response === 0) openReleasePage(url);
+    if (response === 2 && mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("skip-update-version", version);
+    }
+  } catch (err) {
+    writeLog("error", "updater", `Launch check failed: ${err.message}`);
   }
 }
 
@@ -787,16 +825,16 @@ ipcMain.on("set-auto-update-enabled", (event, enabled) => {
 });
 
 ipcMain.handle("check-for-updates", async () => {
-  if (!app.isPackaged) return { ok: false, message: "not packaged" };
   try {
-    const result = await autoUpdater.checkForUpdates();
-    const latest = result?.updateInfo?.version;
-    return { ok: true, upToDate: !latest || latest === app.getVersion() };
+    const { version, url } = await fetchLatestRelease();
+    return { ok: true, upToDate: !isNewerVersion(version, app.getVersion()), version, url };
   } catch (err) {
     writeLog("error", "updater", `Manual check failed: ${err.message}`);
     return { ok: false, message: err.message };
   }
 });
+
+ipcMain.on("open-release-page", (event, url) => openReleasePage(url));
 
 app.whenReady().then(() => {
   const config = loadConfig();
@@ -823,7 +861,7 @@ app.whenReady().then(() => {
   }
 
   createWindow();
-  setupAutoUpdater();
+  checkForUpdatesOnLaunch();
   registerMediaKeys();
   syncTray();
   syncDockMenu();

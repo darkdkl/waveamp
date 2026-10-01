@@ -56,6 +56,8 @@ let autoUpdateEnabled = true;
 let trayIconEnabled = false;
 let closeMinimizesToTrayEnabled = false;
 let updateStatusKey = "";
+let updateVersion = "";
+let releaseUrl = "";
 
 function sendProxyConfig() {
   sendAction("setProxyConfig", {
@@ -128,10 +130,19 @@ function setTrayIconEnabled(enabled) {
 trayEnabledBtn.addEventListener("click", () => setTrayIconEnabled(!trayIconEnabled));
 closeMinimizesToTrayBtn.addEventListener("click", () => setCloseMinimizesToTrayEnabled(!closeMinimizesToTrayEnabled));
 
+const openReleaseBtn = document.getElementById("openReleaseBtn");
+
+function updateStatusMessage() {
+  return updateStatusKey ? window.i18n.t(updateStatusKey).replace("{version}", updateVersion) : "";
+}
+
 function setUpdateStatusText(key) {
   updateStatusKey = key;
-  updateStatusText.textContent = key ? window.i18n.t(key) : "";
+  updateStatusText.textContent = updateStatusMessage();
+  openReleaseBtn.hidden = key !== "updateAvailable";
 }
+
+openReleaseBtn.addEventListener("click", () => window.electronAPI?.openReleasePage?.(releaseUrl));
 
 checkUpdatesBtn.addEventListener("click", async () => {
   setUpdateStatusText("checkingForUpdates");
@@ -140,7 +151,9 @@ checkUpdatesBtn.addEventListener("click", async () => {
     setUpdateStatusText("updateCheckFailed");
     return;
   }
-  setUpdateStatusText(result.upToDate ? "upToDate" : "updateFoundDownloading");
+  updateVersion = result.version;
+  releaseUrl = result.url;
+  setUpdateStatusText(result.upToDate ? "upToDate" : "updateAvailable");
 });
 
 let accentColor = { ...window.accentColor.DEFAULT };
@@ -345,7 +358,7 @@ function refreshTextForLanguage() {
   autoUpdateEnabledBtn.textContent = autoUpdateEnabled ? window.i18n.t("on") : window.i18n.t("off");
   trayEnabledBtn.textContent = trayIconEnabled ? window.i18n.t("on") : window.i18n.t("off");
   closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? window.i18n.t("on") : window.i18n.t("off");
-  if (updateStatusKey) updateStatusText.textContent = window.i18n.t(updateStatusKey);
+  if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
 
 langSelect.addEventListener("change", () => {

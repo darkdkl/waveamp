@@ -42,7 +42,8 @@ Runs on macOS, Windows and Linux.
   overlay)
 - **Tray icon** with an optional close-to-tray mode
 - **HTTP / SOCKS5 proxy** for the radio
-- **Automatic updates** from GitHub Releases
+- **Update check** — tells you when a new version is out, with a link to its
+  download page
 - **English and Russian interface**, adjustable UI scale; your playlist,
   equalizer, favorites and layout are restored on the next launch
 
@@ -104,8 +105,6 @@ see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
 
 - [Electron](https://www.electronjs.org/) — desktop shell (MIT; Chromium and its
   components under their own licenses)
-- [electron-updater](https://github.com/electron-userland/electron-builder) —
-  automatic updates (MIT)
 - [music-metadata](https://github.com/Borewit/music-metadata) — audio file tags
   (MIT)
 
