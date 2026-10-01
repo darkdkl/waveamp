@@ -72,6 +72,7 @@ const radioResizeHandle = document.getElementById("radioResizeHandle");
 
 let queue = [];
 let currentIndex = -1;
+let localPlayRequested = false;
 let isSeeking = false;
 let playlistOpen = false;
 let eqOpen = false;
@@ -603,8 +604,18 @@ function resumeAudioContext() {
 }
 
 function playAudio() {
+  if (playbackMode === "local" && audio.error && queue[currentIndex]?.unplayable) {
+    skipUnplayableTrack();
+    return;
+  }
+  localPlayRequested = playbackMode === "local";
   resumeAudioContext();
   audio.play().catch(() => {});
+}
+
+function skipUnplayableTrack() {
+  localPlayRequested = false;
+  if (currentIndex + 1 < queue.length) loadTrack(currentIndex + 1);
 }
 
 // trackTitle has no data-i18n (applyTranslations would overwrite the track name),
@@ -679,6 +690,7 @@ function loadTrack(index, autoplay = true) {
   durTime.hidden = false;
   liveTag.hidden = true;
   currentIndex = index;
+  localPlayRequested = autoplay;
   const track = queue[index];
   audio.src = getTrackSrc(track);
   updateTrackTitleText();
@@ -699,7 +711,9 @@ function renderPlaylist() {
 
   queue.forEach((track, index) => {
     const item = document.createElement("li");
-    item.className = "playlist__item" + (index === currentIndex ? " is-active" : "");
+    item.className =
+      "playlist__item" + (index === currentIndex ? " is-active" : "") + (track.unplayable ? " is-unplayable" : "");
+    if (track.unplayable) item.title = window.i18n.t("trackUnplayable");
 
     const idx = document.createElement("span");
     idx.className = "playlist__item-index";
@@ -1216,11 +1230,12 @@ function syncElectronWindowSize(instant = false) {
 }
 
 // file.type is empty for some formats on some systems — fall back to the extension.
-const AUDIO_EXT_RE = /\.(mp3|wav|ogg|oga|flac|m4a|aac|wma|ape|opus|weba|mid|midi)$/i;
+const AUDIO_EXT_RE = /\.(mp3|wav|ogg|oga|flac|m4a|aac|opus|weba)$/i;
+const UNSUPPORTED_EXT_RE = /\.(wma|ape|mid|midi|aif|aiff|amr|wv|mpc)$/i;
 
 function addFiles(fileList) {
   const files = Array.from(fileList).filter(
-    (f) => f.type.startsWith("audio/") || (!f.type && AUDIO_EXT_RE.test(f.name))
+    (f) => AUDIO_EXT_RE.test(f.name) || (f.type.startsWith("audio/") && !UNSUPPORTED_EXT_RE.test(f.name))
   );
   if (files.length === 0) return;
   const wasEmpty = queue.length === 0;
@@ -1656,6 +1671,10 @@ audio.addEventListener("loadedmetadata", () => {
   if (playbackMode === "radio") return;
   durTime.textContent = formatTime(audio.duration);
   const track = queue[currentIndex];
+  if (track?.unplayable) {
+    track.unplayable = false;
+    renderPlaylist();
+  }
   if (track && track.duration == null && isFinite(audio.duration)) {
     track.duration = audio.duration;
     scheduleTagRender();
@@ -1737,8 +1756,13 @@ function attemptRadioReconnect() {
 audio.addEventListener("error", () => {
   if (playbackMode === "radio") {
     attemptRadioReconnect();
-  } else if (audio.error) {
+  } else if (audio.error && audio.error.code !== MediaError.MEDIA_ERR_ABORTED) {
     logEvent("error", "audio", `Local playback error (code ${audio.error.code}): ${audio.error.message}`);
+    const track = queue[currentIndex];
+    if (!track) return;
+    track.unplayable = true;
+    renderPlaylist();
+    if (localPlayRequested) skipUnplayableTrack();
   }
 });
 

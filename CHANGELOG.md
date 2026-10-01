@@ -4,6 +4,14 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.3.1] — 2026-10-01
+
+### Fixed
+- Files that can't be played (broken, missing or in an unsupported format)
+  are struck through in the playlist and skipped instead of stopping playback
+- WMA, APE, MIDI, AIFF, AMR, WavPack and Musepack files are no longer added
+  to the playlist, since they can't be played
+
 ## [1.3.0] — 2026-10-01
 
 ### Added

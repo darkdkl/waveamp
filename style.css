@@ -509,6 +509,11 @@ input[type="range"]:disabled {
   color: var(--accent);
 }
 
+.playlist__item.is-unplayable .playlist__item-name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
 .playlist__item-index {
   color: var(--text-muted);
   font-family: "DejaVu Sans Mono", "Courier New", monospace;
