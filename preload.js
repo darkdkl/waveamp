@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showAppMenu: () => ipcRenderer.send("show-app-menu"),
   openSettingsWindow: () => ipcRenderer.send("open-settings-window"),
   closeSettingsWindow: () => ipcRenderer.send("settings-window-close"),
+  setSettingsWindowScale: (percent) => ipcRenderer.send("settings-window-scale", percent),
   setTrayIconEnabled: (enabled) => ipcRenderer.send("set-tray-icon-enabled", enabled),
   setCloseMinimizesToTray: (enabled) => ipcRenderer.send("set-close-minimizes-to-tray", enabled),
   sendSettingsAction: (action) => ipcRenderer.send("settings-action-from-window", action),
