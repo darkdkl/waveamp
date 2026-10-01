@@ -42,7 +42,8 @@
   Windows)
 - **Иконка в трее** и сворачивание в трей по желанию
 - **Прокси HTTP / SOCKS5** для радио
-- **Автообновление** из GitHub Releases
+- **Проверка обновлений** — сообщает о новой версии и даёт ссылку на страницу
+  загрузки
 - **Русский и английский интерфейс**, масштаб интерфейса; плейлист,
   эквалайзер, избранное и расположение панелей восстанавливаются при запуске
 
@@ -105,8 +106,6 @@ npm run build:win
 
 - [Electron](https://www.electronjs.org/) — десктопная обвязка (MIT; Chromium и
   его компоненты — под своими лицензиями)
-- [electron-updater](https://github.com/electron-userland/electron-builder) —
-  автообновление (MIT)
 - [music-metadata](https://github.com/Borewit/music-metadata) — чтение тегов
   аудиофайлов (MIT)
 

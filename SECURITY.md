@@ -4,8 +4,8 @@
 
 ## Supported versions
 
-Security fixes go into the latest release only. WaveAMP updates itself
-automatically; you can also check in Settings → System → Updates.
+Security fixes go into the latest release only. WaveAMP tells you when a new
+version is available; you can also check in Settings → System → Updates.
 
 ## Reporting a vulnerability
 
@@ -23,7 +23,7 @@ possible, and the fix will be released before the details are made public.
 ## Поддерживаемые версии
 
 Исправления безопасности выходят только для последнего релиза. WaveAMP
-обновляется автоматически; проверить вручную можно в Настройки → Системные →
+сообщает о новой версии сам; проверить вручную можно в Настройки → Системные →
 Обновления.
 
 ## Как сообщить об уязвимости

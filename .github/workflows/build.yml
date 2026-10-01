@@ -53,10 +53,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Publishes the installer and the electron-updater feed files
-      # (latest.yml / latest-mac.yml / latest-linux.yml) to a GitHub
-      # Release tagged with package.json's version, so the app's
-      # auto-updater (see main.js) has something to check against.
       - name: Build and publish installer
         run: npm run ${{ matrix.script }}
         env:

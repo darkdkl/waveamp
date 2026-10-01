@@ -1204,6 +1204,7 @@ function setLoggingEnabled(enabled) {
 }
 
 let autoUpdateEnabled = true;
+let skippedUpdateVersion = "";
 
 function setAutoUpdateEnabled(enabled) {
   autoUpdateEnabled = enabled;
@@ -1656,6 +1657,7 @@ function persistConfig() {
         loggingEnabled,
         proxy: getProxyConfig(),
         autoUpdateEnabled,
+        skippedUpdateVersion,
         showTrayIcon: trayIconEnabled,
         closeMinimizesToTray: closeMinimizesToTrayEnabled,
       },
@@ -1711,6 +1713,10 @@ async function restoreConfig() {
     proxyUsername = proxy.username || "";
     proxyPassword = proxy.password || "";
     setProxyEnabled(!!proxy.enabled);
+  }
+
+  if (typeof config.settings?.skippedUpdateVersion === "string") {
+    skippedUpdateVersion = config.settings.skippedUpdateVersion;
   }
 
   if (typeof config.settings?.autoUpdateEnabled === "boolean") {
@@ -1893,6 +1899,11 @@ player.addEventListener("mousedown", (e) => {
 });
 
 window.electronAPI?.onHotkey?.((action) => runHotkeyAction(action));
+
+window.electronAPI?.onSkipUpdateVersion?.((version) => {
+  skippedUpdateVersion = version;
+  persistConfig();
+});
 
 async function applyGlobalHotkeys() {
   if (!window.electronAPI?.setGlobalHotkeys) return;
