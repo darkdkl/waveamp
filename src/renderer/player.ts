@@ -160,6 +160,15 @@ function scheduleTagRender() {
 
 let lastObjectUrl = null;
 
+function safeTrackUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "file:" || url.protocol === "blob:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 function getTrackSrc(track) {
   if (track.path && window.electronAPI?.getFileUrl) {
     return window.electronAPI.getFileUrl(track.path);
@@ -699,7 +708,14 @@ function loadTrack(index, autoplay = true) {
   currentIndex = index;
   localPlayRequested = autoplay;
   const track = queue[index];
-  audio.src = getTrackSrc(track);
+  const src = safeTrackUrl(getTrackSrc(track));
+  if (src) {
+    audio.src = src;
+  } else {
+    logEvent("error", "playlist", `"${track.name}" has an unsupported file URL`);
+    audio.removeAttribute("src");
+    track.unplayable = true;
+  }
   updateTrackTitleText();
   seek.disabled = false;
   renderPlaylist();
