@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { i18n, translations } from "../../src/renderer/i18n";
 import { accentColor } from "../../src/renderer/theme";
@@ -12,6 +12,10 @@ const enKeys = Object.keys(translations.en);
 function source(file: string): string {
   return readFileSync(new URL(`../../src/renderer/${file}`, import.meta.url), "utf8");
 }
+
+const rendererScripts = (readdirSync(new URL("../../src/renderer/", import.meta.url), { recursive: true }) as string[])
+  .filter((file) => file.endsWith(".ts") && !file.endsWith(".d.ts"))
+  .sort();
 
 function matches(text: string, regex: RegExp): string[] {
   return [...text.matchAll(regex)].map((m) => m[1]);
@@ -63,10 +67,19 @@ describe("keys used by the UI exist", () => {
     expect(keys.filter((key) => !enKeys.includes(key))).toEqual([]);
   });
 
-  it.each(["player.ts", "settings.ts", "hotkeys.ts"])('t("…") calls in %s', (file) => {
+  it("scans the renderer scripts", () => {
+    expect(rendererScripts).toContain("settings.ts");
+    expect(rendererScripts.some((file) => file.startsWith("player"))).toBe(true);
+  });
+
+  it.each(rendererScripts)('t("…") calls in %s', (file) => {
     const keys = matches(source(file), /\bt\("([A-Za-z0-9_]+)"\)/g);
-    expect(keys.length).toBeGreaterThan(0);
     expect(keys.filter((key) => !enKeys.includes(key))).toEqual([]);
+  });
+
+  it("finds t() calls across the renderer", () => {
+    const total = rendererScripts.flatMap((file) => matches(source(file), /\bt\("([A-Za-z0-9_]+)"\)/g));
+    expect(total.length).toBeGreaterThan(30);
   });
 
   it("hotkey action names", () => {
