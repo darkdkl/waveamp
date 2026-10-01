@@ -86,6 +86,12 @@ npm install
 npm start
 ```
 
+Tests:
+
+```bash
+npm test
+```
+
 Installers:
 
 ```bash
