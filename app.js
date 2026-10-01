@@ -45,8 +45,17 @@ const radioBtn = document.getElementById("radioBtn");
 const radio = document.getElementById("radio");
 const radioTabSearch = document.getElementById("radioTabSearch");
 const radioTabFavorites = document.getElementById("radioTabFavorites");
+const radioTabAdd = document.getElementById("radioTabAdd");
 const radioSearchView = document.getElementById("radioSearchView");
 const radioFavoritesView = document.getElementById("radioFavoritesView");
+const radioAddView = document.getElementById("radioAddView");
+const radioAddFrame = document.getElementById("radioAddFrame");
+const radioAddTitle = document.getElementById("radioAddTitle");
+const radioAddName = document.getElementById("radioAddName");
+const radioAddUrl = document.getElementById("radioAddUrl");
+const radioAddError = document.getElementById("radioAddError");
+const radioAddCancel = document.getElementById("radioAddCancel");
+const radioAddSubmit = document.getElementById("radioAddSubmit");
 const radioFavCount = document.getElementById("radioFavCount");
 const radioCountrySelect = document.getElementById("radioCountrySelect");
 const radioStateSelect = document.getElementById("radioStateSelect");
@@ -75,7 +84,11 @@ let currentStation = null;
 let favoriteStations = [];
 let radioResults = [];
 let radioOpen = false;
-let radioView = "search"; // "search" | "favorites"
+let radioView = "search"; // "search" | "favorites" | "add"
+let radioViewBeforeAdd = "favorites";
+let editingStationId = null;
+let stationFormErrorKey = "";
+let stationFormBusy = false;
 let radioCountry = "";
 let radioState = "";
 let radioTag = "";
@@ -782,9 +795,9 @@ function createStationRow(station) {
   name.textContent = station.name;
   const sub = document.createElement("div");
   sub.className = "radio__sub";
-  sub.textContent = [station.country, station.tags, station.bitrate ? station.bitrate + "kbps" : ""]
-    .filter(Boolean)
-    .join(" · ");
+  sub.textContent = station.custom
+    ? stationHost(station.url)
+    : [station.country, station.tags, station.bitrate ? station.bitrate + "kbps" : ""].filter(Boolean).join(" · ");
   meta.append(name, sub);
 
   const isFav = isFavoriteStation(station.stationuuid);
@@ -799,7 +812,21 @@ function createStationRow(station) {
     toggleFavoriteStation(station);
   });
 
-  li.append(favicon, meta, favBtn);
+  li.append(favicon, meta);
+  if (station.custom) {
+    const editBtn = document.createElement("button");
+    editBtn.className = "radio__fav-btn radio__edit-btn";
+    editBtn.type = "button";
+    editBtn.textContent = "✎";
+    editBtn.title = window.i18n.t("editStation");
+    editBtn.setAttribute("aria-label", editBtn.title);
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openStationForm(station);
+    });
+    li.append(editBtn);
+  }
+  li.append(favBtn);
   li.addEventListener("click", () => tuneStation(station));
   return li;
 }
@@ -810,8 +837,11 @@ function setRadioView(view) {
   radioTabSearch.setAttribute("aria-pressed", String(view === "search"));
   radioTabFavorites.classList.toggle("is-active", view === "favorites");
   radioTabFavorites.setAttribute("aria-pressed", String(view === "favorites"));
+  radioTabAdd.classList.toggle("is-active", view === "add");
+  radioTabAdd.setAttribute("aria-pressed", String(view === "add"));
   radioSearchView.hidden = view !== "search";
   radioFavoritesView.hidden = view !== "favorites";
+  radioAddView.hidden = view !== "add";
   if (radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
   syncElectronWindowSize();
 }
@@ -847,6 +877,134 @@ function toggleFavoriteStation(station) {
   persistConfig();
 }
 
+function stationHost(url) {
+  try {
+    return new URL(url).host;
+  } catch {
+    return "";
+  }
+}
+
+function isHttpUrl(value) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function setStationFormError(key) {
+  stationFormErrorKey = key;
+  radioAddError.textContent = key ? window.i18n.t(key) : "";
+}
+
+function updateStationFormText() {
+  radioAddTitle.textContent = window.i18n.t(editingStationId ? "editStation" : "newStation");
+  radioAddSubmit.textContent = window.i18n.t(stationFormBusy ? "checking" : editingStationId ? "save" : "add");
+  setStationFormError(stationFormErrorKey);
+}
+
+function setStationFormBusy(busy) {
+  stationFormBusy = busy;
+  radioAddSubmit.disabled = busy;
+  radioAddName.disabled = busy;
+  radioAddUrl.disabled = busy;
+  updateStationFormText();
+}
+
+function openStationForm(station = null) {
+  if (radioView !== "add") radioViewBeforeAdd = radioView;
+  editingStationId = station ? station.stationuuid : null;
+  radioAddName.value = station ? station.name : "";
+  radioAddUrl.value = station ? station.sourceUrl || station.url : "";
+  setStationFormBusy(false);
+  setStationFormError("");
+  setRadioView("add");
+  radioAddName.focus();
+}
+
+function closeStationForm(nextView) {
+  editingStationId = null;
+  setStationFormError("");
+  setRadioView(nextView || radioViewBeforeAdd);
+}
+
+async function submitStationForm() {
+  if (stationFormBusy) return;
+  const name = radioAddName.value.trim();
+  const sourceUrl = radioAddUrl.value.trim();
+  if (!name) {
+    setStationFormError("stationNameRequired");
+    radioAddName.focus();
+    return;
+  }
+  if (!isHttpUrl(sourceUrl)) {
+    setStationFormError("stationUrlInvalid");
+    radioAddUrl.focus();
+    return;
+  }
+  const duplicate = favoriteStations.some(
+    (s) => s.stationuuid !== editingStationId && (s.url === sourceUrl || s.sourceUrl === sourceUrl)
+  );
+  if (duplicate) {
+    setStationFormError("stationUrlDuplicate");
+    radioAddUrl.focus();
+    return;
+  }
+
+  let url = sourceUrl;
+  if (window.electronAPI?.resolveStreamUrl) {
+    setStationFormError("");
+    setStationFormBusy(true);
+    const result = await window.electronAPI.resolveStreamUrl(sourceUrl).catch(() => ({ ok: false }));
+    setStationFormBusy(false);
+    if (radioView !== "add") return;
+    if (!result.ok) {
+      setStationFormError(result.error === "invalid" ? "stationUrlInvalid" : "stationPlaylistFailed");
+      radioAddUrl.focus();
+      return;
+    }
+    url = result.url;
+  }
+
+  const existing = favoriteStations.find((s) => s.stationuuid === editingStationId);
+  if (existing) {
+    const urlChanged = existing.url !== url;
+    Object.assign(existing, { name, url, sourceUrl });
+    persistConfig();
+    closeStationForm("favorites");
+    if (currentStation?.stationuuid === existing.stationuuid) {
+      currentStation = existing;
+      if (urlChanged) tuneStation(existing);
+      else updateTrackTitleText();
+    }
+    renderRadioFavorites();
+    renderRadioResults();
+    return;
+  }
+
+  const station = {
+    stationuuid: "custom-" + crypto.randomUUID(),
+    name,
+    url,
+    sourceUrl,
+    favicon: "",
+    tags: "",
+    country: "",
+    countrycode: "",
+    state: "",
+    bitrate: 0,
+    codec: "",
+    custom: true,
+  };
+  favoriteStations.push(station);
+  renderRadioFavorites();
+  persistConfig();
+  closeStationForm("favorites");
+  tuneStation(station);
+}
+
 function cycleFavorite(direction) {
   if (favoriteStations.length === 0) return;
   const idx = favoriteStations.findIndex((s) => s.stationuuid === currentStation?.stationuuid);
@@ -875,7 +1033,7 @@ function tuneStation(station) {
   audio.src = station.url;
   playAudio();
 
-  if (window.electronAPI?.registerStationClick) {
+  if (!station.custom && window.electronAPI?.registerStationClick) {
     window.electronAPI.registerStationClick(station.stationuuid).catch(() => {});
   }
 
@@ -1235,6 +1393,7 @@ function setLanguage(lang) {
   renderPlaylist();
   renderRadioResults();
   renderRadioFavorites();
+  updateStationFormText();
   persistConfig();
 }
 
@@ -1349,6 +1508,7 @@ const RADIO_CHROME_OFFSET =
   parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--radio-chrome-offset")) || 72;
 
 function activeRadioFrame() {
+  if (radioView === "add") return radioAddFrame;
   return radioView === "favorites" ? radioFavoritesFrame : radioResultsFrame;
 }
 
@@ -1357,6 +1517,7 @@ function applyListHeight(px) {
   playlistListFrame.style.height = px + "px";
   radioResultsFrame.style.height = searchPx + "px";
   radioFavoritesFrame.style.height = px + "px";
+  radioAddFrame.style.height = px + "px";
   if (playlistOpen) playlist.style.maxHeight = playlist.scrollHeight + "px";
   if (radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
 }
@@ -1387,7 +1548,7 @@ playlistResizeHandle.addEventListener("mousedown", (e) => {
 
 radioResizeHandle.addEventListener("mousedown", (e) => {
   const radioHeight = activeRadioFrame().getBoundingClientRect().height / cssZoomFactor();
-  const canonicalHeight = radioView === "favorites" ? radioHeight : radioHeight + RADIO_CHROME_OFFSET;
+  const canonicalHeight = radioView === "search" ? radioHeight + RADIO_CHROME_OFFSET : radioHeight;
   startListResize(e, radioResizeHandle, radio, canonicalHeight);
 });
 
@@ -1432,6 +1593,21 @@ radioBtn.addEventListener("click", () => {
 
 radioTabSearch.addEventListener("click", () => setRadioView("search"));
 radioTabFavorites.addEventListener("click", () => setRadioView("favorites"));
+radioTabAdd.addEventListener("click", () => {
+  if (radioView === "add") closeStationForm();
+  else openStationForm();
+});
+radioAddFrame.addEventListener("submit", (e) => {
+  e.preventDefault();
+  submitStationForm();
+});
+radioAddCancel.addEventListener("click", () => closeStationForm());
+radioAddFrame.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeStationForm();
+  }
+});
 
 radioCountrySelect.addEventListener("change", async () => {
   radioCountry = radioCountrySelect.value;
