@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.3.2] — 2026-10-02
+
+### Security
+- Radio stream addresses are checked right before playback: only http and
+  https links are opened, and favorites with any other scheme are dropped
+  when the config is loaded
+
 ## [1.3.1] — 2026-10-01
 
 ### Fixed
