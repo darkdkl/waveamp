@@ -1237,7 +1237,10 @@ function setLanguage(lang) {
   persistConfig();
 }
 
-const BASE_ZOOM = 0.95;
+const BASE_ZOOM = 0.855;
+const SCALE_MIN = 70;
+const SCALE_MAX = 150;
+const SCALE_STEP = 10;
 
 function setScale(percent) {
   uiScale = (percent / 100) * BASE_ZOOM;
@@ -1307,6 +1310,7 @@ function pushSettingsState() {
   window.electronAPI?.pushSettingsState?.({
     lang: window.i18n.getLanguage(),
     scale: Math.round((uiScale / BASE_ZOOM) * 100),
+    zoomFactor: uiScale,
     accentColor,
     vizResponse,
     hotkeys: hotkeyConfig,
@@ -1674,9 +1678,9 @@ async function restoreConfig() {
     setLanguage(config.settings.lang);
   }
 
-  const validScales = [75, 100, 125, 150];
-  if (validScales.includes(config.settings?.scale)) {
-    setScale(config.settings.scale);
+  if (typeof config.settings?.scale === "number") {
+    const scale = Math.round(config.settings.scale / SCALE_STEP) * SCALE_STEP;
+    setScale(Math.min(SCALE_MAX, Math.max(SCALE_MIN, scale)));
   }
 
   if (config.settings?.accentColor) {

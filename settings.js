@@ -371,6 +371,8 @@ window.electronAPI?.onSettingsState?.((state) => {
     langSelect.value = window.i18n.getLanguage();
   }
   if (typeof state.scale === "number") scaleSelect.value = String(state.scale);
+  if (typeof state.zoomFactor === "number") window.electronAPI?.setZoomFactor?.(state.zoomFactor);
+  if (typeof state.scale === "number") window.electronAPI?.setSettingsWindowScale?.(state.scale);
   if (state.vizResponse) vizResponseSelect.value = state.vizResponse;
   if (state.hotkeys) {
     hotkeyConfig = window.hotkeys.normalize(state.hotkeys);

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, net, session, shell, dialog, globalShortcut } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, net, session, shell, dialog, globalShortcut, screen } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -381,11 +381,14 @@ function createSettingsWindow() {
   }
   const hasParent = mainWindow && !mainWindow.isDestroyed();
   const bounds = hasParent ? mainWindow.getBounds() : null;
+  settingsScale = savedScalePercent();
+  const size = settingsWindowSize(SETTINGS_WINDOW_SIZE, settingsScale);
+  const minSize = settingsWindowSize(SETTINGS_WINDOW_MIN_SIZE, settingsScale);
   settingsWindow = new BrowserWindow({
-    width: 420,
-    height: 520,
-    minWidth: 360,
-    minHeight: 360,
+    width: size.width,
+    height: size.height,
+    minWidth: minSize.width,
+    minHeight: minSize.height,
     x: bounds ? bounds.x + bounds.width + 12 : undefined,
     y: bounds ? bounds.y : undefined,
     title: "WaveAMP — Settings",
@@ -414,6 +417,37 @@ function createSettingsWindow() {
     settingsWindow = null;
   });
 }
+
+const SETTINGS_WINDOW_SIZE = { width: 378, height: 468 };
+const SETTINGS_WINDOW_MIN_SIZE = { width: 324, height: 324 };
+let settingsScale = 100;
+
+function savedScalePercent() {
+  const scale = loadConfig()?.settings?.scale;
+  return typeof scale === "number" ? Math.min(150, Math.max(70, Math.round(scale / 10) * 10)) : 100;
+}
+
+function settingsWindowSize({ width, height }, percent) {
+  const workArea = screen.getPrimaryDisplay().workAreaSize;
+  return {
+    width: Math.min(Math.round((width * percent) / 100), workArea.width),
+    height: Math.min(Math.round((height * percent) / 100), workArea.height),
+  };
+}
+
+ipcMain.on("settings-window-scale", (event, percent) => {
+  if (!settingsWindow || settingsWindow.isDestroyed() || !(percent > 0) || percent === settingsScale) return;
+  const ratio = percent / settingsScale;
+  settingsScale = percent;
+  const minSize = settingsWindowSize(SETTINGS_WINDOW_MIN_SIZE, percent);
+  settingsWindow.setMinimumSize(minSize.width, minSize.height);
+  const [width, height] = settingsWindow.getSize();
+  const display = screen.getDisplayMatching(settingsWindow.getBounds()).workAreaSize;
+  settingsWindow.setSize(
+    Math.min(Math.round(width * ratio), display.width),
+    Math.min(Math.round(height * ratio), display.height)
+  );
+});
 
 function openSettingsWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) {
