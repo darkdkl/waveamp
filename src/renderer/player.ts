@@ -906,13 +906,8 @@ function stationHost(url) {
   }
 }
 
-function isHttpUrl(value) {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === "http:" || protocol === "https:";
-  } catch {
-    return false;
-  }
+function isHttpUrl(value: string): boolean {
+  return safeStreamUrl(value) !== null;
 }
 
 function setStationFormError(key) {
@@ -1033,6 +1028,26 @@ function cycleFavorite(direction) {
   tuneStation(favoriteStations[nextIdx]);
 }
 
+function safeStreamUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function playStream(station: Station): void {
+  const url = safeStreamUrl(station.url);
+  if (!url) {
+    logEvent("error", "radio", `"${station.name}" has an unsupported stream URL`);
+    trackTitle.textContent = station.name + i18n.t("noConnection");
+    return;
+  }
+  audio.src = url;
+  playAudio();
+}
+
 function tuneStation(station) {
   clearTimeout(radioReconnectTimer);
   playbackMode = "radio";
@@ -1051,8 +1066,7 @@ function tuneStation(station) {
   renderRadioResults();
   renderRadioFavorites();
 
-  audio.src = station.url;
-  playAudio();
+  playStream(station);
 
   if (!station.custom && window.electronAPI?.registerStationClick) {
     window.electronAPI.registerStationClick(station.stationuuid).catch(() => {});
@@ -1735,8 +1749,7 @@ function attemptRadioReconnect() {
     radioCrossOriginFallbackTried = true;
     logEvent("info", "radio", `"${currentStation.name}" failed with CORS (${errorInfo}), retrying without it`);
     audio.removeAttribute("crossorigin");
-    audio.src = currentStation.url;
-    playAudio();
+    playStream(currentStation);
     return;
   }
 
@@ -1753,10 +1766,7 @@ function attemptRadioReconnect() {
   );
   trackTitle.textContent = currentStation.name + i18n.t("reconnecting");
   radioReconnectTimer = setTimeout(() => {
-    if (playbackMode === "radio" && currentStation) {
-      audio.src = currentStation.url;
-      playAudio();
-    }
+    if (playbackMode === "radio" && currentStation) playStream(currentStation);
   }, 1500);
 }
 
@@ -1962,7 +1972,7 @@ async function restoreConfig() {
   }
 
   if (Array.isArray(config.radio?.favorites)) {
-    favoriteStations = config.radio.favorites.filter((s) => s && s.stationuuid && s.url);
+    favoriteStations = config.radio.favorites.filter((s) => s && s.stationuuid && safeStreamUrl(s.url));
     renderRadioFavorites();
   }
 
