@@ -2043,6 +2043,10 @@ function runHotkeyAction(action) {
     case "addFolder":
       folderInput.click();
       break;
+    case "addStation":
+      if (!radioOpen) setRadioOpen(true);
+      openStationForm();
+      break;
     case "cycleVisualizer":
       setVizMode(VIZ_MODES[(VIZ_MODES.indexOf(vizMode) + 1) % VIZ_MODES.length]);
       break;

@@ -11,6 +11,8 @@ version, fixes bump the patch version.
   and a stream URL and saves the station straight to Favorites. Links to
   .pls and .m3u playlists are resolved to the stream address. Stations
   added this way can be edited with the ✎ button
+- "Add radio station" hotkey action (unassigned by default, set it in
+  Settings → Hotkeys)
 
 ## [1.2.0] — 2026-10-01
 

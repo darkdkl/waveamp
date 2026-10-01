@@ -21,6 +21,7 @@
     ["openSettings", "hotkeyOpenSettings", isMac ? "Meta+Comma" : "Ctrl+KeyP", "", ""],
     ["addFiles", "hotkeyAddFiles", "KeyL", "", ""],
     ["addFolder", "hotkeyAddFolder", "Shift+KeyL", "", ""],
+    ["addStation", "hotkeyAddStation", "", "", ""],
     ["cycleVisualizer", "hotkeyCycleVisualizer", "", "", ""],
   ].map(([id, nameKey, local, global, macGlobal]) => ({ id, nameKey, local, global: isMac ? macGlobal : global }));
 
