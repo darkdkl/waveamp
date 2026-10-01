@@ -1,0 +1,66 @@
+name: Build installers
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  # The three platform builds run in parallel and each used to create the
+  # GitHub release itself: whichever lost the race got "422 already_exists"
+  # and failed without uploading its installers (v0.14.1, v0.15.0 shipped
+  # without macOS files). Create the release once, up front — electron-builder
+  # then just uploads into the existing release.
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create GitHub release
+        run: |
+          version=$(node -p "require('./package.json').version")
+          gh release view "v$version" > /dev/null 2>&1 ||
+            gh release create "v$version" --title "$version" --notes "" --target "$GITHUB_SHA"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            script: release:mac
+          - os: ubuntu-latest
+            script: release:linux
+          - os: windows-latest
+            script: release:win
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Publishes the installer and the electron-updater feed files
+      # (latest.yml / latest-mac.yml / latest-linux.yml) to a GitHub
+      # Release tagged with package.json's version, so the app's
+      # auto-updater (see main.js) has something to check against.
+      - name: Build and publish installer
+        run: npm run ${{ matrix.script }}
+        env:
+          # No signing certificates in CI on any platform — build
+          # unsigned, don't let electron-builder go looking for one.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,90 @@
+{
+  "name": "waveamp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Retro-style desktop audio player with internet radio, built on Electron",
+  "author": "Dark.Dmake",
+  "homepage": "https://github.com/darkdkl/waveamp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darkdkl/waveamp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/darkdkl/waveamp/issues"
+  },
+  "keywords": ["audio-player", "internet-radio", "equalizer", "electron", "music"],
+  "license": "GPL-3.0-or-later",
+  "main": "main.js",
+  "scripts": {
+    "licenses": "node scripts/generateThirdPartyLicenses.js",
+    "prestart": "npm run licenses",
+    "start": "electron .",
+    "build:mac": "npm run licenses && electron-builder --mac --publish=never",
+    "build:linux": "npm run licenses && electron-builder --linux --publish=never",
+    "build:win": "npm run licenses && electron-builder --win --publish=never",
+    "release:mac": "npm run licenses && electron-builder --mac --publish always",
+    "release:linux": "npm run licenses && electron-builder --linux --publish always",
+    "release:win": "npm run licenses && electron-builder --win --publish always"
+  },
+  "devDependencies": {
+    "electron": "^44.5.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.darkdkl.waveamp",
+    "productName": "WaveAMP",
+    "copyright": "Copyright © 2026 Dark.Dmake",
+    "publish": {
+      "provider": "github",
+      "owner": "darkdkl",
+      "repo": "waveamp",
+      "releaseType": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "settings.html",
+      "settings.js",
+      "style.css",
+      "i18n.js",
+      "theme.js",
+      "hotkeys.js",
+      "app.js",
+      "assets/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "afterSign": "scripts/afterSignAdHoc.js",
+    "extraResources": ["LICENSE", "THIRD_PARTY_LICENSES.txt"],
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.music",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "Audio",
+      "icon": "assets/icon.png"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.png"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "music-metadata": "^11.16.1"
+  }
+}

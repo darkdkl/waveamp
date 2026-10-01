@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: http: data:; media-src 'self' file: blob: https: http:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self';" />
+  <title>WaveAMP</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="player" id="player">
+    <header class="player__titlebar">
+      <span class="player__logo">▮▮ WAVE<span class="player__logo-accent">AMP</span></span>
+      <div class="window-controls" id="windowControls" hidden>
+        <button class="window-controls__btn window-controls__btn--close" id="closeBtn" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
+        <button class="window-controls__btn" id="minimizeBtn" data-i18n-title="minimize" data-i18n-aria="minimize" title="Свернуть" aria-label="Свернуть">&#x2212;</button>
+      </div>
+    </header>
+
+    <section class="player__display">
+      <div class="display__time" id="time">00:00</div>
+      <div class="display__meta">
+        <div class="display__track" id="trackTitle">Нет трека — откройте файл</div>
+        <div class="display__scale">
+          <div class="display__viz" id="viz" data-i18n-title="vizModeHint"></div>
+          <canvas class="display__viz-canvas" id="vizCanvas" data-i18n-title="vizModeHint" hidden></canvas>
+          <span id="durTime">00:00</span>
+          <span id="liveTag" class="display__live" hidden>LIVE</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="player__seek">
+      <input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled />
+    </section>
+
+    <section class="player__controls">
+      <div class="transport">
+        <button class="btn btn--icon" id="prevBtn" data-i18n-title="prevTrack" data-i18n-aria="prevTrack" title="Предыдущий трек" aria-label="Предыдущий трек">
+          <svg viewBox="0 0 24 24"><path d="M6 4h2v16H6V4zm3.5 8L20 4v16L9.5 12z"/></svg>
+        </button>
+        <button class="btn btn--icon btn--play" id="playBtn" data-i18n-title="play" data-i18n-aria="play" title="Воспроизвести" aria-label="Воспроизвести">
+          <svg viewBox="0 0 24 24"><path d="M7 4l14 8-14 8V4z"/></svg>
+        </button>
+        <button class="btn btn--icon" id="pauseBtn" data-i18n-title="pause" data-i18n-aria="pause" title="Пауза" aria-label="Пауза">
+          <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+        </button>
+        <button class="btn btn--icon" id="stopBtn" data-i18n-title="stop" data-i18n-aria="stop" title="Стоп" aria-label="Стоп">
+          <svg viewBox="0 0 24 24"><path d="M5 5h14v14H5V5z"/></svg>
+        </button>
+        <button class="btn btn--icon" id="nextBtn" data-i18n-title="nextTrack" data-i18n-aria="nextTrack" title="Следующий трек" aria-label="Следующий трек">
+          <svg viewBox="0 0 24 24"><path d="M16 4h2v16h-2V4zM4.5 4L15 12 4.5 20V4z"/></svg>
+        </button>
+      </div>
+
+      <div class="volume">
+        <svg class="volume__icon" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4zm11.5 3a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4z"/></svg>
+        <input type="range" id="volume" min="0" max="100" value="80" />
+      </div>
+
+      <div class="panel-toggles">
+        <button class="btn btn--icon" id="eqBtn" data-i18n-title="eq" data-i18n-aria="showEq" title="Эквалайзер" aria-label="Показать эквалайзер">
+          <svg viewBox="0 0 24 24"><path d="M5 20V10h2v10H5zm0-12V4h2v4H5zm6 12V13h2v7h-2zm0-9V4h2v6h-2zm6 9v-4h2v4h-2zm0-6V4h2v9h-2z"/></svg>
+        </button>
+
+        <button class="btn btn--icon" id="radioBtn" data-i18n-title="radio" data-i18n-aria="showRadio" title="Радио" aria-label="Показать радио">
+          <svg viewBox="0 0 24 24"><path d="M12 10.2a1.8 1.8 0 100 3.6 1.8 1.8 0 000-3.6zm0-3.6a5.4 5.4 0 00-3.8 9.2l1.3-1.3a3.6 3.6 0 115 0l1.3 1.3A5.4 5.4 0 0012 6.6zm0-3.6a9 9 0 00-6.4 15.4l1.3-1.3a7.2 7.2 0 1110.2 0l1.3 1.3A9 9 0 0012 3z"/></svg>
+        </button>
+
+        <button class="btn btn--icon" id="playlistBtn" data-i18n-title="playlist" data-i18n-aria="showPlaylist" title="Плейлист" aria-label="Показать плейлист">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h10v2H4v-2z"/></svg>
+        </button>
+
+        <button class="btn btn--icon" id="settingsBtn" type="button" data-i18n-title="settings" data-i18n-aria="settings" title="Настройки" aria-label="Настройки">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c0.04-0.3 0.06-0.61 0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14 0.23-0.41 0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39 0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4 2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24 0-0.43 0.17-0.47 0.41L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33c-0.22-0.08-0.47 0-0.59 0.22L2.74 8.87c-0.12 0.21-0.08 0.47 0.12 0.61l2.03 1.58C4.84 11.36 4.8 11.69 4.8 12s0.02 0.64 0.07 0.94l-2.03 1.58c-0.18 0.14-0.23 0.41-0.12 0.61l1.92 3.32c0.12 0.22 0.37 0.29 0.59 0.22l2.39-0.96c0.5 0.38 1.03 0.7 1.62 0.94l0.36 2.54c0.05 0.24 0.24 0.41 0.48 0.41h3.84c0.24 0 0.44-0.17 0.47-0.41l0.36-2.54c0.59-0.24 1.13-0.56 1.62-0.94l2.39 0.96c0.22 0.08 0.47 0 0.59-0.22l1.92-3.32c0.12-0.22 0.07-0.47-0.12-0.61L19.14 12.94zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6S13.98 15.6 12 15.6z"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="eq" id="eq">
+      <div class="eq__inner">
+        <div class="eq__header">
+          <span data-i18n="eq">Эквалайзер</span>
+          <div class="eq__header-actions">
+            <select class="eq__preset-select" id="eqPresetSelect" data-i18n-title="eqPreset"></select>
+            <button class="eq__toggle is-active" id="eqToggleBtn" type="button" data-i18n="eqOn">Вкл</button>
+            <button class="eq__reset" id="eqResetBtn" type="button" data-i18n="reset">Сброс</button>
+          </div>
+        </div>
+        <div class="eq__bands">
+          <div class="eq__preamp" id="eqPreamp"></div>
+          <div class="eq__divider"></div>
+          <div class="eq__band-group" id="eqBandGroup"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="playlist" id="playlist">
+      <div class="playlist__inner">
+        <div class="playlist__header">
+          <span data-i18n="playlist">Плейлист</span>
+          <div class="playlist__add" id="playlistAddWrap">
+            <button class="btn btn--icon" id="playlistAddBtn" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
+            </button>
+            <div class="playlist__add-menu" id="playlistAddMenu" hidden>
+              <button type="button" id="addFilesMenuItem">
+                <svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm8 1.5V8h4.5L14 3.5z"/></svg>
+                <span data-i18n="openFile">Открыть файл…</span>
+              </button>
+              <button type="button" id="addFolderMenuItem">
+                <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
+                <span data-i18n="openFolder">Открыть каталог…</span>
+              </button>
+              <div class="playlist__add-menu-sep"></div>
+              <button type="button" id="playlistClearBtn">
+                <svg viewBox="0 0 24 24"><path d="M7 4V2h10v2h5v2h-2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6H2V4h5zm2 4v10h2V8H9zm4 0v10h2V8h-2z"/></svg>
+                <span data-i18n="clearPlaylist">Очистить плейлист</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="playlist__list-frame" id="playlistListFrame">
+          <ul class="playlist__list" id="playlistList"></ul>
+          <p class="playlist__empty" id="playlistEmpty" data-i18n="playlistEmpty">Плейлист пуст — откройте или перетащите файлы</p>
+        </div>
+
+        <div class="playlist__resize-handle" id="playlistResizeHandle" data-i18n-title="dragToResize" title="Потяните, чтобы изменить высоту списка"></div>
+      </div>
+    </section>
+
+    <section class="radio" id="radio">
+      <div class="radio__inner">
+        <div class="radio__header">
+          <span data-i18n="radio">Радио</span>
+          <div class="radio__view-toggle">
+            <button class="btn btn--icon is-active" id="radioTabSearch" type="button" data-i18n-title="search" data-i18n-aria="search" title="Поиск" aria-label="Поиск" aria-pressed="true">
+              <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
+            </button>
+            <button class="btn btn--icon" id="radioTabFavorites" type="button" data-i18n-title="favorites" data-i18n-aria="favorites" title="Избранное" aria-label="Избранное" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+              <span class="radio__tab-count" id="radioFavCount" hidden>0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="radio__view" id="radioSearchView">
+          <div class="radio__filters">
+            <select class="radio__select" id="radioCountrySelect">
+              <option value="" data-i18n="countryAny">Страна: любая</option>
+            </select>
+            <select class="radio__select" id="radioStateSelect" hidden>
+              <option value="" data-i18n="stateAny">Регион: любой</option>
+            </select>
+            <select class="radio__select" id="radioTagSelect">
+              <option value="" data-i18n="tagAny">Жанр: любой</option>
+            </select>
+          </div>
+
+          <form class="radio__search" id="radioSearchForm">
+            <input type="text" id="radioSearchInput" data-i18n-placeholder="searchStationPlaceholder" placeholder="Поиск станции..." autocomplete="off" />
+            <button type="submit" data-i18n-title="searchAction" data-i18n-aria="searchAction" title="Искать" aria-label="Искать">
+              <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
+            </button>
+          </form>
+
+          <div class="radio__list-frame" id="radioResultsFrame">
+            <ul class="radio__list" id="radioResultsList"></ul>
+            <p class="radio__empty" id="radioEmpty">Введите название или выберите фильтр</p>
+          </div>
+        </div>
+
+        <div class="radio__view" id="radioFavoritesView" hidden>
+          <div class="radio__list-frame" id="radioFavoritesFrame">
+            <ul class="radio__list" id="radioFavoritesList"></ul>
+            <p class="radio__empty" id="radioFavEmpty" data-i18n="noFavorites">Нет избранных станций</p>
+          </div>
+        </div>
+
+        <div class="radio__resize-handle" id="radioResizeHandle" data-i18n-title="dragToResize" title="Потяните, чтобы изменить высоту списка"></div>
+      </div>
+    </section>
+
+    <div class="dropzone" id="dropzone">
+      <p data-i18n="dropFiles">Отпустите файлы, чтобы добавить в плейлист</p>
+    </div>
+  </main>
+
+  <audio id="audio" preload="metadata"></audio>
+
+  <input type="file" id="fileInput" accept="audio/*" multiple hidden />
+  <input type="file" id="folderInput" webkitdirectory multiple hidden />
+
+  <script src="i18n.js"></script>
+  <script src="theme.js"></script>
+  <script src="hotkeys.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

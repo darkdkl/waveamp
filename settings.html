@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self';" />
+  <title>WaveAMP — Settings</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="settings-window">
+  <div class="settings-window__header">
+    <header class="player__titlebar">
+      <span class="player__logo settings-window__title" data-i18n="settings">Настройки</span>
+      <div class="window-controls">
+        <button class="window-controls__btn window-controls__btn--close" id="settingsCloseBtn" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
+      </div>
+    </header>
+  </div>
+  <div class="settings-panel__inner">
+    <div class="settings-panel__tabs">
+      <button type="button" class="settings-panel__tab is-active" id="settingsTabInterface" data-i18n="interfaceTab">Интерфейс</button>
+      <button type="button" class="settings-panel__tab" id="settingsTabSystem" data-i18n="systemTab">Системные</button>
+      <button type="button" class="settings-panel__tab" id="settingsTabHotkeys" data-i18n="hotkeysTab">Горячие клавиши</button>
+    </div>
+
+    <div class="settings-panel__view" id="settingsInterfaceView">
+      <div class="settings-panel__row">
+        <span class="settings-panel__row-label" data-i18n="language">Язык</span>
+        <select class="settings-panel__select" id="langSelect">
+          <option value="ru">Русский</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div class="settings-panel__row">
+        <span class="settings-panel__row-label" data-i18n="scale">Масштаб</span>
+        <select class="settings-panel__select" id="scaleSelect">
+          <option value="75">75%</option>
+          <option value="100" selected>100%</option>
+          <option value="125">125%</option>
+          <option value="150">150%</option>
+        </select>
+      </div>
+
+      <div class="settings-panel__row">
+        <span class="settings-panel__row-label" data-i18n="vizResponse" data-i18n-title="vizResponseHint">Визуализатор</span>
+        <select class="settings-panel__select" id="vizResponseSelect">
+          <option value="smooth" data-i18n="vizResponseSmooth">Плавный</option>
+          <option value="peak" data-i18n="vizResponsePeak">Пиковый</option>
+        </select>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="colorSection">Цветовая схема</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__swatches" id="accentPresets"></div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="accentHue">Оттенок</span>
+          <input type="range" class="settings-panel__range settings-panel__range--hue" id="accentHueInput" min="0" max="359" step="1" />
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="accentSaturation">Насыщенность</span>
+          <input type="range" class="settings-panel__range settings-panel__range--saturation" id="accentSaturationInput" min="0" max="100" step="1" />
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="accentTint">Цвет корпуса</span>
+          <input type="range" class="settings-panel__range settings-panel__range--tint" id="accentTintInput" min="0" max="100" step="1" />
+        </div>
+        <div class="settings-panel__actions">
+          <button type="button" class="settings-panel__action-btn" id="accentResetBtn" data-i18n="accentReset">Сбросить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-panel__view" id="settingsHotkeysView" hidden>
+      <div class="settings-panel__row">
+        <span class="settings-panel__row-label" data-i18n="globalHotkeysEnable">Глобальные клавиши</span>
+        <button type="button" class="settings-panel__toggle" id="globalHotkeysBtn">Выкл</button>
+      </div>
+      <p class="settings-panel__hint" id="globalHotkeysHint" data-i18n="globalHotkeysHint" hidden>Работают, даже когда WaveAMP свёрнут или в фоне.</p>
+      <div class="settings-panel__card">
+        <div class="hotkeys__row hotkeys__row--head">
+          <span data-i18n="hotkeyAction">Действие</span>
+          <span data-i18n="hotkeyInWindow">В окне</span>
+          <span data-i18n="hotkeyGlobal">Глобально</span>
+        </div>
+        <div class="hotkeys__list" id="hotkeysList"></div>
+      </div>
+      <p class="hotkeys__message" id="hotkeysMessage" role="status"></p>
+      <p class="settings-panel__hint" id="hotkeysHint"></p>
+      <div class="settings-panel__actions">
+        <button type="button" class="settings-panel__action-btn" id="hotkeysResetBtn" data-i18n="hotkeysReset">Сбросить по умолчанию</button>
+      </div>
+    </div>
+
+    <div class="settings-panel__view" id="settingsSystemView" hidden>
+      <div class="settings-panel__section-label" data-i18n="proxySection">Прокси</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="proxyEnable">Использовать прокси</span>
+          <button type="button" class="settings-panel__toggle" id="proxyEnabledBtn">Выкл</button>
+        </div>
+        <div class="settings-panel__proxy-fields" id="proxyFields">
+          <div class="settings-panel__proxy-row">
+            <select class="settings-panel__select settings-panel__select--compact" id="proxyTypeSelect" disabled>
+              <option value="http">HTTP</option>
+              <option value="socks5">SOCKS5</option>
+            </select>
+            <input type="text" class="settings-panel__input" id="proxyHostInput" data-i18n-placeholder="proxyHostPlaceholder" placeholder="хост" autocomplete="off" disabled />
+          </div>
+          <div class="settings-panel__proxy-row">
+            <input type="text" class="settings-panel__input" id="proxyPortInput" data-i18n-placeholder="proxyPortPlaceholder" placeholder="порт" inputmode="numeric" autocomplete="off" disabled />
+          </div>
+          <div class="settings-panel__proxy-row">
+            <input type="text" class="settings-panel__input" id="proxyUsernameInput" data-i18n-placeholder="proxyUsernamePlaceholder" placeholder="логин" autocomplete="off" disabled />
+            <input type="password" class="settings-panel__input" id="proxyPasswordInput" data-i18n-placeholder="proxyPasswordPlaceholder" placeholder="пароль" autocomplete="off" disabled />
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="updatesSection">Обновления</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="updatesCheckOnLaunch">Проверять при запуске</span>
+          <button type="button" class="settings-panel__toggle" id="autoUpdateEnabledBtn">Вкл</button>
+        </div>
+        <div class="settings-panel__actions">
+          <button type="button" class="settings-panel__action-btn" id="checkUpdatesBtn" data-i18n="checkForUpdatesNow">Проверить сейчас</button>
+        </div>
+        <p class="settings-panel__hint" id="updateStatusText"></p>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="traySection">Трей</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="trayEnable">Показывать иконку в трее</span>
+          <button type="button" class="settings-panel__toggle" id="trayEnabledBtn">Выкл</button>
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="closeMinimizesToTray">Закрытие окна сворачивает в трей</span>
+          <button type="button" class="settings-panel__toggle" id="closeMinimizesToTrayBtn">Выкл</button>
+        </div>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="loggingSection">Логирование</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="loggingEnable">Логировать работу приложения</span>
+          <button type="button" class="settings-panel__toggle" id="loggingEnabledBtn">Выкл</button>
+        </div>
+        <p class="settings-panel__hint" data-i18n="loggingHint">Пишет ошибки и события приложения в файл — полезно, если что-то работает не так без понятной причины.</p>
+        <div class="settings-panel__actions">
+          <button type="button" class="settings-panel__action-btn" id="openLogFolderBtn" data-i18n="openLogFolder">Открыть папку с логами</button>
+          <button type="button" class="settings-panel__action-btn" id="clearLogBtn" data-i18n="clearLog">Очистить</button>
+        </div>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="aboutSection">О программе</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="aboutVersion">Версия</span>
+          <span class="settings-panel__row-label" id="appVersionText"></span>
+        </div>
+        <div class="settings-panel__actions">
+          <button type="button" class="settings-panel__action-btn" id="appLicenseBtn" data-i18n="appLicense">Лицензия (GPL-3.0)</button>
+          <button type="button" class="settings-panel__action-btn" id="thirdPartyLicensesBtn" data-i18n="thirdPartyLicenses">Лицензии библиотек</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="theme.js"></script>
+  <script src="hotkeys.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>
