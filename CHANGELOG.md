@@ -4,6 +4,16 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.3.0] — 2026-10-01
+
+### Added
+- Add a radio station by hand: the + button in the radio panel takes a name
+  and a stream URL and saves the station straight to Favorites. Links to
+  .pls and .m3u playlists are resolved to the stream address. Stations
+  added this way can be edited with the ✎ button
+- "Add radio station" hotkey action (unassigned by default, set it in
+  Settings → Hotkeys)
+
 ## [1.2.0] — 2026-10-01
 
 ### Changed

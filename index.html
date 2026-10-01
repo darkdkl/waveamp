@@ -137,6 +137,9 @@
             <button class="btn btn--icon is-active" id="radioTabSearch" type="button" data-i18n-title="search" data-i18n-aria="search" title="Поиск" aria-label="Поиск" aria-pressed="true">
               <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
             </button>
+            <button class="btn btn--icon" id="radioTabAdd" type="button" data-i18n-title="addStation" data-i18n-aria="addStation" title="Добавить станцию" aria-label="Добавить станцию" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+            </button>
             <button class="btn btn--icon" id="radioTabFavorites" type="button" data-i18n-title="favorites" data-i18n-aria="favorites" title="Избранное" aria-label="Избранное" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
               <span class="radio__tab-count" id="radioFavCount" hidden>0</span>
@@ -175,6 +178,25 @@
             <ul class="radio__list" id="radioFavoritesList"></ul>
             <p class="radio__empty" id="radioFavEmpty" data-i18n="noFavorites">Нет избранных станций</p>
           </div>
+        </div>
+
+        <div class="radio__view" id="radioAddView" hidden>
+          <form class="radio__list-frame radio__station-form" id="radioAddFrame" novalidate>
+            <div class="radio__station-form-title" id="radioAddTitle">Новая станция</div>
+            <label class="radio__field">
+              <span data-i18n="stationName">Название</span>
+              <input type="text" id="radioAddName" maxlength="120" autocomplete="off" />
+            </label>
+            <label class="radio__field">
+              <span data-i18n="streamUrl">URL потока</span>
+              <input type="text" id="radioAddUrl" placeholder="https://" inputmode="url" autocomplete="off" spellcheck="false" />
+            </label>
+            <p class="radio__station-form-error" id="radioAddError" role="status"></p>
+            <div class="radio__station-form-actions">
+              <button type="button" class="radio__form-btn" id="radioAddCancel" data-i18n="cancel">Отмена</button>
+              <button type="submit" class="radio__form-btn radio__form-btn--primary" id="radioAddSubmit">Добавить</button>
+            </div>
+          </form>
         </div>
 
         <div class="radio__resize-handle" id="radioResizeHandle" data-i18n-title="dragToResize" title="Потяните, чтобы изменить высоту списка"></div>

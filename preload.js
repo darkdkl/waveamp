@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   loadTags: () => ipcRenderer.invoke("radio-tags"),
   loadTagsForFilter: (countryCode, state) => ipcRenderer.invoke("radio-tags-for-filter", countryCode, state),
   registerStationClick: (uuid) => ipcRenderer.invoke("radio-click", uuid),
+  resolveStreamUrl: (url) => ipcRenderer.invoke("radio-resolve-stream", url),
   applyProxyConfig: (config) => ipcRenderer.send("apply-proxy-config", config),
   setLoggingEnabled: (enabled) => ipcRenderer.send("set-logging-enabled", enabled),
   log: (level, scope, message) => ipcRenderer.send("log", level, scope, message),

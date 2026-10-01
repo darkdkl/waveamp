@@ -102,7 +102,7 @@ const RADIO_USER_AGENT = `WaveAMP/${app.getVersion()} (https://github.com/darkdk
 const RADIO_API_TIMEOUT_MS = 8000;
 
 // net.request, not fetch(): only the Chromium network stack honors session.setProxy().
-function netRequestJson(url, headers, timeoutMs) {
+function netRequestText(url, headers, timeoutMs, maxBytes = Infinity) {
   return new Promise((resolve, reject) => {
     const request = net.request({ url, method: "GET" });
     Object.entries(headers).forEach(([key, value]) => request.setHeader(key, value));
@@ -131,22 +131,79 @@ function netRequestJson(url, headers, timeoutMs) {
         finish(reject, new Error(`HTTP ${response.statusCode}`));
         return;
       }
-      let body = "";
+      const chunks = [];
+      let size = 0;
       response.on("data", (chunk) => {
-        body += chunk;
-      });
-      response.on("end", () => {
-        try {
-          finish(resolve, JSON.parse(body));
-        } catch (err) {
-          finish(reject, err);
+        chunks.push(chunk);
+        size += chunk.length;
+        if (size > maxBytes) {
+          finish(reject, new Error("Response too large"));
+          request.abort();
         }
       });
+      response.on("end", () => finish(resolve, Buffer.concat(chunks).toString("utf8")));
       response.on("error", (err) => finish(reject, err));
     });
     request.on("error", (err) => finish(reject, err));
     request.end();
   });
+}
+
+async function netRequestJson(url, headers, timeoutMs) {
+  return JSON.parse(await netRequestText(url, headers, timeoutMs));
+}
+
+const PLAYLIST_MAX_BYTES = 256 * 1024;
+
+function isHttpUrl(value) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function playlistKind(url) {
+  const path = new URL(url).pathname.toLowerCase();
+  if (path.endsWith(".pls")) return "pls";
+  if (path.endsWith(".m3u")) return "m3u";
+  return null;
+}
+
+function parsePlaylistStreamUrl(text, kind, baseUrl) {
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).map((line) => line.trim());
+  const isPls = kind === "pls" || /^\[playlist\]$/i.test(lines[0] || "");
+  for (const line of lines) {
+    let candidate = null;
+    if (isPls) {
+      const match = /^File\d+\s*=\s*(.+)$/i.exec(line);
+      if (match) candidate = match[1].trim();
+    } else if (line && !line.startsWith("#")) {
+      candidate = line;
+    }
+    if (!candidate) continue;
+    try {
+      const resolved = new URL(candidate, baseUrl).href;
+      if (isHttpUrl(resolved)) return resolved;
+    } catch {}
+  }
+  return null;
+}
+
+async function resolveStreamUrl(url) {
+  if (typeof url !== "string" || !isHttpUrl(url)) return { ok: false, error: "invalid" };
+  const kind = playlistKind(url);
+  if (!kind) return { ok: true, url };
+  try {
+    const text = await netRequestText(url, { "User-Agent": RADIO_USER_AGENT }, RADIO_API_TIMEOUT_MS, PLAYLIST_MAX_BYTES);
+    const streamUrl = parsePlaylistStreamUrl(text, kind, url);
+    if (!streamUrl) return { ok: false, error: "playlist" };
+    return { ok: true, url: streamUrl };
+  } catch (err) {
+    writeLog("warn", "radio", `Playlist ${url} failed: ${err.message}`);
+    return { ok: false, error: "playlist" };
+  }
 }
 
 async function radioApiFetch(pathAndQuery) {
@@ -711,6 +768,7 @@ ipcMain.handle("radio-states", (event, countryName) => fetchStates(countryName))
 ipcMain.handle("radio-tags", () => fetchTags());
 ipcMain.handle("radio-tags-for-filter", (event, countryCode, state) => fetchTagsForFilter(countryCode, state));
 ipcMain.handle("radio-click", (event, uuid) => registerStationClick(uuid));
+ipcMain.handle("radio-resolve-stream", (event, url) => resolveStreamUrl(url));
 
 ipcMain.on("apply-proxy-config", (event, proxyConfig) => {
   applyProxyConfig(proxyConfig).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`));

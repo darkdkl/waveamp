@@ -33,7 +33,8 @@ Runs on macOS, Windows and Linux.
   Shows the actual signal, independent of the volume
 - **Internet radio** — station search through the
   [Radio Browser API](https://www.radio-browser.info/) with country, region
-  and genre filters, plus favorites. The equalizer and visualizer work on radio
+  and genre filters, plus favorites. Stations can also be added by hand from a
+  stream URL or a .pls/.m3u link. The equalizer and visualizer work on radio
   streams too
 - **Color scheme** — presets plus hue, saturation and body color sliders
 - **Hotkeys** — configurable shortcuts that work on any keyboard layout, with
