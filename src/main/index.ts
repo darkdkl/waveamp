@@ -398,7 +398,7 @@ function createWindow() {
   loadRenderer(win, "index.html");
 }
 
-// Settings state is owned by player.ts (it also writes the playlist/EQ part of
+// Settings state is owned by the player window (it also writes the playlist/EQ part of
 // config.json); this window only relays changes, never writes config.
 let settingsWindow = null;
 
@@ -498,7 +498,7 @@ ipcMain.on("settings-state-from-main", (_event, state: SettingsState) => {
   if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.webContents.send("settings-state", state);
 });
 
-// Media Session (app.js) already routes media keys on macOS/Windows; this is
+// Media Session (player/mediaSession.ts) already routes media keys on macOS/Windows; this is
 // a fallback, and registration is expected to fail on macOS.
 function sendMediaKey(action) {
   if (mainWindow && !mainWindow.isDestroyed()) {

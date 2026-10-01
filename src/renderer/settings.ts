@@ -50,7 +50,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") window.electronAPI?.closeSettingsWindow?.();
 });
 
-// State is owned by app.js; this window only relays changes and mirrors onSettingsState.
+// State is owned by the player window; this window only relays changes and mirrors onSettingsState.
 function sendAction<T extends SettingsAction["type"]>(type: T, value: SettingsActionValue<T>) {
   window.electronAPI?.sendSettingsAction?.({ type, value } as SettingsAction);
 }
