@@ -12,9 +12,10 @@ export function updateMediaSessionMetadata(): void {
   const station = state.currentStation;
   if (state.playbackMode === "radio" && station) {
     const artSrc = station.favicon || appIconArtworkUrl;
+    const stationInfo = [station.country, station.tags].filter(Boolean).join(" · ") || "WaveAMP Radio";
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: station.name,
-      artist: [station.country, station.tags].filter(Boolean).join(" · ") || "WaveAMP Radio",
+      title: state.nowPlayingTitle || station.name,
+      artist: state.nowPlayingTitle ? station.name : stationInfo,
       album: "WaveAMP",
       artwork: artSrc ? [{ src: artSrc, sizes: "any", type: "" }] : [],
     });

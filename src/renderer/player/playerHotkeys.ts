@@ -7,6 +7,7 @@ import { setEqOpen, setPlaylistOpen, setRadioOpen } from "./layout";
 import { cycleVizMode } from "./visualizer";
 import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
 import { openStationForm } from "./radio/stationForm";
+import { toggleCurrentTrackSaved } from "./radio/savedTracks";
 import { pushSettingsState } from "./settingsBridge";
 import type { HotkeyConfig } from "../../shared/types";
 
@@ -85,6 +86,9 @@ function runHotkeyAction(action: string): void {
     case "addStation":
       if (!state.radioOpen) setRadioOpen(true);
       openStationForm();
+      break;
+    case "saveTrack":
+      toggleCurrentTrackSaved();
       break;
     case "cycleVisualizer":
       cycleVizMode();

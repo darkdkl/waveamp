@@ -1,6 +1,6 @@
 {
   "name": "waveamp",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
   "description": "Retro-style desktop audio player with internet radio, built on Electron",
   "author": "Dark.Dmake",
@@ -12,7 +12,13 @@
   "bugs": {
     "url": "https://github.com/darkdkl/waveamp/issues"
   },
-  "keywords": ["audio-player", "internet-radio", "equalizer", "electron", "music"],
+  "keywords": [
+    "audio-player",
+    "internet-radio",
+    "equalizer",
+    "electron",
+    "music"
+  ],
   "license": "GPL-3.0-or-later",
   "main": "out/main/index.js",
   "scripts": {
@@ -50,14 +56,23 @@
       "repo": "waveamp",
       "releaseType": "release"
     },
-    "files": ["out/**/*", "assets/**/*"],
+    "files": [
+      "out/**/*",
+      "assets/**/*"
+    ],
     "directories": {
       "output": "dist"
     },
     "afterSign": "scripts/afterSignAdHoc.js",
-    "extraResources": ["LICENSE", "THIRD_PARTY_LICENSES.txt"],
+    "extraResources": [
+      "LICENSE",
+      "THIRD_PARTY_LICENSES.txt"
+    ],
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.music",
       "icon": "assets/icon.icns"
     },
@@ -65,7 +80,10 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "category": "Audio",
@@ -75,7 +93,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.png"

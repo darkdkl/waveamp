@@ -7,6 +7,7 @@ import { persistConfig } from "../config";
 import { playAudio, updateTrackTitleText } from "../playback";
 import { renderRadioFavorites, renderRadioResults } from "./panel";
 import { refreshCoverArt } from "../coverArt";
+import { clearNowPlaying } from "./nowPlaying";
 import type { Station } from "../../../shared/types";
 
 const RADIO_MAX_RECONNECT = 3;
@@ -24,6 +25,7 @@ function playStream(station: Station): void {
   const url = safeStreamUrl(station.url);
   if (!url) {
     logEvent("error", "radio", `"${station.name}" has an unsupported stream URL`);
+    clearNowPlaying();
     trackTitle.textContent = station.name + i18n.t("noConnection");
     return;
   }
@@ -33,6 +35,7 @@ function playStream(station: Station): void {
 
 export function tuneStation(station: Station): void {
   clearTimeout(radioReconnectTimer);
+  clearNowPlaying();
   state.playbackMode = "radio";
   state.currentStation = station;
   radioReconnectAttempts = 0;
@@ -71,6 +74,7 @@ export function attemptRadioReconnect(): void {
   const station = state.currentStation;
   if (!station) return;
   clearTimeout(radioReconnectTimer);
+  clearNowPlaying();
   const errorInfo = audio.error ? `code ${audio.error.code}: ${audio.error.message}` : "unknown error";
 
   // A missing-CORS failure looks like a network error — retry once without crossOrigin.

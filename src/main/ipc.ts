@@ -1,4 +1,4 @@
-import { app, ipcMain } from "electron";
+import { app, BrowserWindow, clipboard, dialog, ipcMain } from "electron";
 import { loadConfig, saveConfig } from "./config";
 import { clearLogs, openLogFolder, setLoggingEnabled, isLoggingEnabled, writeLog } from "./logging";
 import { applyProxyConfig } from "./network";
@@ -34,6 +34,8 @@ import { readTrackTags } from "./tags";
 import { readCoverArt } from "./coverArt";
 import { checkForUpdates, openReleasePage, setAutoUpdateEnabled } from "./updates";
 import { openLicenseFile } from "./licenses";
+import { startNowPlaying, stopNowPlaying } from "./nowPlaying";
+import { loadSavedTracks, writeSavedTracks } from "./savedTracks";
 import type {
   AppConfig,
   GlobalHotkeyRequest,
@@ -110,6 +112,21 @@ export function registerIpcHandlers(): void {
   );
   ipcMain.handle("radio-click", (_event, uuid: string) => registerStationClick(uuid));
   ipcMain.handle("radio-resolve-stream", (_event, url: string) => resolveStreamUrl(url));
+
+  ipcMain.on("now-playing-start", (_event, url: string) => startNowPlaying(String(url)));
+  ipcMain.on("now-playing-stop", () => stopNowPlaying());
+
+  ipcMain.handle("saved-tracks-load", () => loadSavedTracks());
+  ipcMain.on("saved-tracks-save", (_event, tracks: unknown) => writeSavedTracks(tracks));
+
+  ipcMain.on("copy-text", (_event, text: string) => clipboard.writeText(String(text)));
+
+  ipcMain.handle("confirm", async (event, message: string, yes: string, cancel: string) => {
+    const options = { type: "question" as const, message, buttons: [yes, cancel], defaultId: 1, cancelId: 1, noLink: true };
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const { response } = await (win ? dialog.showMessageBox(win, options) : dialog.showMessageBox(options));
+    return response === 0;
+  });
 
   ipcMain.on("apply-proxy-config", (_event, proxyConfig: ProxyConfig) => {
     applyProxyConfig(proxyConfig).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`));

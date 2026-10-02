@@ -24,6 +24,7 @@ const ACTIONS = [
   ["addFiles", "hotkeyAddFiles", "KeyL", "", ""],
   ["addFolder", "hotkeyAddFolder", "Shift+KeyL", "", ""],
   ["addStation", "hotkeyAddStation", "", "", ""],
+  ["saveTrack", "hotkeySaveTrack", "KeyH", "", ""],
   ["cycleVisualizer", "hotkeyCycleVisualizer", "", "", ""],
 ].map(([id, nameKey, local, global, macGlobal]) => ({ id, nameKey, local, global: isMac ? macGlobal : global }));
 

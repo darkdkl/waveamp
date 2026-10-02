@@ -10,6 +10,8 @@ import { SCALE_MAX, SCALE_MIN, SCALE_STEP, setEqOpen, setPlaylistOpen, setRadioO
 import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
+import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
+import { loadSavedTracks } from "./radio/savedTracks";
 import { applyGlobalHotkeys } from "./playerHotkeys";
 import { setCoverArtEnabled } from "./coverArt";
 import {
@@ -25,7 +27,9 @@ import type { Station } from "../../shared/types";
 
 export async function restoreConfig(): Promise<void> {
   if (!window.electronAPI?.loadConfig) return;
+  const savedTracksLoaded = loadSavedTracks();
   const config = await window.electronAPI.loadConfig();
+  await savedTracksLoaded;
   if (!config) return;
   const settings = config.settings;
 
@@ -48,6 +52,10 @@ export async function restoreConfig(): Promise<void> {
 
   if (typeof settings?.coverArtEnabled === "boolean") {
     setCoverArtEnabled(settings.coverArtEnabled);
+  }
+
+  if (typeof settings?.radioTrackTitleEnabled === "boolean") {
+    setRadioTrackTitleEnabled(settings.radioTrackTitleEnabled);
   }
 
   state.hotkeyConfig = hotkeys.normalize(settings?.hotkeys);

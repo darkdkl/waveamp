@@ -28,6 +28,7 @@ const checkUpdatesBtn = byId<HTMLButtonElement>("checkUpdatesBtn");
 const updateStatusText = byId("updateStatusText");
 const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
 const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
+const radioTrackTitleBtn = byId<HTMLButtonElement>("radioTrackTitleBtn");
 const closeMinimizesToTrayBtn = byId<HTMLButtonElement>("closeMinimizesToTrayBtn");
 const accentPresets = byId("accentPresets");
 const accentHueInput = byId<HTMLInputElement>("accentHueInput");
@@ -65,6 +66,7 @@ let loggingEnabled = false;
 let autoUpdateEnabled = true;
 let trayIconEnabled = false;
 let coverArtEnabled = true;
+let radioTrackTitleEnabled = true;
 let closeMinimizesToTrayEnabled = false;
 let updateStatusKey = "";
 let updateVersion = "";
@@ -147,6 +149,14 @@ function setCoverArtEnabled(enabled: boolean) {
   sendAction("setCoverArtEnabled", enabled);
 }
 coverArtBtn.addEventListener("click", () => setCoverArtEnabled(!coverArtEnabled));
+
+function setRadioTrackTitleEnabled(enabled: boolean) {
+  radioTrackTitleEnabled = enabled;
+  radioTrackTitleBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
+  radioTrackTitleBtn.classList.toggle("is-active", enabled);
+  sendAction("setRadioTrackTitleEnabled", enabled);
+}
+radioTrackTitleBtn.addEventListener("click", () => setRadioTrackTitleEnabled(!radioTrackTitleEnabled));
 closeMinimizesToTrayBtn.addEventListener("click", () => setCloseMinimizesToTrayEnabled(!closeMinimizesToTrayEnabled));
 
 const openReleaseBtn = byId<HTMLButtonElement>("openReleaseBtn");
@@ -378,6 +388,7 @@ function refreshTextForLanguage() {
   autoUpdateEnabledBtn.textContent = autoUpdateEnabled ? i18n.t("on") : i18n.t("off");
   trayEnabledBtn.textContent = trayIconEnabled ? i18n.t("on") : i18n.t("off");
   coverArtBtn.textContent = coverArtEnabled ? i18n.t("on") : i18n.t("off");
+  radioTrackTitleBtn.textContent = radioTrackTitleEnabled ? i18n.t("on") : i18n.t("off");
   closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? i18n.t("on") : i18n.t("off");
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
@@ -437,6 +448,7 @@ window.electronAPI?.onSettingsState?.((state) => {
   autoUpdateEnabled = state.autoUpdateEnabled !== false;
   trayIconEnabled = !!state.showTrayIcon;
   coverArtEnabled = state.coverArtEnabled !== false;
+  radioTrackTitleEnabled = state.radioTrackTitleEnabled !== false;
   closeMinimizesToTrayEnabled = !!state.closeMinimizesToTray && trayIconEnabled;
   closeMinimizesToTrayBtn.disabled = !trayIconEnabled;
 
@@ -445,6 +457,7 @@ window.electronAPI?.onSettingsState?.((state) => {
   autoUpdateEnabledBtn.classList.toggle("is-active", autoUpdateEnabled);
   trayEnabledBtn.classList.toggle("is-active", trayIconEnabled);
   coverArtBtn.classList.toggle("is-active", coverArtEnabled);
+  radioTrackTitleBtn.classList.toggle("is-active", radioTrackTitleEnabled);
   closeMinimizesToTrayBtn.classList.toggle("is-active", closeMinimizesToTrayEnabled);
 
   refreshTextForLanguage();

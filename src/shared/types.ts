@@ -22,6 +22,17 @@ export interface Station {
   sourceUrl?: string;
 }
 
+export interface NowPlayingUpdate {
+  url: string;
+  title: string | null;
+}
+
+export interface SavedTrack {
+  title: string;
+  station: string;
+  savedAt: number;
+}
+
 export interface CountedOption {
   name: string;
   count: number;
@@ -99,6 +110,7 @@ export interface AppConfig {
     accentColor: AccentColor;
     vizResponse: VizResponse;
     coverArtEnabled: boolean;
+    radioTrackTitleEnabled: boolean;
     hotkeys: HotkeyConfig;
     volume: number;
     loggingEnabled: boolean;
@@ -125,6 +137,7 @@ export interface SettingsState {
   accentColor: AccentColor;
   vizResponse: VizResponse;
   coverArtEnabled: boolean;
+  radioTrackTitleEnabled: boolean;
   hotkeys: HotkeyConfig;
   globalHotkeyFailures: string[];
   proxy: ProxyConfig;
@@ -140,6 +153,7 @@ export type SettingsAction =
   | { type: "setAccentColor"; value: AccentColor }
   | { type: "setVizResponse"; value: VizResponse }
   | { type: "setCoverArtEnabled"; value: boolean }
+  | { type: "setRadioTrackTitleEnabled"; value: boolean }
   | { type: "setHotkeys"; value: HotkeyConfig }
   | { type: "setProxyConfig"; value: ProxyConfig }
   | { type: "setLoggingEnabled"; value: boolean }

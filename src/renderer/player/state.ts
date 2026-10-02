@@ -6,6 +6,7 @@ import type {
   EqCustomPreset,
   HotkeyConfig,
   ProxyConfig,
+  SavedTrack,
   Station,
   TrackTags,
   VizMode,
@@ -13,7 +14,7 @@ import type {
 } from "../../shared/types";
 
 export type PlaybackMode = "local" | "radio";
-export type RadioView = "search" | "favorites" | "add";
+export type RadioView = "search" | "favorites" | "add" | "saved";
 
 export interface Track {
   name: string;
@@ -37,6 +38,9 @@ export const state = {
   favoriteStations: [] as Station[],
   radioResults: [] as Station[],
   radioView: "search" as RadioView,
+  radioTrackTitleEnabled: true,
+  nowPlayingTitle: null as string | null,
+  savedTracks: [] as SavedTrack[],
 
   playlistOpen: false,
   eqOpen: false,

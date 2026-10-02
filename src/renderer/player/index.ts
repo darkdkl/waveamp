@@ -17,6 +17,8 @@ import { initListResize, initPanelToggles, measurePlayerHeight, setScale } from 
 import { initRadioSearch, initRadioTabs, refreshRadioEmptyText } from "./radio/panel";
 import { initStationForm } from "./radio/stationForm";
 import { initRadioStream } from "./radio/stream";
+import { initNowPlaying } from "./radio/nowPlaying";
+import { initSavedTracks } from "./radio/savedTracks";
 import { initSettingsBridge, initSettingsButton, initSkipUpdateVersion } from "./settingsBridge";
 import { initPlayerHotkeys } from "./playerHotkeys";
 import { restoreConfig } from "./restore";
@@ -36,6 +38,8 @@ initRadioSearch();
 initFileInputs();
 initAudioEvents();
 initRadioStream();
+initNowPlaying();
+initSavedTracks();
 initMediaSession();
 initAudioErrorHandling();
 initSeekAndVolume();

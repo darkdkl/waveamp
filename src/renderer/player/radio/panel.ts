@@ -15,6 +15,8 @@ import {
   radioStateSelect,
   radioTabAdd,
   radioTabFavorites,
+  radioSavedView,
+  radioTabSaved,
   radioTabSearch,
   radioTagSelect,
 } from "../dom";
@@ -44,7 +46,10 @@ export function setRadioView(view: RadioView): void {
   radioTabFavorites.setAttribute("aria-pressed", String(view === "favorites"));
   radioTabAdd.classList.toggle("is-active", view === "add");
   radioTabAdd.setAttribute("aria-pressed", String(view === "add"));
+  radioTabSaved.classList.toggle("is-active", view === "saved");
+  radioTabSaved.setAttribute("aria-pressed", String(view === "saved"));
   radioSearchView.hidden = view !== "search";
+  radioSavedView.hidden = view !== "saved";
   radioFavoritesView.hidden = view !== "favorites";
   radioAddView.hidden = view !== "add";
   if (state.radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
@@ -270,6 +275,7 @@ async function runRadioSearch(): Promise<void> {
 export function initRadioTabs(): void {
   radioTabSearch.addEventListener("click", () => setRadioView("search"));
   radioTabFavorites.addEventListener("click", () => setRadioView("favorites"));
+  radioTabSaved.addEventListener("click", () => setRadioView("saved"));
 }
 
 export function initRadioSearch(): void {

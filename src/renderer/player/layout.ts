@@ -12,6 +12,7 @@ import {
   radioFavoritesFrame,
   radioResizeHandle,
   radioResultsFrame,
+  radioSavedFrame,
 } from "./dom";
 import { state } from "./state";
 import { persistConfig } from "./config";
@@ -28,6 +29,7 @@ const LIST_MAX_HEIGHT = 1920;
 
 let basePlayerHeight = 0;
 let radioChromeOffset = 72;
+let radioSavedOffset = 38;
 
 export function syncElectronWindowSize(instant = false): void {
   if (!window.electronAPI) return;
@@ -86,7 +88,13 @@ export function setScale(percent: number): void {
 
 function activeRadioFrame(): HTMLElement {
   if (state.radioView === "add") return radioAddFrame;
+  if (state.radioView === "saved") return radioSavedFrame;
   return state.radioView === "favorites" ? radioFavoritesFrame : radioResultsFrame;
+}
+
+function activeRadioOffset(): number {
+  if (state.radioView === "search") return radioChromeOffset;
+  return state.radioView === "saved" ? radioSavedOffset : 0;
 }
 
 function applyListHeight(px: number): void {
@@ -95,6 +103,7 @@ function applyListHeight(px: number): void {
   radioResultsFrame.style.height = searchPx + "px";
   radioFavoritesFrame.style.height = px + "px";
   radioAddFrame.style.height = px + "px";
+  radioSavedFrame.style.height = Math.max(LIST_MIN_HEIGHT, px - radioSavedOffset) + "px";
   if (state.playlistOpen) playlist.style.maxHeight = playlist.scrollHeight + "px";
   if (state.radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
 }
@@ -131,8 +140,9 @@ export function initPanelToggles(): void {
 }
 
 export function initListResize(): void {
-  radioChromeOffset =
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--radio-chrome-offset")) || 72;
+  const rootStyle = getComputedStyle(document.documentElement);
+  radioChromeOffset = parseFloat(rootStyle.getPropertyValue("--radio-chrome-offset")) || 72;
+  radioSavedOffset = parseFloat(rootStyle.getPropertyValue("--radio-saved-offset")) || 38;
 
   playlistResizeHandle.addEventListener("mousedown", (e) => {
     const playlistHeight = playlistListFrame.getBoundingClientRect().height / cssZoomFactor();
@@ -141,7 +151,7 @@ export function initListResize(): void {
 
   radioResizeHandle.addEventListener("mousedown", (e) => {
     const radioHeight = activeRadioFrame().getBoundingClientRect().height / cssZoomFactor();
-    const canonicalHeight = state.radioView === "search" ? radioHeight + radioChromeOffset : radioHeight;
+    const canonicalHeight = radioHeight + activeRadioOffset();
     startListResize(e, radioResizeHandle, radio, canonicalHeight);
   });
 
