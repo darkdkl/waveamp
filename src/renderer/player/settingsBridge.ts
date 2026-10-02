@@ -8,6 +8,7 @@ import { setVizResponse } from "./visualizer";
 import { renderEqToggle } from "./equalizer";
 import { setCoverArtEnabled } from "./coverArt";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
+import { setPlayerClockEnabled } from "./clock";
 import { renderSavedTracks } from "./radio/savedTracks";
 import { renderPlaylist } from "./playlist";
 import { updateTrackTitleText } from "./playback";
@@ -93,6 +94,7 @@ export function pushSettingsState(): void {
     vizResponse: state.vizResponse,
     coverArtEnabled: state.coverArtEnabled,
     radioTrackTitleEnabled: state.radioTrackTitleEnabled,
+    playerClockEnabled: state.playerClockEnabled,
     hotkeys: state.hotkeyConfig,
     globalHotkeyFailures: state.globalHotkeyFailures,
     proxy: getProxyConfig(),
@@ -129,6 +131,9 @@ export function initSettingsBridge(): void {
         break;
       case "setRadioTrackTitleEnabled":
         setRadioTrackTitleEnabled(!!action.value);
+        break;
+      case "setPlayerClockEnabled":
+        setPlayerClockEnabled(!!action.value);
         break;
       case "setHotkeys":
         setHotkeys(action.value);

@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.6.0] — 2026-10-02
+
+### Added
+- Radio: the display shows a clock instead of "--:--"
+- Settings → Interface → "Clock in player mode": during playback the track
+  time alternates with the clock
+
 ## [1.5.0] — 2026-10-02
 
 ### Added

@@ -41,6 +41,8 @@ Runs on macOS, Windows and Linux.
   streams too
 - **Saved tracks** — the display shows the track playing on the station; save
   the ones you like to a list and copy their titles
+- **Clock** on the display for radio, and optionally alternating with the track
+  time during playback
 - **Color scheme** — presets plus hue, saturation and body color sliders
 - **Hotkeys** — configurable shortcuts that work on any keyboard layout, with
   optional global hotkeys

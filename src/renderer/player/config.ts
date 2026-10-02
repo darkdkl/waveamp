@@ -37,6 +37,7 @@ export function persistConfig(): void {
         vizResponse: state.vizResponse,
         coverArtEnabled: state.coverArtEnabled,
         radioTrackTitleEnabled: state.radioTrackTitleEnabled,
+        playerClockEnabled: state.playerClockEnabled,
         hotkeys: state.hotkeyConfig,
         volume: Number(volume.value),
         loggingEnabled: state.loggingEnabled,
