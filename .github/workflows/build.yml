@@ -73,3 +73,18 @@ jobs:
           # unsigned, don't let electron-builder go looking for one.
           CSC_IDENTITY_AUTO_DISCOVERY: false
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  prune:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete older releases
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --exclude-drafts --exclude-pre-releases \
+            --json tagName,createdAt --jq "sort_by(.createdAt) | reverse | .[$RELEASES_TO_KEEP:] | .[].tagName" |
+          while read -r tag; do
+            gh release delete "$tag" --yes --repo "$GITHUB_REPOSITORY"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASES_TO_KEEP: 2
