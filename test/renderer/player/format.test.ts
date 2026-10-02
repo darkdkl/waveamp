@@ -3,6 +3,7 @@ import {
   dbToGain,
   formatBandLabel,
   formatDb,
+  formatClock,
   formatTime,
   isAddableAudioFile,
   isHttpUrl,
@@ -107,5 +108,12 @@ describe("isAddableAudioFile", () => {
   it("rejects non-audio files", () => {
     expect(isAddableAudioFile({ name: "cover.jpg", type: "image/jpeg" })).toBe(false);
     expect(isAddableAudioFile({ name: "notes.txt", type: "" })).toBe(false);
+  });
+});
+
+describe("formatClock", () => {
+  it("shows 24-hour time with a blinking colon", () => {
+    expect(formatClock(new Date(2026, 9, 2, 9, 5))).toBe("09:05");
+    expect(formatClock(new Date(2026, 9, 2, 21, 47), false)).toBe("21 47");
   });
 });

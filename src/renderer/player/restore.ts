@@ -11,6 +11,7 @@ import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
+import { setPlayerClockEnabled } from "./clock";
 import { loadSavedTracks } from "./radio/savedTracks";
 import { applyGlobalHotkeys } from "./playerHotkeys";
 import { setCoverArtEnabled } from "./coverArt";
@@ -52,6 +53,10 @@ export async function restoreConfig(): Promise<void> {
 
   if (typeof settings?.coverArtEnabled === "boolean") {
     setCoverArtEnabled(settings.coverArtEnabled);
+  }
+
+  if (typeof settings?.playerClockEnabled === "boolean") {
+    setPlayerClockEnabled(settings.playerClockEnabled);
   }
 
   if (typeof settings?.radioTrackTitleEnabled === "boolean") {

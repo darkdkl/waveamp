@@ -1,5 +1,5 @@
 import { i18n } from "../../i18n";
-import { audio, durTime, liveTag, seek, timeDisplay, trackTitle } from "../dom";
+import { audio, durTime, liveTag, seek, trackTitle } from "../dom";
 import { state } from "../state";
 import { safeStreamUrl } from "../format";
 import { logEvent } from "../log";
@@ -8,6 +8,7 @@ import { playAudio, updateTrackTitleText } from "../playback";
 import { renderRadioFavorites, renderRadioResults } from "./panel";
 import { refreshCoverArt } from "../coverArt";
 import { clearNowPlaying } from "./nowPlaying";
+import { syncTimeDisplay } from "../clock";
 import type { Station } from "../../../shared/types";
 
 const RADIO_MAX_RECONNECT = 3;
@@ -46,7 +47,7 @@ export function tuneStation(station: Station): void {
   refreshCoverArt();
   seek.disabled = true;
   seek.value = "0";
-  timeDisplay.textContent = "--:--";
+  syncTimeDisplay();
   durTime.hidden = true;
   liveTag.hidden = false;
 

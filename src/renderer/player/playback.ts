@@ -25,6 +25,7 @@ import { renderRadioFavorites, renderRadioResults } from "./radio/panel";
 import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./radio/stream";
 import { refreshCoverArt } from "./coverArt";
 import { clearNowPlaying, renderRadioTitle, resetRadioTitle } from "./radio/nowPlaying";
+import { isClockShown, showTrackTimeNow, syncTimeDisplay } from "./clock";
 
 export function playAudio(): void {
   if (state.playbackMode === "local" && audio.error && state.queue[state.currentIndex]?.unplayable) {
@@ -66,6 +67,7 @@ export function resetToNoTrackState(): void {
   durTime.hidden = false;
   durTime.textContent = "00:00";
   timeDisplay.textContent = "00:00";
+  syncTimeDisplay();
   seek.disabled = true;
   seek.value = "0";
   updateTrackTitleText();
@@ -82,6 +84,7 @@ export function loadTrack(index: number, autoplay = true, direction: 1 | -1 = 1)
   durTime.hidden = false;
   liveTag.hidden = true;
   state.currentIndex = index;
+  syncTimeDisplay();
   state.localPlayRequested = autoplay;
   const track = state.queue[index];
   const src = safeTrackUrl(getTrackSrc(track));
@@ -161,7 +164,7 @@ export function initTransportControls(): void {
 
 export function initAudioEvents(): void {
   audio.addEventListener("timeupdate", () => {
-    if (state.isSeeking || state.playbackMode === "radio") return;
+    if (state.isSeeking || state.playbackMode === "radio" || isClockShown()) return;
     timeDisplay.textContent = formatTime(audio.currentTime);
     if (audio.duration) {
       seek.value = String(Math.floor((audio.currentTime / audio.duration) * 1000));
@@ -204,6 +207,7 @@ export function initAudioErrorHandling(): void {
 export function initSeekAndVolume(): void {
   seek.addEventListener("input", () => {
     state.isSeeking = true;
+    showTrackTimeNow();
     if (audio.duration) {
       const t = (Number(seek.value) / 1000) * audio.duration;
       timeDisplay.textContent = formatTime(t);
@@ -215,6 +219,7 @@ export function initSeekAndVolume(): void {
       audio.currentTime = (Number(seek.value) / 1000) * audio.duration;
     }
     state.isSeeking = false;
+    syncTimeDisplay();
   });
 
   volume.addEventListener("input", () => {

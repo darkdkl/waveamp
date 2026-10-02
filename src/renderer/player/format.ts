@@ -7,6 +7,12 @@ export function formatTime(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+export function formatClock(date: Date, colonVisible = true): string {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}${colonVisible ? ":" : " "}${minutes}`;
+}
+
 export function trackLabel(name: string): string {
   return name.replace(/\.[^./]+$/, "");
 }

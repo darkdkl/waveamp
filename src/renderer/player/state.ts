@@ -39,6 +39,7 @@ export const state = {
   radioResults: [] as Station[],
   radioView: "search" as RadioView,
   radioTrackTitleEnabled: true,
+  playerClockEnabled: false,
   nowPlayingTitle: null as string | null,
   savedTracks: [] as SavedTrack[],
 

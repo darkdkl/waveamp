@@ -197,6 +197,12 @@ body.is-electron .player::before {
   text-shadow: 0 0 6px hsl(var(--accent-h) var(--accent-s) 74% / 0.55);
   min-width: 80px;
   text-align: center;
+  white-space: pre;
+  transition: opacity 200ms ease;
+}
+
+.display__time.is-fading {
+  opacity: 0;
 }
 
 .display__meta {

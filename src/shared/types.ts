@@ -111,6 +111,7 @@ export interface AppConfig {
     vizResponse: VizResponse;
     coverArtEnabled: boolean;
     radioTrackTitleEnabled: boolean;
+    playerClockEnabled: boolean;
     hotkeys: HotkeyConfig;
     volume: number;
     loggingEnabled: boolean;
@@ -138,6 +139,7 @@ export interface SettingsState {
   vizResponse: VizResponse;
   coverArtEnabled: boolean;
   radioTrackTitleEnabled: boolean;
+  playerClockEnabled: boolean;
   hotkeys: HotkeyConfig;
   globalHotkeyFailures: string[];
   proxy: ProxyConfig;
@@ -154,6 +156,7 @@ export type SettingsAction =
   | { type: "setVizResponse"; value: VizResponse }
   | { type: "setCoverArtEnabled"; value: boolean }
   | { type: "setRadioTrackTitleEnabled"; value: boolean }
+  | { type: "setPlayerClockEnabled"; value: boolean }
   | { type: "setHotkeys"; value: HotkeyConfig }
   | { type: "setProxyConfig"; value: ProxyConfig }
   | { type: "setLoggingEnabled"; value: boolean }
