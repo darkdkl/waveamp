@@ -20,7 +20,8 @@ import { initRadioStream } from "./radio/stream";
 import { initNowPlaying } from "./radio/nowPlaying";
 import { initSavedTracks } from "./radio/savedTracks";
 import { initClock } from "./clock";
-import { initSettingsBridge, initSettingsButton, initSkipUpdateVersion } from "./settingsBridge";
+import { initPlayState } from "./playState";
+import { applyWindowControlsSide, initSettingsBridge, initSettingsButton, initSkipUpdateVersion } from "./settingsBridge";
 import { initPlayerHotkeys } from "./playerHotkeys";
 import { restoreConfig } from "./restore";
 
@@ -42,6 +43,7 @@ initRadioStream();
 initNowPlaying();
 initSavedTracks();
 initClock();
+initPlayState();
 initMediaSession();
 initAudioErrorHandling();
 initSeekAndVolume();
@@ -50,6 +52,7 @@ initDragAndDrop();
 const electronAPI = window.electronAPI;
 if (electronAPI) {
   document.body.classList.add("is-electron");
+  applyWindowControlsSide();
   windowControls.hidden = false;
   minimizeBtn.addEventListener("click", () => {
     electronAPI.minimizeWindow();

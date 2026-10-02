@@ -4,6 +4,23 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.7.0] — 2026-10-03
+
+### Added
+- The display shows whether playback is playing, paused or stopped, next to
+  the track length or LIVE; the Play or Pause button lights up accordingly
+- The Settings button stays pressed while Settings is open and closes it when
+  clicked again
+- Settings → Interface → "Window buttons": left or right. Defaults to the left
+  on macOS and to the right on Windows and Linux
+
+### Changed
+- The clock on the display is slightly dimmer than the track time
+
+### Fixed
+- The mark before the player name in the title bar sat below the text; it now
+  matches the height of the letters
+
 ## [1.6.1] — 2026-10-02
 
 ### Fixed

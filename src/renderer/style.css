@@ -119,6 +119,12 @@ body.is-electron .player::before {
   display: flex;
 }
 
+.window-controls-right .window-controls {
+  left: auto;
+  right: 0;
+  flex-direction: row-reverse;
+}
+
 .window-controls__btn {
   width: 20px;
   height: 20px;
@@ -147,6 +153,14 @@ body.is-electron .player::before {
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--text-muted);
+}
+
+.player__logo-mark {
+  display: inline-block;
+  width: 0.62em;
+  height: 0.72em;
+  margin-right: 0.5em;
+  background: linear-gradient(90deg, currentColor 0 38%, transparent 38% 62%, currentColor 62% 100%);
 }
 
 .player__logo-accent {
@@ -305,6 +319,29 @@ body.is-electron .player::before {
   letter-spacing: 0.05em;
 }
 
+.display__state[hidden] {
+  display: none;
+}
+
+.display__state {
+  display: flex;
+  align-self: flex-end;
+  margin: 0 -4px 2px 0;
+  color: var(--lcd-fg);
+  filter: drop-shadow(0 0 2px hsl(var(--accent-h) var(--accent-s) 74% / 0.5));
+}
+
+.display__state svg {
+  width: 9px;
+  height: 9px;
+  fill: currentColor;
+}
+
+.display__time.is-clock {
+  color: color-mix(in srgb, var(--lcd-fg) 75%, var(--lcd-bg));
+  text-shadow: 0 0 4px hsl(var(--accent-h) var(--accent-s) 74% / 0.3);
+}
+
 .display__live.is-idle {
   color: var(--lcd-fg-dim);
   text-shadow: none;
@@ -413,11 +450,11 @@ input[type="range"]:disabled {
   fill: currentColor;
 }
 
-.btn--play {
+.btn.is-current {
   color: var(--accent);
 }
 
-.btn--play svg {
+.btn.is-current svg {
   fill: var(--accent);
 }
 

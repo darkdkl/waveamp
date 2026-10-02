@@ -216,6 +216,7 @@ function createSettingsWindow(): void {
     },
   });
   settingsWindow = win;
+  sendToMainWindow("settings-window-state", true);
 
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event, url) => {
@@ -226,6 +227,7 @@ function createSettingsWindow(): void {
   loadRenderer(win, "settings.html");
   win.on("closed", () => {
     settingsWindow = null;
+    sendToMainWindow("settings-window-state", false);
   });
 }
 

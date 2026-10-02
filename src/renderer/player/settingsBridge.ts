@@ -16,7 +16,7 @@ import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from 
 import { updateStationFormText } from "./radio/stationForm";
 import { tuneStation } from "./radio/stream";
 import { setHotkeys } from "./playerHotkeys";
-import type { AccentColor, ProxyConfig } from "../../shared/types";
+import type { AccentColor, ProxyConfig, WindowControlsSide } from "../../shared/types";
 
 export function getProxyConfig(): ProxyConfig {
   return { ...state.proxy };
@@ -79,6 +79,16 @@ export function setLanguage(lang: string): void {
   persistConfig();
 }
 
+export function applyWindowControlsSide(): void {
+  document.body.classList.toggle("window-controls-right", state.windowControlsSide === "right");
+}
+
+export function setWindowControlsSide(side: WindowControlsSide): void {
+  state.windowControlsSide = side === "left" ? "left" : "right";
+  applyWindowControlsSide();
+  persistConfig();
+}
+
 export function setAccentColor(color: Partial<AccentColor>): void {
   state.accentColor = accentColorTheme.normalize(color);
   accentColorTheme.apply(state.accentColor);
@@ -95,6 +105,7 @@ export function pushSettingsState(): void {
     coverArtEnabled: state.coverArtEnabled,
     radioTrackTitleEnabled: state.radioTrackTitleEnabled,
     playerClockEnabled: state.playerClockEnabled,
+    windowControlsSide: state.windowControlsSide,
     hotkeys: state.hotkeyConfig,
     globalHotkeyFailures: state.globalHotkeyFailures,
     proxy: getProxyConfig(),
@@ -106,8 +117,14 @@ export function pushSettingsState(): void {
 }
 
 export function initSettingsButton(): void {
+  let settingsOpen = false;
   settingsBtn.addEventListener("click", () => {
-    window.electronAPI?.openSettingsWindow?.();
+    if (settingsOpen) window.electronAPI?.closeSettingsWindow?.();
+    else window.electronAPI?.openSettingsWindow?.();
+  });
+  window.electronAPI?.onSettingsWindowState?.((open) => {
+    settingsOpen = open;
+    settingsBtn.classList.toggle("is-active", open);
   });
 }
 
@@ -134,6 +151,9 @@ export function initSettingsBridge(): void {
         break;
       case "setPlayerClockEnabled":
         setPlayerClockEnabled(!!action.value);
+        break;
+      case "setWindowControlsSide":
+        setWindowControlsSide(action.value);
         break;
       case "setHotkeys":
         setHotkeys(action.value);
