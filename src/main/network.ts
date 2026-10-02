@@ -24,6 +24,11 @@ export async function applyProxyConfig(proxyConfig: Partial<ProxyConfig> | null)
   writeLog("info", "proxy", `Applied ${proxyConfig.type} proxy ${hostPort}`);
 }
 
+export function answerProxyLogin(callback: (username?: string, password?: string) => void): void {
+  if (currentProxyAuth) callback(currentProxyAuth.username, currentProxyAuth.password);
+  else callback();
+}
+
 export function registerProxyLogin(): void {
   app.on("login", (event, webContents, details, authInfo, callback) => {
     if (authInfo.isProxy && currentProxyAuth) {
@@ -57,10 +62,7 @@ export function netRequestText(
       fn(value);
     }
 
-    request.on("login", (authInfo, callback) => {
-      if (currentProxyAuth) callback(currentProxyAuth.username, currentProxyAuth.password);
-      else callback();
-    });
+    request.on("login", (_authInfo, callback) => answerProxyLogin(callback));
 
     request.on("response", (response) => {
       if (response.statusCode < 200 || response.statusCode >= 300) {

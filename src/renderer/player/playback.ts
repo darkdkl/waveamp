@@ -24,6 +24,7 @@ import { getTrackSrc, releaseObjectUrl, renderPlaylist, scheduleTagRender } from
 import { renderRadioFavorites, renderRadioResults } from "./radio/panel";
 import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./radio/stream";
 import { refreshCoverArt } from "./coverArt";
+import { clearNowPlaying, renderRadioTitle, resetRadioTitle } from "./radio/nowPlaying";
 
 export function playAudio(): void {
   if (state.playbackMode === "local" && audio.error && state.queue[state.currentIndex]?.unplayable) {
@@ -45,17 +46,20 @@ function skipUnplayableTrack(): void {
 // so its text is always derived here.
 export function updateTrackTitleText(): void {
   if (state.playbackMode === "radio" && state.currentStation) {
-    trackTitle.textContent = state.currentStation.name;
-  } else if (state.playbackMode === "local" && state.queue[state.currentIndex]) {
-    trackTitle.textContent = trackDisplayName(state.queue[state.currentIndex]);
+    renderRadioTitle();
   } else {
-    trackTitle.textContent = i18n.t("noTrack");
+    resetRadioTitle();
+    trackTitle.textContent =
+      state.playbackMode === "local" && state.queue[state.currentIndex]
+        ? trackDisplayName(state.queue[state.currentIndex])
+        : i18n.t("noTrack");
   }
   updateMediaSessionMetadata();
 }
 
 export function resetToNoTrackState(): void {
   releaseObjectUrl();
+  clearNowPlaying();
   state.playbackMode = "local";
   state.currentStation = null;
   liveTag.hidden = true;
@@ -72,6 +76,7 @@ export function loadTrack(index: number, autoplay = true, direction: 1 | -1 = 1)
   if (index < 0 || index >= state.queue.length) return;
   state.skipDirection = direction;
   cancelRadioReconnect();
+  clearNowPlaying();
   state.playbackMode = "local";
   state.currentStation = null;
   durTime.hidden = false;

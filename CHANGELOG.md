@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.5.0] — 2026-10-02
+
+### Added
+- Radio: the display shows the track playing on the station; the bookmark next
+  to it (or H) saves the track to the new "Saved tracks" list in the radio panel
+
 ## [1.4.1] — 2026-10-02
 
 ### Fixed

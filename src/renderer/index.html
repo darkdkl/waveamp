@@ -20,7 +20,12 @@
     <section class="player__display">
       <div class="display__time" id="time">00:00</div>
       <div class="display__meta">
-        <div class="display__track" id="trackTitle">Нет трека — откройте файл</div>
+        <div class="display__track-row">
+          <div class="display__track" id="trackTitle">Нет трека — откройте файл</div>
+          <button class="display__save" id="saveTrackBtn" type="button" hidden>
+            <svg viewBox="0 0 24 24"><path d="M6 2.5h12v19l-6-4.8-6 4.8z"/></svg>
+          </button>
+        </div>
         <div class="display__scale">
           <canvas class="display__viz-canvas" id="vizCanvas" data-i18n-title="vizModeHint"></canvas>
           <span id="durTime">00:00</span>
@@ -143,6 +148,10 @@
               <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
               <span class="radio__tab-count" id="radioFavCount" hidden>0</span>
             </button>
+            <button class="btn btn--icon" id="radioTabSaved" type="button" data-i18n-title="savedTracks" data-i18n-aria="savedTracks" title="Сохранённые треки" aria-label="Сохранённые треки" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M6 2.5h12v19l-6-4.8-6 4.8z"/></svg>
+              <span class="radio__tab-count" id="radioSavedCount" hidden>0</span>
+            </button>
           </div>
         </div>
 
@@ -176,6 +185,32 @@
           <div class="radio__list-frame" id="radioFavoritesFrame">
             <ul class="radio__list" id="radioFavoritesList"></ul>
             <p class="radio__empty" id="radioFavEmpty" data-i18n="noFavorites">Нет избранных станций</p>
+          </div>
+        </div>
+
+        <div class="radio__view" id="radioSavedView" hidden>
+          <div class="radio__subheader">
+            <span data-i18n="savedTracks">Сохранённые треки</span>
+            <div class="playlist__add" id="radioSavedMenuWrap">
+              <button class="btn btn--icon" id="radioSavedMenuBtn" type="button" data-i18n-title="actions" data-i18n-aria="actions" title="Действия" aria-label="Действия" aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 24 24"><path d="M5 10a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4z"/></svg>
+              </button>
+              <div class="playlist__add-menu" id="radioSavedMenu" hidden>
+                <button type="button" id="savedCopyAllBtn">
+                  <svg viewBox="0 0 24 24"><path d="M8 2h11a2 2 0 012 2v13h-2V4H8V2zM4 6h11a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2zm0 2v12h11V8H4z"/></svg>
+                  <span data-i18n="copyAll">Скопировать всё</span>
+                </button>
+                <div class="playlist__add-menu-sep"></div>
+                <button type="button" id="savedClearBtn">
+                  <svg viewBox="0 0 24 24"><path d="M7 4V2h10v2h5v2h-2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6H2V4h5zm2 4v10h2V8H9zm4 0v10h2V8h-2z"/></svg>
+                  <span data-i18n="clearList">Очистить список</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="radio__list-frame" id="radioSavedFrame">
+            <ul class="radio__list" id="radioSavedList"></ul>
+            <p class="radio__empty" id="radioSavedEmpty" data-i18n="noSavedTracks">Нет сохранённых треков</p>
           </div>
         </div>
 

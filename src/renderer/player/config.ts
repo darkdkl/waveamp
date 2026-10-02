@@ -36,6 +36,7 @@ export function persistConfig(): void {
         accentColor: state.accentColor,
         vizResponse: state.vizResponse,
         coverArtEnabled: state.coverArtEnabled,
+        radioTrackTitleEnabled: state.radioTrackTitleEnabled,
         hotkeys: state.hotkeyConfig,
         volume: Number(volume.value),
         loggingEnabled: state.loggingEnabled,

@@ -28,6 +28,7 @@
   --player-padding: 14px;
   --list-height: 309px;
   --radio-chrome-offset: 72px;
+  --radio-saved-offset: 38px;
   color-scheme: dark;
 }
 
@@ -214,6 +215,64 @@ body.is-electron .player::before {
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: "DejaVu Sans Mono", "Courier New", monospace;
+}
+
+.display__track-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.display__track-row .display__track {
+  flex: 1;
+  min-width: 0;
+  transition: opacity 200ms ease, color 200ms ease;
+}
+
+.display__track.is-station {
+  color: var(--lcd-fg-dim);
+  text-shadow: none;
+}
+
+.display__track.is-fading {
+  opacity: 0;
+}
+
+.display__save[hidden] {
+  display: none;
+}
+
+.display__save {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.display__save svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: var(--lcd-fg-dim);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.display__save:hover svg {
+  stroke: var(--lcd-fg);
+}
+
+.display__save.is-saved svg {
+  fill: var(--lcd-fg);
+  stroke: var(--lcd-fg);
+  stroke-width: 0;
+  filter: drop-shadow(0 0 3px hsl(var(--accent-h) var(--accent-s) 74% / 0.7));
 }
 
 .display__scale {
@@ -913,6 +972,34 @@ input[type="range"].eq__slider {
   height: var(--list-height);
 }
 
+#radioSavedFrame {
+  height: calc(var(--list-height) - var(--radio-saved-offset));
+}
+
+.radio__subheader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 30px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.radio__subheader .playlist__add-menu {
+  min-width: 180px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.playlist__add-menu button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background: none;
+  color: var(--text);
+}
+
 .radio__station-form {
   gap: 8px;
   margin: 0;
@@ -1085,8 +1172,13 @@ input[type="range"].eq__slider {
   text-overflow: ellipsis;
 }
 
-.radio__item.is-active .radio__name {
+.radio__item.is-active .radio__name,
+.radio__item.is-copied .radio__name {
   color: var(--accent);
+}
+
+.radio__item.is-copied {
+  background: hsl(var(--accent-h) var(--accent-s) 74% / 0.12);
 }
 
 .radio__sub {

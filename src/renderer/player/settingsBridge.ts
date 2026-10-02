@@ -7,6 +7,8 @@ import { BASE_ZOOM, setScale } from "./layout";
 import { setVizResponse } from "./visualizer";
 import { renderEqToggle } from "./equalizer";
 import { setCoverArtEnabled } from "./coverArt";
+import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
+import { renderSavedTracks } from "./radio/savedTracks";
 import { renderPlaylist } from "./playlist";
 import { updateTrackTitleText } from "./playback";
 import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from "./radio/panel";
@@ -71,6 +73,7 @@ export function setLanguage(lang: string): void {
   renderPlaylist();
   renderRadioResults();
   renderRadioFavorites();
+  renderSavedTracks();
   updateStationFormText();
   persistConfig();
 }
@@ -89,6 +92,7 @@ export function pushSettingsState(): void {
     accentColor: state.accentColor,
     vizResponse: state.vizResponse,
     coverArtEnabled: state.coverArtEnabled,
+    radioTrackTitleEnabled: state.radioTrackTitleEnabled,
     hotkeys: state.hotkeyConfig,
     globalHotkeyFailures: state.globalHotkeyFailures,
     proxy: getProxyConfig(),
@@ -122,6 +126,9 @@ export function initSettingsBridge(): void {
         break;
       case "setCoverArtEnabled":
         setCoverArtEnabled(!!action.value);
+        break;
+      case "setRadioTrackTitleEnabled":
+        setRadioTrackTitleEnabled(!!action.value);
         break;
       case "setHotkeys":
         setHotkeys(action.value);
