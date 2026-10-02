@@ -1,6 +1,20 @@
 import { fixMojibake } from "./textEncoding";
 
 export const ICY_MAX_METAINT = 256 * 1024;
+export const ICY_POLL_INTERVAL_MS = 30_000;
+export const ICY_POLL_JITTER = 0.2;
+export const ICY_MAX_BACKOFF_MS = 5 * 60_000;
+const ICY_BLOCKING_STATUSES = new Set([403, 429]);
+
+export function icyPollDelay(failures: number, random: () => number = Math.random): number {
+  const backoff = ICY_POLL_INTERVAL_MS * 2 ** Math.max(0, failures);
+  const jitter = 1 + (random() * 2 - 1) * ICY_POLL_JITTER;
+  return Math.round(Math.min(ICY_MAX_BACKOFF_MS, backoff * jitter));
+}
+
+export function isBlockingStatus(status: number): boolean {
+  return ICY_BLOCKING_STATUSES.has(status);
+}
 
 export function parseMetaInt(value: string | string[] | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;

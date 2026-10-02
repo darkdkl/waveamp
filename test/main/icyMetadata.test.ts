@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { IcyMetadataReader, parseMetaInt, parseStreamTitle } from "../../src/main/icyMetadata";
+import {
+  ICY_MAX_BACKOFF_MS,
+  ICY_POLL_INTERVAL_MS,
+  IcyMetadataReader,
+  icyPollDelay,
+  isBlockingStatus,
+  parseMetaInt,
+  parseStreamTitle,
+} from "../../src/main/icyMetadata";
 
 function metadataBlock(text: string, encoding: BufferEncoding = "utf8"): Buffer {
   const body = Buffer.from(text, encoding);
@@ -55,5 +63,27 @@ describe("IcyMetadataReader", () => {
     const stream = Buffer.concat([Buffer.alloc(8), Buffer.from([0]), Buffer.alloc(8), metadataBlock("StreamTitle='C - D';")]);
     const block = new IcyMetadataReader(8).push(stream);
     expect(block && parseStreamTitle(block)).toBe("C - D");
+  });
+});
+
+describe("icyPollDelay", () => {
+  it("spreads the base interval by ±20%", () => {
+    expect(icyPollDelay(0, () => 0)).toBe(ICY_POLL_INTERVAL_MS * 0.8);
+    expect(icyPollDelay(0, () => 0.5)).toBe(ICY_POLL_INTERVAL_MS);
+    expect(icyPollDelay(0, () => 1)).toBe(ICY_POLL_INTERVAL_MS * 1.2);
+  });
+
+  it("doubles after each failure up to the cap", () => {
+    expect(icyPollDelay(1, () => 0.5)).toBe(ICY_POLL_INTERVAL_MS * 2);
+    expect(icyPollDelay(2, () => 0.5)).toBe(ICY_POLL_INTERVAL_MS * 4);
+    expect(icyPollDelay(10, () => 1)).toBe(ICY_MAX_BACKOFF_MS);
+  });
+});
+
+describe("isBlockingStatus", () => {
+  it("treats 403 and 429 as a refusal", () => {
+    expect(isBlockingStatus(403)).toBe(true);
+    expect(isBlockingStatus(429)).toBe(true);
+    expect(isBlockingStatus(503)).toBe(false);
   });
 });
