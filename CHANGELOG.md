@@ -4,6 +4,18 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.3.3] — 2026-10-02
+
+### Fixed
+- The player and Settings windows appear already in the saved look (color,
+  language, scale, open panels) instead of flashing the defaults first
+- The check for updates on launch now runs once the window is shown and the
+  proxy is applied; on macOS its dialog is a standalone window, so it is no
+  longer lost on the frameless player. Each step is written to the log
+- The EQ On/Off button keeps the right text after switching the language
+- The time display resets when the playlist is cleared
+- Previous skips over unplayable tracks backwards instead of bouncing forward
+
 ## [1.3.2] — 2026-10-02
 
 ### Security

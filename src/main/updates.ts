@@ -46,11 +46,19 @@ export function openReleasePage(url: unknown): void {
 }
 
 export async function checkForUpdatesOnLaunch(): Promise<void> {
-  if (!app.isPackaged || !autoUpdateEnabled) return;
+  if (!app.isPackaged) return;
+  if (!autoUpdateEnabled) {
+    writeLog("info", "updater", "Launch check disabled");
+    return;
+  }
   try {
     const { version, url } = await fetchLatestRelease();
+    writeLog("info", "updater", `Launch check: latest v${version}, installed v${app.getVersion()}`);
     if (!isNewerVersion(version, app.getVersion())) return;
-    if (loadConfig()?.settings?.skippedUpdateVersion === version) return;
+    if (loadConfig()?.settings?.skippedUpdateVersion === version) {
+      writeLog("info", "updater", `v${version} was skipped by the user`);
+      return;
+    }
     writeLog("info", "updater", `Update available: v${version}`);
     const s = UPDATE_STRINGS[getAppLanguage()] || UPDATE_STRINGS.ru;
     const options: Electron.MessageBoxOptions = {
@@ -61,8 +69,9 @@ export async function checkForUpdatesOnLaunch(): Promise<void> {
       message: s.message(version),
       detail: s.detail(app.getVersion()),
     };
-    const mainWindow = getMainWindow();
-    const { response } = await (mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options));
+    const parent = process.platform === "darwin" ? null : getMainWindow();
+    const { response } = await (parent ? dialog.showMessageBox(parent, options) : dialog.showMessageBox(options));
+    writeLog("info", "updater", `Update dialog answered: ${["download", "later", "skip"][response] ?? response}`);
     if (response === 0) openReleasePage(url);
     if (response === 2) sendToMainWindow("skip-update-version", version);
   } catch (err) {

@@ -397,7 +397,10 @@ input[type="range"]:disabled {
   pointer-events: auto;
 }
 
-.playlist.is-resizing {
+.playlist.is-resizing,
+.is-restoring .playlist,
+.is-restoring .eq,
+.is-restoring .radio {
   transition: none;
 }
 

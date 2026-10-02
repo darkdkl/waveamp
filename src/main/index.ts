@@ -19,15 +19,15 @@ app.whenReady().then(() => {
   initMenuPreferences(settings?.lang === "en" ? "en" : "ru", !!settings?.showTrayIcon, !!settings?.closeMinimizesToTray);
   pruneOldLogs();
   writeLog("info", "app", `App starting (v${app.getVersion()})`);
-  if (settings?.proxy) {
-    applyProxyConfig(settings.proxy).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`));
-  }
+  const proxyReady = settings?.proxy
+    ? applyProxyConfig(settings.proxy).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`))
+    : Promise.resolve();
 
   setAppMenu();
   setDockIcon();
 
-  createWindow();
-  checkForUpdatesOnLaunch();
+  const windowShown = createWindow();
+  Promise.all([proxyReady, windowShown]).then(() => checkForUpdatesOnLaunch());
   registerMediaKeys();
   syncTray();
   syncDockMenu();

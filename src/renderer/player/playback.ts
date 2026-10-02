@@ -36,7 +36,8 @@ export function playAudio(): void {
 
 function skipUnplayableTrack(): void {
   state.localPlayRequested = false;
-  if (state.currentIndex + 1 < state.queue.length) loadTrack(state.currentIndex + 1);
+  const next = state.currentIndex + state.skipDirection;
+  if (next >= 0 && next < state.queue.length) loadTrack(next, true, state.skipDirection);
 }
 
 // trackTitle has no data-i18n (applyTranslations would overwrite the track name),
@@ -59,13 +60,15 @@ export function resetToNoTrackState(): void {
   liveTag.hidden = true;
   durTime.hidden = false;
   durTime.textContent = "00:00";
+  timeDisplay.textContent = "00:00";
   seek.disabled = true;
   seek.value = "0";
   updateTrackTitleText();
 }
 
-export function loadTrack(index: number, autoplay = true): void {
+export function loadTrack(index: number, autoplay = true, direction: 1 | -1 = 1): void {
   if (index < 0 || index >= state.queue.length) return;
+  state.skipDirection = direction;
   cancelRadioReconnect();
   state.playbackMode = "local";
   state.currentStation = null;
@@ -134,7 +137,7 @@ export function playPrev(): void {
     return;
   }
   if (state.currentIndex - 1 >= 0) {
-    loadTrack(state.currentIndex - 1);
+    loadTrack(state.currentIndex - 1, true, -1);
   } else {
     audio.currentTime = 0;
   }

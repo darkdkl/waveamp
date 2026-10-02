@@ -1,6 +1,7 @@
 import { i18n } from "../i18n";
 import { closeBtn, minimizeBtn, player, windowControls } from "./dom";
 import { logEvent } from "./log";
+import { state } from "./state";
 import { buildEqualizer, initEqualizerControls } from "./equalizer";
 import { initVisualizerControls, startVisualizer } from "./visualizer";
 import { loadMediaSessionArtwork, initMediaSession } from "./mediaSession";
@@ -61,7 +62,11 @@ updateTrackTitleText();
 refreshRadioEmptyText();
 
 renderPlaylist();
-restoreConfig();
+restoreConfig().finally(() => {
+  state.restoring = false;
+  document.body.classList.remove("is-restoring");
+  window.electronAPI?.notifyWindowReady?.();
+});
 
 initPlayerHotkeys();
 
