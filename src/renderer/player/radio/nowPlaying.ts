@@ -100,7 +100,10 @@ export function setRadioTrackTitleEnabled(enabled: boolean): void {
 export function initNowPlaying(): void {
   trackTitle.style.transitionDuration = `${CROSSFADE_MS / 2}ms`;
   audio.addEventListener("playing", syncNowPlayingPolling);
-  audio.addEventListener("pause", syncNowPlayingPolling);
+  audio.addEventListener("pause", () => {
+    syncNowPlayingPolling();
+    if (state.playbackMode === "radio") setNowPlayingTitle(null);
+  });
   saveTrackBtn.addEventListener("click", toggleCurrentTrackSaved);
   window.electronAPI?.onNowPlaying?.((update) => {
     if (update.url === pollingUrl) setNowPlayingTitle(update.title);

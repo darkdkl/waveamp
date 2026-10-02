@@ -155,7 +155,10 @@ export function playPrev(): void {
 }
 
 export function initTransportControls(): void {
-  playBtn.addEventListener("click", playAudio);
+  playBtn.addEventListener("click", () => {
+    if (state.playbackMode === "local" && state.queue.length === 0) fileInput.click();
+    else playAudio();
+  });
   pauseBtn.addEventListener("click", () => audio.pause());
   stopBtn.addEventListener("click", stop);
   prevBtn.addEventListener("click", playPrev);

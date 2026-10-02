@@ -50,6 +50,7 @@ export function tuneStation(station: Station): void {
   syncTimeDisplay();
   durTime.hidden = true;
   liveTag.hidden = false;
+  setLiveActive(false);
 
   renderRadioResults();
   renderRadioFavorites();
@@ -104,10 +105,18 @@ export function attemptRadioReconnect(): void {
   }, 1500);
 }
 
+function setLiveActive(active: boolean): void {
+  liveTag.classList.toggle("is-idle", !active);
+}
+
 export function initRadioStream(): void {
   audio.addEventListener("playing", () => {
+    setLiveActive(true);
     if (state.playbackMode !== "radio") return;
     radioReconnectAttempts = 0;
     updateTrackTitleText();
   });
+  for (const event of ["pause", "waiting", "error", "emptied"]) {
+    audio.addEventListener(event, () => setLiveActive(false));
+  }
 }
