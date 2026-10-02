@@ -17,6 +17,10 @@ version, fixes bump the patch version.
 ### Changed
 - The clock on the display is slightly dimmer than the track time
 
+### Fixed
+- The mark before the player name in the title bar sat below the text; it now
+  matches the height of the letters
+
 ## [1.6.1] — 2026-10-02
 
 ### Fixed
