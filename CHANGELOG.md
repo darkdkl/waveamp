@@ -4,6 +4,15 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.8.0] — 2026-10-03
+
+### Added
+- The Settings window has a handle at the bottom, like the lists in the player
+  window, to drag its height
+
+### Changed
+- The Settings window keeps a fixed width; only its height can be changed
+
 ## [1.7.0] — 2026-10-03
 
 ### Added

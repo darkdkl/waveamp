@@ -195,7 +195,8 @@ function createSettingsWindow(): void {
   const win = new BrowserWindow({
     width: size.width,
     height: size.height,
-    minWidth: minSize.width,
+    minWidth: size.width,
+    maxWidth: size.width,
     minHeight: minSize.height,
     x: bounds ? bounds.x + bounds.width + 12 : undefined,
     y: bounds ? bounds.y : undefined,
@@ -248,10 +249,27 @@ export function setSettingsWindowScale(percent: number): void {
   if (!isAlive(settingsWindow) || !(percent > 0) || percent === settingsScale) return;
   const ratio = percent / settingsScale;
   settingsScale = percent;
-  const minSize = settingsWindowSize(SETTINGS_WINDOW_MIN_SIZE, percent);
-  settingsWindow.setMinimumSize(minSize.width, minSize.height);
-  const [width, height] = settingsWindow.getSize();
+  const width = settingsWindowSize(SETTINGS_WINDOW_SIZE, percent).width;
+  const minHeight = settingsWindowSize(SETTINGS_WINDOW_MIN_SIZE, percent).height;
+  settingsWindow.setMinimumSize(width, minHeight);
+  settingsWindow.setMaximumSize(width, 0);
+  const [currentWidth, height] = settingsWindow.getSize();
   const display = screen.getDisplayMatching(settingsWindow.getBounds()).workAreaSize;
-  const next = rescaledSize({ width, height }, ratio, display);
-  settingsWindow.setSize(next.width, next.height);
+  const next = rescaledSize({ width: currentWidth, height }, ratio, display);
+  settingsWindow.setSize(width, next.height);
+}
+
+let settingsResizeStartHeight = 0;
+
+export function startSettingsWindowResize(): void {
+  if (isAlive(settingsWindow)) settingsResizeStartHeight = settingsWindow.getSize()[1];
+}
+
+export function resizeSettingsWindowBy(delta: number): void {
+  if (!isAlive(settingsWindow) || !Number.isFinite(delta) || !settingsResizeStartHeight) return;
+  const minHeight = settingsWindowSize(SETTINGS_WINDOW_MIN_SIZE, settingsScale).height;
+  const maxHeight = screen.getDisplayMatching(settingsWindow.getBounds()).workAreaSize.height;
+  const height = Math.min(maxHeight, Math.max(minHeight, settingsResizeStartHeight + delta));
+  const [width] = settingsWindow.getSize();
+  settingsWindow.setSize(width, Math.round(height));
 }
