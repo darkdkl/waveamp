@@ -2,6 +2,7 @@ import appIconUrl from "../../../assets/icon.png";
 import { audio } from "./dom";
 import { state } from "./state";
 import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
+import { getLocalArtworkUrl } from "./coverArt";
 
 // MediaMetadata artwork rejects file:// URLs, so use a blob: URL.
 let appIconArtworkUrl: string | null = null;
@@ -19,11 +20,16 @@ export function updateMediaSessionMetadata(): void {
     });
   } else if (state.playbackMode === "local" && state.queue[state.currentIndex]) {
     const track = state.queue[state.currentIndex];
+    const coverUrl = getLocalArtworkUrl();
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.tags?.title || track.name,
       artist: track.tags?.artist || "WaveAMP",
       album: track.tags?.album || "",
-      artwork: appIconArtworkUrl ? [{ src: appIconArtworkUrl, sizes: "1024x1024", type: "image/png" }] : [],
+      artwork: coverUrl
+        ? [{ src: coverUrl, sizes: "any", type: "image/jpeg" }]
+        : appIconArtworkUrl
+          ? [{ src: appIconArtworkUrl, sizes: "1024x1024", type: "image/png" }]
+          : [],
     });
   } else {
     navigator.mediaSession.metadata = null;

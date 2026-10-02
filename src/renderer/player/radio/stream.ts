@@ -6,6 +6,7 @@ import { logEvent } from "../log";
 import { persistConfig } from "../config";
 import { playAudio, updateTrackTitleText } from "../playback";
 import { renderRadioFavorites, renderRadioResults } from "./panel";
+import { refreshCoverArt } from "../coverArt";
 import type { Station } from "../../../shared/types";
 
 const RADIO_MAX_RECONNECT = 3;
@@ -39,6 +40,7 @@ export function tuneStation(station: Station): void {
   audio.crossOrigin = "anonymous";
 
   updateTrackTitleText();
+  refreshCoverArt();
   seek.disabled = true;
   seek.value = "0";
   timeDisplay.textContent = "--:--";

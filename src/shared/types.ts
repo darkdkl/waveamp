@@ -98,6 +98,7 @@ export interface AppConfig {
     scale: number;
     accentColor: AccentColor;
     vizResponse: VizResponse;
+    coverArtEnabled: boolean;
     hotkeys: HotkeyConfig;
     volume: number;
     loggingEnabled: boolean;
@@ -123,6 +124,7 @@ export interface SettingsState {
   zoomFactor: number;
   accentColor: AccentColor;
   vizResponse: VizResponse;
+  coverArtEnabled: boolean;
   hotkeys: HotkeyConfig;
   globalHotkeyFailures: string[];
   proxy: ProxyConfig;
@@ -137,6 +139,7 @@ export type SettingsAction =
   | { type: "setScale"; value: number }
   | { type: "setAccentColor"; value: AccentColor }
   | { type: "setVizResponse"; value: VizResponse }
+  | { type: "setCoverArtEnabled"; value: boolean }
   | { type: "setHotkeys"; value: HotkeyConfig }
   | { type: "setProxyConfig"; value: ProxyConfig }
   | { type: "setLoggingEnabled"; value: boolean }
