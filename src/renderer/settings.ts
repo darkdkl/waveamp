@@ -1,7 +1,15 @@
 import { i18n } from "./i18n";
 import { hotkeys } from "./hotkeys";
 import { accentColor as accentColorTheme } from "./theme";
-import type { AccentColor, ProxyConfig, ProxyType, SettingsAction, SettingsActionValue, VizResponse } from "../shared/types";
+import type {
+  AccentColor,
+  ProxyConfig,
+  ProxyType,
+  SettingsAction,
+  SettingsActionValue,
+  VizResponse,
+  WindowControlsSide,
+} from "../shared/types";
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   return document.getElementById(id) as T;
@@ -14,6 +22,7 @@ const settingsSystemView = byId("settingsSystemView");
 const langSelect = byId<HTMLSelectElement>("langSelect");
 const scaleSelect = byId<HTMLSelectElement>("scaleSelect");
 const vizResponseSelect = byId<HTMLSelectElement>("vizResponseSelect");
+const windowControlsSelect = byId<HTMLSelectElement>("windowControlsSelect");
 const proxyEnabledBtn = byId<HTMLButtonElement>("proxyEnabledBtn");
 const proxyTypeSelect = byId<HTMLSelectElement>("proxyTypeSelect");
 const proxyHostInput = byId<HTMLInputElement>("proxyHostInput");
@@ -415,6 +424,10 @@ scaleSelect.addEventListener("change", () => {
   sendAction("setScale", Number(scaleSelect.value));
 });
 
+windowControlsSelect.addEventListener("change", () => {
+  sendAction("setWindowControlsSide", windowControlsSelect.value as WindowControlsSide);
+});
+
 vizResponseSelect.addEventListener("change", () => {
   sendAction("setVizResponse", vizResponseSelect.value as VizResponse);
 });
@@ -432,6 +445,10 @@ window.electronAPI?.onSettingsState?.((state) => {
   if (typeof state.zoomFactor === "number") window.electronAPI?.setZoomFactor?.(state.zoomFactor);
   if (typeof state.scale === "number") window.electronAPI?.setSettingsWindowScale?.(state.scale);
   if (state.vizResponse) vizResponseSelect.value = state.vizResponse;
+  if (state.windowControlsSide) {
+    windowControlsSelect.value = state.windowControlsSide;
+    document.body.classList.toggle("window-controls-right", state.windowControlsSide === "right");
+  }
   if (state.hotkeys) {
     hotkeyConfig = hotkeys.normalize(state.hotkeys);
     hotkeyFailures = state.globalHotkeyFailures || [];

@@ -18,6 +18,7 @@ export const saveTrackBtn = byId<HTMLButtonElement>("saveTrackBtn");
 export const timeDisplay = byId("time");
 export const durTime = byId("durTime");
 export const liveTag = byId("liveTag");
+export const playStateIcon = byId("playState");
 export const vizCanvas = byId<HTMLCanvasElement>("vizCanvas");
 export const seek = byId<HTMLInputElement>("seek");
 export const volume = byId<HTMLInputElement>("volume");

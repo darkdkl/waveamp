@@ -2,6 +2,7 @@ export type Lang = "ru" | "en";
 export type VizMode = "spectrum" | "meters" | "scope";
 export type VizResponse = "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
+export type WindowControlsSide = "left" | "right";
 
 export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends (infer U)[] ? DeepPartial<U>[] : T[K] extends object ? DeepPartial<T[K]> : T[K];
@@ -112,6 +113,7 @@ export interface AppConfig {
     coverArtEnabled: boolean;
     radioTrackTitleEnabled: boolean;
     playerClockEnabled: boolean;
+    windowControlsSide: WindowControlsSide;
     hotkeys: HotkeyConfig;
     volume: number;
     loggingEnabled: boolean;
@@ -140,6 +142,7 @@ export interface SettingsState {
   coverArtEnabled: boolean;
   radioTrackTitleEnabled: boolean;
   playerClockEnabled: boolean;
+  windowControlsSide: WindowControlsSide;
   hotkeys: HotkeyConfig;
   globalHotkeyFailures: string[];
   proxy: ProxyConfig;
@@ -157,6 +160,7 @@ export type SettingsAction =
   | { type: "setCoverArtEnabled"; value: boolean }
   | { type: "setRadioTrackTitleEnabled"; value: boolean }
   | { type: "setPlayerClockEnabled"; value: boolean }
+  | { type: "setWindowControlsSide"; value: WindowControlsSide }
   | { type: "setHotkeys"; value: HotkeyConfig }
   | { type: "setProxyConfig"; value: ProxyConfig }
   | { type: "setLoggingEnabled"; value: boolean }

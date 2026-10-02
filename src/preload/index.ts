@@ -81,6 +81,7 @@ const api = {
   showAppMenu: (): void => ipcRenderer.send("show-app-menu"),
   openSettingsWindow: (): void => ipcRenderer.send("open-settings-window"),
   closeSettingsWindow: (): void => ipcRenderer.send("settings-window-close"),
+  onSettingsWindowState: (callback: (open: boolean) => void) => ipcRenderer.on("settings-window-state", (_event, open) => callback(!!open)),
   setSettingsWindowScale: (percent: number): void => ipcRenderer.send("settings-window-scale", percent),
   setTrayIconEnabled: (enabled: boolean): void => ipcRenderer.send("set-tray-icon-enabled", enabled),
   setCloseMinimizesToTray: (enabled: boolean): void => ipcRenderer.send("set-close-minimizes-to-tray", enabled),

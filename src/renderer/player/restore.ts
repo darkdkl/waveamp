@@ -23,6 +23,7 @@ import {
   setLoggingEnabled,
   setProxySettings,
   setTrayIconEnabled,
+  setWindowControlsSide,
 } from "./settingsBridge";
 import type { Station } from "../../shared/types";
 
@@ -53,6 +54,10 @@ export async function restoreConfig(): Promise<void> {
 
   if (typeof settings?.coverArtEnabled === "boolean") {
     setCoverArtEnabled(settings.coverArtEnabled);
+  }
+
+  if (settings?.windowControlsSide === "left" || settings?.windowControlsSide === "right") {
+    setWindowControlsSide(settings.windowControlsSide);
   }
 
   if (typeof settings?.playerClockEnabled === "boolean") {

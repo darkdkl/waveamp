@@ -34,6 +34,7 @@ function stopTicking(): void {
 
 function applyView(showClock: boolean): void {
   clockShown = showClock;
+  timeDisplay.classList.toggle("is-clock", showClock);
   if (showClock) {
     startTicking();
   } else {

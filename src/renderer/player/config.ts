@@ -38,6 +38,7 @@ export function persistConfig(): void {
         coverArtEnabled: state.coverArtEnabled,
         radioTrackTitleEnabled: state.radioTrackTitleEnabled,
         playerClockEnabled: state.playerClockEnabled,
+        windowControlsSide: state.windowControlsSide,
         hotkeys: state.hotkeyConfig,
         volume: Number(volume.value),
         loggingEnabled: state.loggingEnabled,

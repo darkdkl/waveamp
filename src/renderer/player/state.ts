@@ -11,6 +11,7 @@ import type {
   TrackTags,
   VizMode,
   VizResponse,
+  WindowControlsSide,
 } from "../../shared/types";
 
 export type PlaybackMode = "local" | "radio";
@@ -40,6 +41,7 @@ export const state = {
   radioView: "search" as RadioView,
   radioTrackTitleEnabled: true,
   playerClockEnabled: false,
+  windowControlsSide: (hotkeys.isMac ? "left" : "right") as WindowControlsSide,
   nowPlayingTitle: null as string | null,
   savedTracks: [] as SavedTrack[],
 

@@ -26,6 +26,7 @@ import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./ra
 import { refreshCoverArt } from "./coverArt";
 import { clearNowPlaying, renderRadioTitle, resetRadioTitle } from "./radio/nowPlaying";
 import { isClockShown, showTrackTimeNow, syncTimeDisplay } from "./clock";
+import { markStopped, renderPlayState } from "./playState";
 
 export function playAudio(): void {
   if (state.playbackMode === "local" && audio.error && state.queue[state.currentIndex]?.unplayable) {
@@ -55,6 +56,7 @@ export function updateTrackTitleText(): void {
         ? trackDisplayName(state.queue[state.currentIndex])
         : i18n.t("noTrack");
   }
+  renderPlayState();
   updateMediaSessionMetadata();
 }
 
@@ -121,6 +123,7 @@ export function playPause(): void {
 
 export function stop(): void {
   audio.pause();
+  markStopped();
   if (state.playbackMode === "local") {
     audio.currentTime = 0;
   }
