@@ -4,6 +4,11 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [Unreleased]
+
+### Development
+- TypeScript strict mode is on for the whole codebase
+
 ## [1.3.3] — 2026-10-02
 
 ### Fixed
@@ -16,12 +21,23 @@ version, fixes bump the patch version.
 - The time display resets when the playlist is cleared
 - Previous skips over unplayable tracks backwards instead of bouncing forward
 
+### Development
+- The source is now TypeScript, built with electron-vite (Vite); `npm run dev`
+  starts the app with hot reload
+- The player and the main process are split into focused modules, with all
+  IPC handlers in one place
+- 121 unit tests
+
 ## [1.3.2] — 2026-10-02
 
 ### Security
 - Radio stream addresses are checked right before playback: only http and
   https links are opened, and favorites with any other scheme are dropped
   when the config is loaded
+
+### Development
+- Unit tests (Vitest) and a check that runs on every pull request
+- Merging without a version bump no longer re-publishes the current release
 
 ## [1.3.1] — 2026-10-01
 
