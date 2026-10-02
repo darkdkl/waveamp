@@ -28,7 +28,9 @@ export const state = {
   queue: [] as Track[],
   currentIndex: -1,
   localPlayRequested: false,
+  skipDirection: 1 as 1 | -1,
   isSeeking: false,
+  restoring: true,
 
   playbackMode: "local" as PlaybackMode,
   currentStation: null as Station | null,

@@ -37,7 +37,7 @@ export function syncElectronWindowSize(instant = false): void {
   if (state.radioOpen) target += radio.scrollHeight;
   target *= state.uiScale;
   const targetWidth = WINDOW_WIDTH_BASE * state.uiScale;
-  if (instant && window.electronAPI.resizeWindowInstant) {
+  if ((instant || state.restoring) && window.electronAPI.resizeWindowInstant) {
     window.electronAPI.resizeWindowInstant(target, targetWidth);
   } else {
     window.electronAPI.resizeWindow(target, targetWidth);

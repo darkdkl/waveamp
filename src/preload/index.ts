@@ -76,6 +76,7 @@ const api = {
   setCloseMinimizesToTray: (enabled: boolean): void => ipcRenderer.send("set-close-minimizes-to-tray", enabled),
   sendSettingsAction: (action: SettingsAction): void => ipcRenderer.send("settings-action-from-window", action),
   onSettingsAction: (callback: (action: SettingsAction) => void) => ipcRenderer.on("settings-action", (_event, action) => callback(action)),
+  notifyWindowReady: (): void => ipcRenderer.send("window-ready"),
   requestSettingsState: (): void => ipcRenderer.send("settings-request-state"),
   onSettingsStateRequested: (callback: () => void) => ipcRenderer.on("settings-state-requested", () => callback()),
   pushSettingsState: (state: SettingsState): void => ipcRenderer.send("settings-state-from-main", state),

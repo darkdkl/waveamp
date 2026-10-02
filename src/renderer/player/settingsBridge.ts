@@ -5,6 +5,7 @@ import { state } from "./state";
 import { persistConfig } from "./config";
 import { BASE_ZOOM, setScale } from "./layout";
 import { setVizResponse } from "./visualizer";
+import { renderEqToggle } from "./equalizer";
 import { renderPlaylist } from "./playlist";
 import { updateTrackTitleText } from "./playback";
 import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from "./radio/panel";
@@ -63,6 +64,7 @@ export function setTrayIconEnabled(enabled: boolean): void {
 
 export function setLanguage(lang: string): void {
   i18n.setLanguage(lang);
+  renderEqToggle();
   updateTrackTitleText();
   refreshRadioEmptyText();
   renderPlaylist();

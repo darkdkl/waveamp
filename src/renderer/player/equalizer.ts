@@ -74,6 +74,10 @@ export function syncEqControlsFromState(): void {
     if (values[i + 1]) values[i + 1].textContent = formatDb(db);
   });
 
+  renderEqToggle();
+}
+
+export function renderEqToggle(): void {
   eqToggleBtn.textContent = state.eqEnabled ? i18n.t("eqOn") : i18n.t("eqOff");
   eqToggleBtn.classList.toggle("is-active", state.eqEnabled);
 }
@@ -119,8 +123,7 @@ export function initEqualizerControls(): void {
 
   eqToggleBtn.addEventListener("click", () => {
     state.eqEnabled = !state.eqEnabled;
-    eqToggleBtn.textContent = state.eqEnabled ? i18n.t("eqOn") : i18n.t("eqOff");
-    eqToggleBtn.classList.toggle("is-active", state.eqEnabled);
+    renderEqToggle();
     applyEqState();
     persistConfig();
   });

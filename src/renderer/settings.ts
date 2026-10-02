@@ -381,6 +381,8 @@ vizResponseSelect.addEventListener("change", () => {
   sendAction("setVizResponse", vizResponseSelect.value as VizResponse);
 });
 
+let windowReadySent = false;
+
 window.electronAPI?.onSettingsState?.((state) => {
   if (!state) return;
 
@@ -428,6 +430,10 @@ window.electronAPI?.onSettingsState?.((state) => {
   closeMinimizesToTrayBtn.classList.toggle("is-active", closeMinimizesToTrayEnabled);
 
   refreshTextForLanguage();
+  if (!windowReadySent) {
+    windowReadySent = true;
+    window.electronAPI?.notifyWindowReady?.();
+  }
 });
 
 window.electronAPI?.requestSettingsState?.();

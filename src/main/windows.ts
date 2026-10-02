@@ -8,6 +8,8 @@ const RESIZE_DURATION_MS = 180;
 export const ICON_PATH = path.join(app.getAppPath(), "assets", "icon.png");
 const PRELOAD_PATH = path.join(__dirname, "../preload/index.js");
 
+const REVEAL_FALLBACK_MS = 2000;
+
 const SETTINGS_WINDOW_SIZE: Size = { width: 378, height: 468 };
 const SETTINGS_WINDOW_MIN_SIZE: Size = { width: 324, height: 324 };
 
@@ -31,6 +33,32 @@ export function sendToMainWindow(channel: string, ...args: unknown[]): void {
 
 export function sendToSettingsWindow(channel: string, ...args: unknown[]): void {
   if (isAlive(settingsWindow)) settingsWindow.webContents.send(channel, ...args);
+}
+
+const pendingReveals = new Map<number, () => void>();
+
+function revealWhenReady(win: BrowserWindow): Promise<void> {
+  const id = win.webContents.id;
+  return new Promise((resolve) => {
+    const reveal = () => {
+      if (!pendingReveals.has(id)) return;
+      pendingReveals.delete(id);
+      clearTimeout(timer);
+      if (!win.isDestroyed()) win.show();
+      resolve();
+    };
+    const timer = setTimeout(reveal, REVEAL_FALLBACK_MS);
+    pendingReveals.set(id, reveal);
+    win.on("closed", () => {
+      pendingReveals.delete(id);
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
+
+export function revealSenderWindow(sender: WebContents): void {
+  pendingReveals.get(sender.id)?.();
 }
 
 function loadRenderer(win: BrowserWindow, page: string): void {
@@ -113,10 +141,11 @@ export function closeSenderWindow(sender: WebContents, hideInstead: boolean): vo
   }
 }
 
-export function createWindow(): void {
+export function createWindow(): Promise<void> {
   const win = new BrowserWindow({
     width: WINDOW_WIDTH,
     height: 198,
+    show: false,
     useContentSize: true,
     resizable: false,
     frame: false,
@@ -140,7 +169,9 @@ export function createWindow(): void {
     if (isAlive(settingsWindow)) settingsWindow.close();
   });
 
+  const shown = revealWhenReady(win);
   loadRenderer(win, "index.html");
+  return shown;
 }
 
 function settingsWindowSize(size: Size, percent: number): Size {
@@ -166,6 +197,7 @@ function createSettingsWindow(): void {
     x: bounds ? bounds.x + bounds.width + 12 : undefined,
     y: bounds ? bounds.y : undefined,
     title: "WaveAMP — Settings",
+    show: false,
     // Not modal: on macOS a modal child becomes a sheet without a close button.
     parent: parent ?? undefined,
     frame: false,
@@ -187,6 +219,7 @@ function createSettingsWindow(): void {
     if (url !== win.webContents.getURL()) event.preventDefault();
   });
 
+  revealWhenReady(win);
   loadRenderer(win, "settings.html");
   win.on("closed", () => {
     settingsWindow = null;

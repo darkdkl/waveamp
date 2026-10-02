@@ -15,6 +15,7 @@ import {
   closeSenderWindow,
   closeSettingsWindow,
   minimizeSenderWindow,
+  revealSenderWindow,
   openSettingsWindow,
   resizeSenderWindow,
   sendToMainWindow,
@@ -66,6 +67,8 @@ export function registerIpcHandlers(): void {
   ipcMain.on("set-tray-icon-enabled", (_event, enabled: boolean) => setTrayIconEnabled(!!enabled));
 
   ipcMain.on("set-close-minimizes-to-tray", (_event, enabled: boolean) => setCloseMinimizesToTray(!!enabled));
+
+  ipcMain.on("window-ready", (event) => revealSenderWindow(event.sender));
 
   ipcMain.on("window-minimize", (event) => minimizeSenderWindow(event.sender));
 
