@@ -6,6 +6,7 @@ import { persistConfig } from "./config";
 import { BASE_ZOOM, setScale } from "./layout";
 import { setVizResponse } from "./visualizer";
 import { renderEqToggle } from "./equalizer";
+import { setCoverArtEnabled } from "./coverArt";
 import { renderPlaylist } from "./playlist";
 import { updateTrackTitleText } from "./playback";
 import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from "./radio/panel";
@@ -87,6 +88,7 @@ export function pushSettingsState(): void {
     zoomFactor: state.uiScale,
     accentColor: state.accentColor,
     vizResponse: state.vizResponse,
+    coverArtEnabled: state.coverArtEnabled,
     hotkeys: state.hotkeyConfig,
     globalHotkeyFailures: state.globalHotkeyFailures,
     proxy: getProxyConfig(),
@@ -117,6 +119,9 @@ export function initSettingsBridge(): void {
         break;
       case "setVizResponse":
         setVizResponse(action.value);
+        break;
+      case "setCoverArtEnabled":
+        setCoverArtEnabled(!!action.value);
         break;
       case "setHotkeys":
         setHotkeys(action.value);

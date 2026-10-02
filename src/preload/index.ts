@@ -39,6 +39,7 @@ const api = {
   loadConfig: (): Promise<StoredConfig | null> => ipcRenderer.invoke("config-load"),
   saveConfig: (config: AppConfig): void => ipcRenderer.send("config-save", config),
   readTrackTags: (filePath: string): Promise<TrackTags> => ipcRenderer.invoke("read-track-tags", filePath),
+  readTrackCover: (filePath: string): Promise<string | null> => ipcRenderer.invoke("read-track-cover", filePath),
   getFilePath: (file: File): string | null => {
     try {
       return webUtils.getPathForFile(file) || null;

@@ -31,6 +31,7 @@ import {
 } from "./menus";
 import { applyGlobalHotkeys } from "./shortcuts";
 import { readTrackTags } from "./tags";
+import { readCoverArt } from "./coverArt";
 import { checkForUpdates, openReleasePage, setAutoUpdateEnabled } from "./updates";
 import { openLicenseFile } from "./licenses";
 import type {
@@ -97,6 +98,8 @@ export function registerIpcHandlers(): void {
       return null;
     })
   );
+
+  ipcMain.handle("read-track-cover", (_event, filePath: string) => readCoverArt(filePath));
 
   ipcMain.handle("radio-search", (_event, params: StationSearchParams) => searchStations(params));
   ipcMain.handle("radio-countries", () => fetchCountries());

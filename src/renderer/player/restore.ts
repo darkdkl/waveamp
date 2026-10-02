@@ -11,6 +11,7 @@ import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
 import { applyGlobalHotkeys } from "./playerHotkeys";
+import { setCoverArtEnabled } from "./coverArt";
 import {
   setAccentColor,
   setAutoUpdateEnabled,
@@ -43,6 +44,10 @@ export async function restoreConfig(): Promise<void> {
 
   if (settings?.vizResponse) {
     setVizResponse(settings.vizResponse);
+  }
+
+  if (typeof settings?.coverArtEnabled === "boolean") {
+    setCoverArtEnabled(settings.coverArtEnabled);
   }
 
   state.hotkeyConfig = hotkeys.normalize(settings?.hotkeys);

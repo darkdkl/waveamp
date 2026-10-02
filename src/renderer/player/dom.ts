@@ -12,6 +12,7 @@ export const windowControls = byId("windowControls");
 export const minimizeBtn = byId<HTMLButtonElement>("minimizeBtn");
 export const closeBtn = byId<HTMLButtonElement>("closeBtn");
 
+export const playerDisplay = document.querySelector(".player__display") as HTMLElement;
 export const trackTitle = byId("trackTitle");
 export const timeDisplay = byId("time");
 export const durTime = byId("durTime");

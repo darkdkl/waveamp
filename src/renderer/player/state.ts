@@ -51,6 +51,8 @@ export const state = {
 
   vizMode: "spectrum" as VizMode,
   vizResponse: "smooth" as VizResponse,
+  coverArtEnabled: true,
+  coverArt: null as string | null,
 
   proxy: { enabled: false, type: "http", host: "", port: "", username: "", password: "" } as ProxyConfig,
   loggingEnabled: false,

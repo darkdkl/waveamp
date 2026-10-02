@@ -23,6 +23,7 @@ import { updateMediaSessionMetadata } from "./mediaSession";
 import { getTrackSrc, releaseObjectUrl, renderPlaylist, scheduleTagRender } from "./playlist";
 import { renderRadioFavorites, renderRadioResults } from "./radio/panel";
 import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./radio/stream";
+import { refreshCoverArt } from "./coverArt";
 
 export function playAudio(): void {
   if (state.playbackMode === "local" && audio.error && state.queue[state.currentIndex]?.unplayable) {
@@ -64,6 +65,7 @@ export function resetToNoTrackState(): void {
   seek.disabled = true;
   seek.value = "0";
   updateTrackTitleText();
+  refreshCoverArt();
 }
 
 export function loadTrack(index: number, autoplay = true, direction: 1 | -1 = 1): void {
@@ -86,6 +88,7 @@ export function loadTrack(index: number, autoplay = true, direction: 1 | -1 = 1)
     track.unplayable = true;
   }
   updateTrackTitleText();
+  refreshCoverArt();
   seek.disabled = false;
   renderPlaylist();
   renderRadioResults();

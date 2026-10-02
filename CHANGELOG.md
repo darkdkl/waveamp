@@ -4,7 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
-## [Unreleased]
+## [1.4.0] — 2026-10-02
+
+### Added
+- Cover art: the album cover — embedded in the file, or `cover`, `folder`,
+  `front` or `album` .jpg/.png next to it — shows dimmed behind the display;
+  for radio it is the station's logo. Settings → Interface → "Cover art on
+  display" turns it off. The system "Now Playing" shows the cover too
 
 ### Development
 - TypeScript strict mode is on for the whole codebase

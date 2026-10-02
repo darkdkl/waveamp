@@ -27,6 +27,7 @@ const autoUpdateEnabledBtn = byId<HTMLButtonElement>("autoUpdateEnabledBtn");
 const checkUpdatesBtn = byId<HTMLButtonElement>("checkUpdatesBtn");
 const updateStatusText = byId("updateStatusText");
 const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
+const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
 const closeMinimizesToTrayBtn = byId<HTMLButtonElement>("closeMinimizesToTrayBtn");
 const accentPresets = byId("accentPresets");
 const accentHueInput = byId<HTMLInputElement>("accentHueInput");
@@ -63,6 +64,7 @@ let proxyEnabled = false;
 let loggingEnabled = false;
 let autoUpdateEnabled = true;
 let trayIconEnabled = false;
+let coverArtEnabled = true;
 let closeMinimizesToTrayEnabled = false;
 let updateStatusKey = "";
 let updateVersion = "";
@@ -137,6 +139,14 @@ function setTrayIconEnabled(enabled: boolean) {
   sendAction("setTrayIconEnabled", enabled);
 }
 trayEnabledBtn.addEventListener("click", () => setTrayIconEnabled(!trayIconEnabled));
+
+function setCoverArtEnabled(enabled: boolean) {
+  coverArtEnabled = enabled;
+  coverArtBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
+  coverArtBtn.classList.toggle("is-active", enabled);
+  sendAction("setCoverArtEnabled", enabled);
+}
+coverArtBtn.addEventListener("click", () => setCoverArtEnabled(!coverArtEnabled));
 closeMinimizesToTrayBtn.addEventListener("click", () => setCloseMinimizesToTrayEnabled(!closeMinimizesToTrayEnabled));
 
 const openReleaseBtn = byId<HTMLButtonElement>("openReleaseBtn");
@@ -367,6 +377,7 @@ function refreshTextForLanguage() {
   loggingEnabledBtn.textContent = loggingEnabled ? i18n.t("on") : i18n.t("off");
   autoUpdateEnabledBtn.textContent = autoUpdateEnabled ? i18n.t("on") : i18n.t("off");
   trayEnabledBtn.textContent = trayIconEnabled ? i18n.t("on") : i18n.t("off");
+  coverArtBtn.textContent = coverArtEnabled ? i18n.t("on") : i18n.t("off");
   closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? i18n.t("on") : i18n.t("off");
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
@@ -425,6 +436,7 @@ window.electronAPI?.onSettingsState?.((state) => {
   loggingEnabled = !!state.loggingEnabled;
   autoUpdateEnabled = state.autoUpdateEnabled !== false;
   trayIconEnabled = !!state.showTrayIcon;
+  coverArtEnabled = state.coverArtEnabled !== false;
   closeMinimizesToTrayEnabled = !!state.closeMinimizesToTray && trayIconEnabled;
   closeMinimizesToTrayBtn.disabled = !trayIconEnabled;
 
@@ -432,6 +444,7 @@ window.electronAPI?.onSettingsState?.((state) => {
   loggingEnabledBtn.classList.toggle("is-active", loggingEnabled);
   autoUpdateEnabledBtn.classList.toggle("is-active", autoUpdateEnabled);
   trayEnabledBtn.classList.toggle("is-active", trayIconEnabled);
+  coverArtBtn.classList.toggle("is-active", coverArtEnabled);
   closeMinimizesToTrayBtn.classList.toggle("is-active", closeMinimizesToTrayEnabled);
 
   refreshTextForLanguage();

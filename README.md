@@ -24,6 +24,9 @@ Runs on macOS, Windows and Linux.
 - **Tags** — "Artist — Title" and duration from file tags (ID3, FLAC/Vorbis,
   MP4 and more); legacy Cyrillic (cp1251) and mis-decoded UTF-8 tags are
   repaired
+- **Cover art** — the album cover (embedded in the file or `cover.jpg` /
+  `folder.jpg` next to it) or the radio station's logo shows dimmed behind the
+  display and in the system "Now Playing"; can be turned off in Settings
 - **Equalizer** — 10 bands (60 Hz–16 kHz) plus preamp, real audio processing
   through the Web Audio API. 18 presets based on the classic Winamp presets,
   with automatic preamp headroom, and a Custom preset that remembers your own

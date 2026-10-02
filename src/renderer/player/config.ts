@@ -35,6 +35,7 @@ export function persistConfig(): void {
         scale: Math.round((state.uiScale / BASE_ZOOM) * 100),
         accentColor: state.accentColor,
         vizResponse: state.vizResponse,
+        coverArtEnabled: state.coverArtEnabled,
         hotkeys: state.hotkeyConfig,
         volume: Number(volume.value),
         loggingEnabled: state.loggingEnabled,
