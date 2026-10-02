@@ -1,4 +1,4 @@
-import { viz, vizCanvas } from "./dom";
+import { vizCanvas } from "./dom";
 import { state } from "./state";
 import { analyserNode, meterAnalysers } from "./audioGraph";
 import { SMOOTH_TAU_MS, followLevel, needlePosition, spectrumBinMap } from "./vizMath";
@@ -8,7 +8,6 @@ import type { VizMode } from "../../shared/types";
 const VIZ_COLUMNS = 26;
 const VIZ_SEGMENTS = 9;
 const vizFreqData = new Uint8Array(analyserNode.frequencyBinCount);
-const vizSegments: HTMLElement[][] = [];
 const vizBinMap = spectrumBinMap(VIZ_COLUMNS, vizFreqData.length);
 
 const VIZ_MODES: VizMode[] = ["spectrum", "meters", "scope"];
@@ -28,26 +27,8 @@ const spectrumLevels = new Float32Array(VIZ_COLUMNS);
 const needles = [0, 0];
 let lastVizFrame = performance.now();
 
-function buildViz(): void {
-  for (let c = 0; c < VIZ_COLUMNS; c++) {
-    const col = document.createElement("div");
-    col.className = "display__viz-col";
-    const segs = [];
-    for (let s = 0; s < VIZ_SEGMENTS; s++) {
-      const seg = document.createElement("div");
-      seg.className = "display__viz-seg";
-      col.appendChild(seg);
-      segs.push(seg);
-    }
-    viz.appendChild(col);
-    vizSegments.push(segs);
-  }
-}
-
 export function setVizMode(mode: string): void {
   state.vizMode = VIZ_MODES.includes(mode as VizMode) ? (mode as VizMode) : "spectrum";
-  viz.hidden = state.vizMode !== "spectrum";
-  vizCanvas.hidden = state.vizMode === "spectrum";
   persistConfig();
 }
 
@@ -82,6 +63,8 @@ function resolveCssColor(name: string): string {
 interface VizColors {
   fg: string;
   dim: string;
+  off: string;
+  glow: string;
   hot: string;
 }
 
@@ -90,7 +73,13 @@ let vizColorsReadAt = -Infinity;
 
 function currentVizColors(now: number): VizColors {
   if (!vizColors || now - vizColorsReadAt > 500) {
-    vizColors = { fg: resolveCssColor("--lcd-fg"), dim: resolveCssColor("--lcd-fg-dim"), hot: "#e06060" };
+    vizColors = {
+      fg: resolveCssColor("--lcd-fg"),
+      dim: resolveCssColor("--lcd-fg-dim"),
+      off: resolveCssColor("--lcd-off"),
+      glow: resolveCssColor("--lcd-glow"),
+      hot: "#e06060",
+    };
     vizColorsReadAt = now;
   }
   return vizColors;
@@ -204,8 +193,17 @@ function renderScope(dt: number, now: number): void {
   vizCtx.stroke();
 }
 
-function renderSpectrum(dt: number): void {
+function renderSpectrum(dt: number, now: number): void {
   analyserNode.getByteFrequencyData(vizFreqData);
+  prepareVizCanvas();
+  const colors = currentVizColors(now);
+  const dpr = window.devicePixelRatio || 1;
+  const width = vizCanvas.width;
+  const height = vizCanvas.height;
+  const colGap = Math.max(1, Math.round(2 * dpr));
+  const segGap = Math.max(1, Math.round(dpr));
+  const off = new Path2D();
+  const lit = new Path2D();
   for (let c = 0; c < VIZ_COLUMNS; c++) {
     spectrumLevels[c] = followLevel(
       spectrumLevels[c],
@@ -214,12 +212,24 @@ function renderSpectrum(dt: number): void {
       SPECTRUM_PEAK_FALL_TAU_MS,
       state.vizResponse
     );
-    const lit = Math.round(spectrumLevels[c] * VIZ_SEGMENTS);
-    const segs = vizSegments[c];
+    const litCount = Math.round(spectrumLevels[c] * VIZ_SEGMENTS);
+    const x0 = Math.round((c * (width + colGap)) / VIZ_COLUMNS);
+    const x1 = Math.round(((c + 1) * (width + colGap)) / VIZ_COLUMNS) - colGap;
     for (let s = 0; s < VIZ_SEGMENTS; s++) {
-      segs[s].classList.toggle("is-lit", s < lit);
+      const bottom = height - Math.round((s * (height + segGap)) / VIZ_SEGMENTS);
+      const top = height - Math.round(((s + 1) * (height + segGap)) / VIZ_SEGMENTS) + segGap;
+      (s < litCount ? lit : off).rect(x0, top, x1 - x0, bottom - top);
     }
   }
+  vizCtx.save();
+  vizCtx.setTransform(1, 0, 0, 1, 0, 0);
+  vizCtx.fillStyle = colors.off;
+  vizCtx.fill(off);
+  vizCtx.shadowColor = colors.glow;
+  vizCtx.shadowBlur = 3 * dpr;
+  vizCtx.fillStyle = colors.fg;
+  vizCtx.fill(lit);
+  vizCtx.restore();
 }
 
 function renderViz(now: number): void {
@@ -227,15 +237,14 @@ function renderViz(now: number): void {
   lastVizFrame = now;
   if (state.vizMode === "meters") renderMeters(dt, now);
   else if (state.vizMode === "scope") renderScope(dt, now);
-  else renderSpectrum(dt);
+  else renderSpectrum(dt, now);
   requestAnimationFrame(renderViz);
 }
 
 export function initVisualizerControls(): void {
-  [viz, vizCanvas].forEach((el) => el.addEventListener("click", cycleVizMode));
+  vizCanvas.addEventListener("click", cycleVizMode);
 }
 
 export function startVisualizer(): void {
-  buildViz();
   requestAnimationFrame(renderViz);
 }

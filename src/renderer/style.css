@@ -7,6 +7,7 @@
   --lcd-fg: var(--accent);
   --lcd-fg-dim: var(--accent-dim);
   --lcd-off: hsl(var(--accent-h) calc(var(--accent-s) * 0.3) 12%);
+  --lcd-glow: hsl(var(--accent-h) var(--accent-s) 74% / 0.6);
   --chrome-tint: 0%;
   --chrome-1: color-mix(in srgb, #2a2e35, hsl(var(--accent-h) 40% 19%) var(--chrome-tint));
   --chrome-2: color-mix(in srgb, #16181c, hsl(var(--accent-h) 40% 10%) var(--chrome-tint));
@@ -224,45 +225,11 @@ body.is-electron .player::before {
   color: var(--lcd-fg-dim);
 }
 
-.display__viz[hidden],
-.display__viz-canvas[hidden] {
-  display: none;
-}
-
-.display__viz {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 26px;
-  min-width: 0;
-  cursor: pointer;
-}
-
 .display__viz-canvas {
   flex: 1;
   min-width: 0;
   height: 26px;
   cursor: pointer;
-}
-
-.display__viz-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 1px;
-  height: 100%;
-}
-
-.display__viz-seg {
-  flex: 1;
-  background: var(--lcd-off);
-  border-radius: 0.5px;
-}
-
-.display__viz-seg.is-lit {
-  background: var(--lcd-fg);
-  box-shadow: 0 0 3px hsl(var(--accent-h) var(--accent-s) 74% / 0.6);
 }
 
 .display__live {

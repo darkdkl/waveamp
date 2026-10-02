@@ -4,6 +4,14 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.4.1] — 2026-10-02
+
+### Fixed
+- Opening and closing the EQ, playlist and radio panels no longer stutters
+  during playback on macOS: the spectrum is now drawn on a canvas instead of
+  hundreds of page elements, and the window uses the system's own resize
+  animation
+
 ## [1.4.0] — 2026-10-02
 
 ### Added

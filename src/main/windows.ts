@@ -120,6 +120,9 @@ export function resizeSenderWindow(sender: WebContents, height: number, width: n
   if (instant) {
     cancelResize(win);
     win.setContentSize(Math.round(targetWidth), Math.round(height), false);
+  } else if (process.platform === "darwin") {
+    cancelResize(win);
+    win.setContentSize(Math.round(targetWidth), Math.round(height), true);
   } else {
     animateResize(win, Math.round(targetWidth), Math.round(height));
   }
