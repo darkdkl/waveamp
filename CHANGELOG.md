@@ -4,6 +4,15 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.6.1] — 2026-10-02
+
+### Fixed
+- Hotkeys work again after clicking the volume or seek slider
+- Play with an empty playlist opens the file picker, like Space
+- A station whose logo fails to load shows its letter instead of an empty box
+- Radio on pause or while connecting: LIVE dims and the last track title and
+  the bookmark are hidden, so an outdated track can't be saved
+
 ## [1.6.0] — 2026-10-02
 
 ### Added

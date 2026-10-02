@@ -72,7 +72,10 @@ function createStationRow(station: Station): HTMLLIElement {
     const img = document.createElement("img");
     img.src = station.favicon;
     img.alt = "";
-    img.addEventListener("error", () => img.remove());
+    img.addEventListener("error", () => {
+      img.remove();
+      favicon.textContent = letter;
+    });
     favicon.textContent = "";
     favicon.appendChild(img);
   }

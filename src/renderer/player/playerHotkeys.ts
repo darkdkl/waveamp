@@ -14,6 +14,7 @@ import type { HotkeyConfig } from "../../shared/types";
 const SEEK_STEP_SECONDS = 5;
 const VOLUME_STEP = 5;
 const REPEATABLE_HOTKEYS = new Set(["seekForward", "seekBackward", "volumeUp", "volumeDown"]);
+const RANGE_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"]);
 let volumeBeforeMute: number | null = null;
 
 function changeVolumeBy(delta: number): void {
@@ -114,8 +115,10 @@ export function setHotkeys(config: Partial<HotkeyConfig> | null | undefined): vo
 export function initPlayerHotkeys(): void {
   document.addEventListener("keydown", (e) => {
     const target = e.target as HTMLElement;
+    const isRange = target instanceof HTMLInputElement && target.type === "range";
+    if (isRange && RANGE_KEYS.has(e.code)) return;
     if (
-      target instanceof HTMLInputElement ||
+      (target instanceof HTMLInputElement && !isRange) ||
       target instanceof HTMLTextAreaElement ||
       target instanceof HTMLSelectElement ||
       target.isContentEditable

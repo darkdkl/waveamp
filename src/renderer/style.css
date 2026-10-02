@@ -305,6 +305,11 @@ body.is-electron .player::before {
   letter-spacing: 0.05em;
 }
 
+.display__live.is-idle {
+  color: var(--lcd-fg-dim);
+  text-shadow: none;
+}
+
 .player__seek {
   margin-top: 12px;
 }
