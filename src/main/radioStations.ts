@@ -48,7 +48,7 @@ export function filterStationsByTag(stations: Station[], tag: string, limit: num
 
 export function toCountryOptions(data: RadioBrowserNamedCount[], limit: number): CountryOption[] {
   return data
-    .filter((c) => c.iso_3166_1 && c.stationcount > 0)
+    .filter((c): c is RadioBrowserNamedCount & { iso_3166_1: string } => !!c.iso_3166_1 && c.stationcount > 0)
     .map((c) => ({ code: c.iso_3166_1, name: c.name, count: c.stationcount }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);

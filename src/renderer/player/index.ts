@@ -41,14 +41,15 @@ initAudioErrorHandling();
 initSeekAndVolume();
 initDragAndDrop();
 
-if (window.electronAPI) {
+const electronAPI = window.electronAPI;
+if (electronAPI) {
   document.body.classList.add("is-electron");
   windowControls.hidden = false;
   minimizeBtn.addEventListener("click", () => {
-    window.electronAPI.minimizeWindow();
+    electronAPI.minimizeWindow();
   });
   closeBtn.addEventListener("click", () => {
-    window.electronAPI.closeWindow();
+    electronAPI.closeWindow();
   });
 }
 

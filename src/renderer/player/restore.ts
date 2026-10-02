@@ -87,15 +87,17 @@ export async function restoreConfig(): Promise<void> {
     if (typeof config.eq.preampDb === "number") state.preampDb = config.eq.preampDb;
     if (typeof config.eq.enabled === "boolean") state.eqEnabled = config.eq.enabled;
     const custom = config.eq.custom;
-    if (Array.isArray(custom?.bandGains) && typeof custom.preampDb === "number") {
+    const customGains = custom?.bandGains;
+    if (Array.isArray(customGains) && typeof custom?.preampDb === "number") {
       state.customEq = {
-        bandGains: EQ_BANDS.map((_, i) => (typeof custom.bandGains[i] === "number" ? custom.bandGains[i] : 0)),
+        bandGains: EQ_BANDS.map((_, i) => (typeof customGains[i] === "number" ? customGains[i] : 0)),
         preampDb: custom.preampDb,
       };
     } else {
       state.customEq = { bandGains: [...state.bandGains], preampDb: state.preampDb };
     }
-    state.eqPreset = findEqPreset(config.eq.preset) ? config.eq.preset : "custom";
+    const preset = config.eq.preset;
+    state.eqPreset = preset && findEqPreset(preset) ? preset : "custom";
     eqPresetSelect.value = state.eqPreset;
     syncEqControlsFromState();
     applyEqState();
@@ -103,15 +105,15 @@ export async function restoreConfig(): Promise<void> {
 
   if (Array.isArray(config.radio?.favorites)) {
     state.favoriteStations = config.radio.favorites.filter(
-      (s) => s && s.stationuuid && safeStreamUrl(s.url)
-    ) as Station[];
+      (s): s is Station => !!s && !!s.stationuuid && !!s.url && safeStreamUrl(s.url) !== null
+    );
     renderRadioFavorites();
   }
 
   if (config.playlist?.tracks?.length) {
     state.queue = config.playlist.tracks
-      .filter((t) => t && t.path)
-      .map((t) => ({ name: t.name || trackLabel(t.path.split("/").pop()), path: t.path, file: null }));
+      .filter((t): t is { name?: string; path: string } => !!t && !!t.path)
+      .map((t) => ({ name: t.name || trackLabel(t.path.split("/").pop() ?? ""), path: t.path, file: null }));
     renderPlaylist();
 
     const idx = config.playlist.currentIndex;

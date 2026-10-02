@@ -3,6 +3,7 @@ import { writeLog } from "./logging";
 import { ICON_PATH, getMainWindow, openSettingsWindow } from "./windows";
 import { sendMediaKey } from "./shortcuts";
 import type { Lang } from "../shared/types";
+import { errorMessage } from "../shared/errors";
 
 let tray: Tray | null = null;
 let appLang: Lang = "ru";
@@ -133,7 +134,7 @@ export function setDockIcon(): void {
       app.dock.setIcon(ICON_PATH);
     } catch (err) {
       console.error("Failed to set dock icon:", err);
-      writeLog("warn", "app", `Failed to set dock icon: ${err.message}`);
+      writeLog("warn", "app", `Failed to set dock icon: ${errorMessage(err)}`);
     }
   }
 }

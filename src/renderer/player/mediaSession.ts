@@ -4,7 +4,7 @@ import { state } from "./state";
 import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
 
 // MediaMetadata artwork rejects file:// URLs, so use a blob: URL.
-let appIconArtworkUrl = null;
+let appIconArtworkUrl: string | null = null;
 
 export function updateMediaSessionMetadata(): void {
   if (!("mediaSession" in navigator)) return;

@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { i18n, translations } from "../../src/renderer/i18n";
 import { accentColor } from "../../src/renderer/theme";
+import type { Lang } from "../../src/shared/types";
 
 vi.stubGlobal("navigator", { platform: "Linux", userAgent: "" });
 const { hotkeys } = await import("../../src/renderer/hotkeys");
@@ -27,11 +28,11 @@ describe("translations", () => {
   });
 
   it.each(languages)("%s has the same keys as English", (lang) => {
-    expect(Object.keys(translations[lang]).sort()).toEqual([...enKeys].sort());
+    expect(Object.keys(translations[lang as Lang]).sort()).toEqual([...enKeys].sort());
   });
 
   it.each(languages)("%s has no empty strings", (lang) => {
-    const empty = Object.entries(translations[lang]).filter(([, value]) => typeof value !== "string" || !value.trim());
+    const empty = Object.entries(translations[lang as Lang]).filter(([, value]) => typeof value !== "string" || !value.trim());
     expect(empty).toEqual([]);
   });
 });

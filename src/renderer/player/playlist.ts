@@ -24,18 +24,18 @@ import { loadTrack, resetToNoTrackState, stop, updateTrackTitleText } from "./pl
 const TAG_READ_CONCURRENCY = 4;
 
 export async function loadTrackTags(tracks: Track[]): Promise<void> {
-  if (!window.electronAPI?.readTrackTags) return;
-  const pending = tracks.filter((track) => track.path);
-  async function worker() {
-    while (pending.length) {
-      const track = pending.shift();
-      const tags = await window.electronAPI.readTrackTags(track.path);
+  const api = window.electronAPI;
+  if (!api?.readTrackTags) return;
+  const pending = tracks.filter((track): track is Track & { path: string } => !!track.path);
+  const worker = async () => {
+    for (let track = pending.shift(); track; track = pending.shift()) {
+      const tags = await api.readTrackTags(track.path);
       if (!tags) continue;
       track.tags = tags;
       if (track.duration == null) track.duration = tags.duration;
       scheduleTagRender();
     }
-  }
+  };
   await Promise.all(Array.from({ length: TAG_READ_CONCURRENCY }, worker));
 }
 
@@ -53,14 +53,14 @@ export function scheduleTagRender(): void {
   });
 }
 
-let lastObjectUrl = null;
+let lastObjectUrl: string | null = null;
 
 export function getTrackSrc(track: Track): string {
   if (track.path && window.electronAPI?.getFileUrl) {
     return window.electronAPI.getFileUrl(track.path);
   }
   if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
-  lastObjectUrl = URL.createObjectURL(track.file);
+  lastObjectUrl = URL.createObjectURL(track.file as File);
   return lastObjectUrl;
 }
 
@@ -220,12 +220,12 @@ export function initPlaylistAddMenu(): void {
 
 export function initFileInputs(): void {
   fileInput.addEventListener("change", () => {
-    addFiles(fileInput.files);
+    addFiles(fileInput.files ?? []);
     fileInput.value = "";
   });
 
   folderInput.addEventListener("change", () => {
-    addFiles(folderInput.files);
+    addFiles(folderInput.files ?? []);
     folderInput.value = "";
   });
 }
