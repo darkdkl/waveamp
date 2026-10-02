@@ -10,7 +10,7 @@ import type { Station } from "../../../shared/types";
 
 const RADIO_MAX_RECONNECT = 3;
 let radioReconnectAttempts = 0;
-let radioReconnectTimer = null;
+let radioReconnectTimer: ReturnType<typeof setTimeout> | undefined;
 // crossOrigin is needed for EQ/viz on radio, but stations without CORS headers
 // won't play with it — retry once without it, losing EQ/viz for that station.
 let radioCrossOriginFallbackTried = false;

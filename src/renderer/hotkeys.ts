@@ -1,4 +1,4 @@
-import type { HotkeyConfig } from "../shared/types";
+import type { DeepPartial, HotkeyConfig } from "../shared/types";
 import { i18n } from "./i18n";
 
 // Combos are modifiers + KeyboardEvent.code (the physical key), so they work on any layout.
@@ -80,7 +80,7 @@ function format(combo: string): string {
   return [...mods.map((m) => modLabels[m]), keyLabel(code)].join(isMac ? "" : "+");
 }
 
-function normalize(saved: Partial<HotkeyConfig> | null | undefined): HotkeyConfig {
+function normalize(saved: DeepPartial<HotkeyConfig> | null | undefined): HotkeyConfig {
   const local: Record<string, string> = {};
   const global: Record<string, string> = {};
   for (const action of ACTIONS) {

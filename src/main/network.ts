@@ -50,7 +50,7 @@ export function netRequestText(
       finish(reject, new Error(`Timed out after ${timeoutMs} ms`));
       request.abort();
     }, timeoutMs);
-    function finish(fn, value) {
+    function finish<T>(fn: (value: T) => void, value: T): void {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
@@ -68,7 +68,7 @@ export function netRequestText(
         finish(reject, new Error(`HTTP ${response.statusCode}`));
         return;
       }
-      const chunks = [];
+      const chunks: Buffer[] = [];
       let size = 0;
       response.on("data", (chunk) => {
         chunks.push(chunk);

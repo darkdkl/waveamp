@@ -1,39 +1,43 @@
 import { i18n } from "./i18n";
 import { hotkeys } from "./hotkeys";
 import { accentColor as accentColorTheme } from "./theme";
-import type { ProxyConfig, ProxyType, SettingsAction, SettingsActionValue, VizResponse } from "../shared/types";
+import type { AccentColor, ProxyConfig, ProxyType, SettingsAction, SettingsActionValue, VizResponse } from "../shared/types";
 
-const settingsTabInterface = document.getElementById("settingsTabInterface") as HTMLButtonElement;
-const settingsTabSystem = document.getElementById("settingsTabSystem") as HTMLButtonElement;
-const settingsInterfaceView = document.getElementById("settingsInterfaceView");
-const settingsSystemView = document.getElementById("settingsSystemView");
-const langSelect = document.getElementById("langSelect") as HTMLSelectElement;
-const scaleSelect = document.getElementById("scaleSelect") as HTMLSelectElement;
-const vizResponseSelect = document.getElementById("vizResponseSelect") as HTMLSelectElement;
-const proxyEnabledBtn = document.getElementById("proxyEnabledBtn") as HTMLButtonElement;
-const proxyTypeSelect = document.getElementById("proxyTypeSelect") as HTMLSelectElement;
-const proxyHostInput = document.getElementById("proxyHostInput") as HTMLInputElement;
-const proxyPortInput = document.getElementById("proxyPortInput") as HTMLInputElement;
-const proxyUsernameInput = document.getElementById("proxyUsernameInput") as HTMLInputElement;
-const proxyPasswordInput = document.getElementById("proxyPasswordInput") as HTMLInputElement;
-const loggingEnabledBtn = document.getElementById("loggingEnabledBtn") as HTMLButtonElement;
-const openLogFolderBtn = document.getElementById("openLogFolderBtn") as HTMLButtonElement;
-const clearLogBtn = document.getElementById("clearLogBtn") as HTMLButtonElement;
-const autoUpdateEnabledBtn = document.getElementById("autoUpdateEnabledBtn") as HTMLButtonElement;
-const checkUpdatesBtn = document.getElementById("checkUpdatesBtn") as HTMLButtonElement;
-const updateStatusText = document.getElementById("updateStatusText");
-const trayEnabledBtn = document.getElementById("trayEnabledBtn") as HTMLButtonElement;
-const closeMinimizesToTrayBtn = document.getElementById("closeMinimizesToTrayBtn") as HTMLButtonElement;
-const accentPresets = document.getElementById("accentPresets");
-const accentHueInput = document.getElementById("accentHueInput") as HTMLInputElement;
-const accentSaturationInput = document.getElementById("accentSaturationInput") as HTMLInputElement;
-const accentTintInput = document.getElementById("accentTintInput") as HTMLInputElement;
-const accentResetBtn = document.getElementById("accentResetBtn") as HTMLButtonElement;
+function byId<T extends HTMLElement = HTMLElement>(id: string): T {
+  return document.getElementById(id) as T;
+}
 
-const settingsTabHotkeys = document.getElementById("settingsTabHotkeys") as HTMLButtonElement;
-const settingsHotkeysView = document.getElementById("settingsHotkeysView");
+const settingsTabInterface = byId<HTMLButtonElement>("settingsTabInterface");
+const settingsTabSystem = byId<HTMLButtonElement>("settingsTabSystem");
+const settingsInterfaceView = byId("settingsInterfaceView");
+const settingsSystemView = byId("settingsSystemView");
+const langSelect = byId<HTMLSelectElement>("langSelect");
+const scaleSelect = byId<HTMLSelectElement>("scaleSelect");
+const vizResponseSelect = byId<HTMLSelectElement>("vizResponseSelect");
+const proxyEnabledBtn = byId<HTMLButtonElement>("proxyEnabledBtn");
+const proxyTypeSelect = byId<HTMLSelectElement>("proxyTypeSelect");
+const proxyHostInput = byId<HTMLInputElement>("proxyHostInput");
+const proxyPortInput = byId<HTMLInputElement>("proxyPortInput");
+const proxyUsernameInput = byId<HTMLInputElement>("proxyUsernameInput");
+const proxyPasswordInput = byId<HTMLInputElement>("proxyPasswordInput");
+const loggingEnabledBtn = byId<HTMLButtonElement>("loggingEnabledBtn");
+const openLogFolderBtn = byId<HTMLButtonElement>("openLogFolderBtn");
+const clearLogBtn = byId<HTMLButtonElement>("clearLogBtn");
+const autoUpdateEnabledBtn = byId<HTMLButtonElement>("autoUpdateEnabledBtn");
+const checkUpdatesBtn = byId<HTMLButtonElement>("checkUpdatesBtn");
+const updateStatusText = byId("updateStatusText");
+const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
+const closeMinimizesToTrayBtn = byId<HTMLButtonElement>("closeMinimizesToTrayBtn");
+const accentPresets = byId("accentPresets");
+const accentHueInput = byId<HTMLInputElement>("accentHueInput");
+const accentSaturationInput = byId<HTMLInputElement>("accentSaturationInput");
+const accentTintInput = byId<HTMLInputElement>("accentTintInput");
+const accentResetBtn = byId<HTMLButtonElement>("accentResetBtn");
 
-function setSettingsView(view) {
+const settingsTabHotkeys = byId<HTMLButtonElement>("settingsTabHotkeys");
+const settingsHotkeysView = byId("settingsHotkeysView");
+
+function setSettingsView(view: "interface" | "system" | "hotkeys") {
   settingsTabInterface.classList.toggle("is-active", view === "interface");
   settingsTabSystem.classList.toggle("is-active", view === "system");
   settingsTabHotkeys.classList.toggle("is-active", view === "hotkeys");
@@ -45,7 +49,7 @@ settingsTabInterface.addEventListener("click", () => setSettingsView("interface"
 settingsTabSystem.addEventListener("click", () => setSettingsView("system"));
 settingsTabHotkeys.addEventListener("click", () => setSettingsView("hotkeys"));
 
-document.getElementById("settingsCloseBtn").addEventListener("click", () => window.electronAPI?.closeSettingsWindow?.());
+byId("settingsCloseBtn").addEventListener("click", () => window.electronAPI?.closeSettingsWindow?.());
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") window.electronAPI?.closeSettingsWindow?.();
 });
@@ -75,7 +79,7 @@ function sendProxyConfig() {
   });
 }
 
-function setProxyEnabled(enabled) {
+function setProxyEnabled(enabled: boolean) {
   proxyEnabled = enabled;
   proxyEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   proxyEnabledBtn.classList.toggle("is-active", enabled);
@@ -90,7 +94,7 @@ proxyEnabledBtn.addEventListener("click", () => setProxyEnabled(!proxyEnabled));
   el.addEventListener("change", sendProxyConfig);
 });
 
-function setLoggingEnabled(enabled) {
+function setLoggingEnabled(enabled: boolean) {
   loggingEnabled = enabled;
   loggingEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   loggingEnabledBtn.classList.toggle("is-active", enabled);
@@ -99,9 +103,9 @@ function setLoggingEnabled(enabled) {
 loggingEnabledBtn.addEventListener("click", () => setLoggingEnabled(!loggingEnabled));
 openLogFolderBtn.addEventListener("click", () => window.electronAPI?.openLogFolder?.());
 
-const appVersionText = document.getElementById("appVersionText");
-const appLicenseBtn = document.getElementById("appLicenseBtn") as HTMLButtonElement;
-const thirdPartyLicensesBtn = document.getElementById("thirdPartyLicensesBtn") as HTMLButtonElement;
+const appVersionText = byId("appVersionText");
+const appLicenseBtn = byId<HTMLButtonElement>("appLicenseBtn");
+const thirdPartyLicensesBtn = byId<HTMLButtonElement>("thirdPartyLicensesBtn");
 window.electronAPI?.getAppVersion?.().then((version) => {
   appVersionText.textContent = `WaveAMP ${version}`;
 });
@@ -109,7 +113,7 @@ appLicenseBtn.addEventListener("click", () => window.electronAPI?.openLicenseFil
 thirdPartyLicensesBtn.addEventListener("click", () => window.electronAPI?.openLicenseFile?.("THIRD_PARTY_LICENSES.txt"));
 clearLogBtn.addEventListener("click", () => window.electronAPI?.clearLogs?.());
 
-function setAutoUpdateEnabled(enabled) {
+function setAutoUpdateEnabled(enabled: boolean) {
   autoUpdateEnabled = enabled;
   autoUpdateEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   autoUpdateEnabledBtn.classList.toggle("is-active", enabled);
@@ -117,14 +121,14 @@ function setAutoUpdateEnabled(enabled) {
 }
 autoUpdateEnabledBtn.addEventListener("click", () => setAutoUpdateEnabled(!autoUpdateEnabled));
 
-function setCloseMinimizesToTrayEnabled(enabled) {
+function setCloseMinimizesToTrayEnabled(enabled: boolean) {
   closeMinimizesToTrayEnabled = enabled;
   closeMinimizesToTrayBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   closeMinimizesToTrayBtn.classList.toggle("is-active", enabled);
   sendAction("setCloseMinimizesToTrayEnabled", enabled);
 }
 
-function setTrayIconEnabled(enabled) {
+function setTrayIconEnabled(enabled: boolean) {
   trayIconEnabled = enabled;
   trayEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
   trayEnabledBtn.classList.toggle("is-active", enabled);
@@ -135,13 +139,13 @@ function setTrayIconEnabled(enabled) {
 trayEnabledBtn.addEventListener("click", () => setTrayIconEnabled(!trayIconEnabled));
 closeMinimizesToTrayBtn.addEventListener("click", () => setCloseMinimizesToTrayEnabled(!closeMinimizesToTrayEnabled));
 
-const openReleaseBtn = document.getElementById("openReleaseBtn") as HTMLButtonElement;
+const openReleaseBtn = byId<HTMLButtonElement>("openReleaseBtn");
 
 function updateStatusMessage() {
   return updateStatusKey ? i18n.t(updateStatusKey).replace("{version}", updateVersion) : "";
 }
 
-function setUpdateStatusText(key) {
+function setUpdateStatusText(key: string) {
   updateStatusKey = key;
   updateStatusText.textContent = updateStatusMessage();
   openReleaseBtn.hidden = key !== "updateAvailable";
@@ -191,30 +195,30 @@ function showAccentColor() {
   });
 }
 
-function setAccentColor(color) {
+function setAccentColor(color: Partial<AccentColor>) {
   accentColor = accentColorTheme.normalize(color);
   showAccentColor();
   sendAction("setAccentColor", accentColor);
 }
 
-accentHueInput.addEventListener("input", () => setAccentColor({ ...accentColor, hue: accentHueInput.value }));
+accentHueInput.addEventListener("input", () => setAccentColor({ ...accentColor, hue: Number(accentHueInput.value) }));
 accentSaturationInput.addEventListener("input", () =>
-  setAccentColor({ ...accentColor, saturation: accentSaturationInput.value })
+  setAccentColor({ ...accentColor, saturation: Number(accentSaturationInput.value) })
 );
-accentTintInput.addEventListener("input", () => setAccentColor({ ...accentColor, tint: accentTintInput.value }));
+accentTintInput.addEventListener("input", () => setAccentColor({ ...accentColor, tint: Number(accentTintInput.value) }));
 accentResetBtn.addEventListener("click", () => setAccentColor(accentColorTheme.DEFAULT));
 showAccentColor();
 
-const hotkeysList = document.getElementById("hotkeysList");
-const globalHotkeysBtn = document.getElementById("globalHotkeysBtn") as HTMLButtonElement;
-const hotkeysMessage = document.getElementById("hotkeysMessage");
-const hotkeysHint = document.getElementById("hotkeysHint");
-const globalHotkeysHint = document.getElementById("globalHotkeysHint");
-const hotkeysResetBtn = document.getElementById("hotkeysResetBtn") as HTMLButtonElement;
+const hotkeysList = byId("hotkeysList");
+const globalHotkeysBtn = byId<HTMLButtonElement>("globalHotkeysBtn");
+const hotkeysMessage = byId("hotkeysMessage");
+const hotkeysHint = byId("hotkeysHint");
+const globalHotkeysHint = byId("globalHotkeysHint");
+const hotkeysResetBtn = byId<HTMLButtonElement>("hotkeysResetBtn");
 const isLinux = /Linux/.test(navigator.platform || navigator.userAgent);
 
 let hotkeyConfig = hotkeys.defaults();
-let hotkeyFailures = [];
+let hotkeyFailures: string[] = [];
 let capturing: { action: string; scope: "local" | "global" } | null = null;
 let hotkeyMessage: { key: string; params?: Record<string, string | number> } | null = null;
 
@@ -226,8 +230,8 @@ function setHotkeyMessage(key: string | null, params?: Record<string, string | n
   hotkeyMessage = key ? { key, params } : null;
 }
 
-function actionName(id) {
-  return i18n.t(hotkeys.ACTIONS.find((action) => action.id === id).nameKey);
+function actionName(id: string) {
+  return i18n.t(hotkeys.ACTIONS.find((action) => action.id === id)?.nameKey ?? id);
 }
 
 function renderHotkeys() {
@@ -278,7 +282,8 @@ function sendHotkeys() {
   sendAction("setHotkeys", hotkeyConfig);
 }
 
-function assignHotkey(combo) {
+function assignHotkey(combo: string) {
+  if (!capturing) return;
   const { action, scope } = capturing;
   capturing = null;
   if (combo) {

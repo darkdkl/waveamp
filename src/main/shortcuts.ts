@@ -39,7 +39,7 @@ export function applyGlobalHotkeys({ enabled, bindings }: Partial<GlobalHotkeyRe
     } catch {
       ok = false;
     }
-    if (ok) {
+    if (ok && accelerator) {
       registeredHotkeys.push(accelerator);
     } else {
       failed.push(action);

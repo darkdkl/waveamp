@@ -19,7 +19,7 @@ const VU_REFERENCE_DBFS = -12;
 const VU_SCALE_MARKS = [-20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3];
 const VU_MAJOR_MARKS = [-20, -10, -5, 0, 3];
 
-const vizCtx = vizCanvas.getContext("2d");
+const vizCtx = vizCanvas.getContext("2d") as CanvasRenderingContext2D;
 const meterSamples = new Float32Array(meterAnalysers[0].fftSize);
 const scopeRight = new Float32Array(meterAnalysers[1].fftSize);
 const SCOPE_WINDOW = 512;
@@ -79,10 +79,16 @@ function resolveCssColor(name: string): string {
   return getComputedStyle(vizCanvas).color;
 }
 
-let vizColors = null;
+interface VizColors {
+  fg: string;
+  dim: string;
+  hot: string;
+}
+
+let vizColors: VizColors | null = null;
 let vizColorsReadAt = -Infinity;
 
-function currentVizColors(now: number) {
+function currentVizColors(now: number): VizColors {
   if (!vizColors || now - vizColorsReadAt > 500) {
     vizColors = { fg: resolveCssColor("--lcd-fg"), dim: resolveCssColor("--lcd-fg-dim"), hot: "#e06060" };
     vizColorsReadAt = now;
@@ -103,14 +109,14 @@ function prepareVizCanvas() {
   return { width, height };
 }
 
-function drawMeter(x, width, height, position, label, colors) {
+function drawMeter(x: number, width: number, height: number, position: number, label: string, colors: VizColors): void {
   const halfWidth = width / 2 - 4;
   const drop = height - 9;
   const halfSweep = 2 * Math.atan(drop / halfWidth);
   const radius = halfWidth / Math.sin(halfSweep);
   const cx = x + width / 2;
   const cy = radius + 2;
-  const angleAt = (pos) => -Math.PI / 2 + (pos - 0.5) * 2 * halfSweep;
+  const angleAt = (pos: number) => -Math.PI / 2 + (pos - 0.5) * 2 * halfSweep;
 
   vizCtx.save();
   vizCtx.beginPath();
@@ -172,7 +178,7 @@ function renderMeters(dt: number, now: number): void {
 function renderScope(dt: number, now: number): void {
   meterAnalysers[0].getFloatTimeDomainData(meterSamples);
   meterAnalysers[1].getFloatTimeDomainData(scopeRight);
-  const mixAt = (i) => (meterSamples[i] + scopeRight[i]) / 2;
+  const mixAt = (i: number) => (meterSamples[i] + scopeRight[i]) / 2;
   let start = 0;
   for (let i = 1; i < meterSamples.length - SCOPE_WINDOW; i++) {
     if (mixAt(i - 1) < 0 && mixAt(i) >= 0) {

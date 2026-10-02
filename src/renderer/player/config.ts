@@ -1,21 +1,22 @@
 import { i18n } from "../i18n";
 import { volume } from "./dom";
-import { state } from "./state";
+import { state, type Track } from "./state";
 import { BASE_ZOOM } from "./layout";
 import { getProxyConfig } from "./settingsBridge";
 
 const CONFIG_VERSION = 1;
-let persistTimer = null;
+let persistTimer: ReturnType<typeof setTimeout> | undefined;
 
 export function persistConfig(): void {
-  if (!window.electronAPI?.saveConfig) return;
+  const api = window.electronAPI;
+  if (!api?.saveConfig) return;
   clearTimeout(persistTimer);
   persistTimer = setTimeout(() => {
-    window.electronAPI.saveConfig({
+    api.saveConfig({
       version: CONFIG_VERSION,
       playlist: {
         tracks: state.queue
-          .filter((track) => track.path)
+          .filter((track): track is Track & { path: string } => !!track.path)
           .map((track) => ({ name: track.name, path: track.path })),
         currentIndex: state.currentIndex,
       },

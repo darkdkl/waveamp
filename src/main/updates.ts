@@ -6,6 +6,7 @@ import { getAppLanguage } from "./menus";
 import { getMainWindow, sendToMainWindow } from "./windows";
 import { isNewerVersion, isReleasePageUrl, parseLatestRelease, type ReleaseInfo } from "./version";
 import type { UpdateCheckResult } from "../shared/types";
+import { errorMessage } from "../shared/errors";
 
 const LATEST_RELEASE_API = "https://api.github.com/repos/darkdkl/waveamp/releases/latest";
 
@@ -13,15 +14,15 @@ let autoUpdateEnabled = true;
 
 const UPDATE_STRINGS = {
   ru: {
-    message: (version) => `Доступна новая версия WaveAMP ${version}`,
-    detail: (current) => `У вас установлена версия ${current}. Скачайте установщик для своей системы на странице релиза.`,
+    message: (version: string) => `Доступна новая версия WaveAMP ${version}`,
+    detail: (current: string) => `У вас установлена версия ${current}. Скачайте установщик для своей системы на странице релиза.`,
     download: "Скачать",
     later: "Позже",
     skip: "Пропустить эту версию",
   },
   en: {
-    message: (version) => `WaveAMP ${version} is available`,
-    detail: (current) => `You have version ${current}. Download the installer for your system from the release page.`,
+    message: (version: string) => `WaveAMP ${version} is available`,
+    detail: (current: string) => `You have version ${current}. Download the installer for your system from the release page.`,
     download: "Download",
     later: "Later",
     skip: "Skip this version",
@@ -75,7 +76,7 @@ export async function checkForUpdatesOnLaunch(): Promise<void> {
     if (response === 0) openReleasePage(url);
     if (response === 2) sendToMainWindow("skip-update-version", version);
   } catch (err) {
-    writeLog("error", "updater", `Launch check failed: ${err.message}`);
+    writeLog("error", "updater", `Launch check failed: ${errorMessage(err)}`);
   }
 }
 
@@ -84,7 +85,7 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
     const { version, url } = await fetchLatestRelease();
     return { ok: true, upToDate: !isNewerVersion(version, app.getVersion()), version, url };
   } catch (err) {
-    writeLog("error", "updater", `Manual check failed: ${err.message}`);
-    return { ok: false, message: err.message };
+    writeLog("error", "updater", `Manual check failed: ${errorMessage(err)}`);
+    return { ok: false, message: errorMessage(err) };
   }
 }

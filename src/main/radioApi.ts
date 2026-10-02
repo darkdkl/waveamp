@@ -10,6 +10,7 @@ import {
   toTagOptions,
 } from "./radioStations";
 import type { CountedOption, CountryOption, ResolveStreamResult, Station, StationSearchParams } from "../shared/types";
+import { errorMessage } from "../shared/errors";
 
 const RADIO_API_MIRRORS = [
   "https://de1.api.radio-browser.info",
@@ -30,16 +31,16 @@ const TAG_LIMIT = 30;
 const TAG_SAMPLE_SIZE = 500;
 
 async function radioApiFetch(pathAndQuery: string): Promise<any> {
-  let lastErr;
+  let lastErr: unknown;
   for (const base of RADIO_API_MIRRORS) {
     try {
       return await netRequestJson(base + pathAndQuery, { "User-Agent": USER_AGENT }, REQUEST_TIMEOUT_MS);
     } catch (err) {
       lastErr = err;
-      writeLog("warn", "radio-api", `Mirror ${base} failed for ${pathAndQuery}: ${err.message}`);
+      writeLog("warn", "radio-api", `Mirror ${base} failed for ${pathAndQuery}: ${errorMessage(err)}`);
     }
   }
-  writeLog("error", "radio-api", `All mirrors failed for ${pathAndQuery}: ${lastErr?.message}`);
+  writeLog("error", "radio-api", `All mirrors failed for ${pathAndQuery}: ${errorMessage(lastErr)}`);
   throw lastErr;
 }
 
@@ -53,7 +54,7 @@ export async function resolveStreamUrl(url: string): Promise<ResolveStreamResult
     if (!streamUrl) return { ok: false, error: "playlist" };
     return { ok: true, url: streamUrl };
   } catch (err) {
-    writeLog("warn", "radio", `Playlist ${url} failed: ${err.message}`);
+    writeLog("warn", "radio", `Playlist ${url} failed: ${errorMessage(err)}`);
     return { ok: false, error: "playlist" };
   }
 }

@@ -6,7 +6,7 @@ const ACCELERATOR_KEYS: Record<string, string> = {
 
 export function comboToAccelerator(combo: string, platform: NodeJS.Platform = process.platform): string | null {
   const parts = combo.split("+");
-  const code = parts.pop();
+  const code = parts.pop() ?? "";
   const mods = parts.map((mod) =>
     ({ Ctrl: "Control", Alt: "Alt", Shift: "Shift", Meta: platform === "darwin" ? "Command" : "Super" })[mod]
   );

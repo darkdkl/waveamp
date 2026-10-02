@@ -26,6 +26,7 @@ import { syncElectronWindowSize } from "../layout";
 import { openStationForm } from "./stationForm";
 import { tuneStation } from "./stream";
 import type { CountedOption, Station } from "../../../shared/types";
+import { errorMessage } from "../../../shared/errors";
 
 let radioCountry = "";
 let radioState = "";
@@ -166,7 +167,7 @@ async function refreshRadioTags(): Promise<void> {
     renderTagOptions(tags);
   } catch (err) {
     console.error("Failed to load radio tags:", err);
-    logEvent("error", "radio", `Failed to load tags: ${err.message}`);
+    logEvent("error", "radio", `Failed to load tags: ${errorMessage(err)}`);
   }
 }
 
@@ -190,7 +191,7 @@ async function loadRadioFilters(): Promise<void> {
     radioFiltersLoaded = true;
   } catch (err) {
     console.error("Failed to load radio filters:", err);
-    logEvent("error", "radio", `Failed to load filters: ${err.message}`);
+    logEvent("error", "radio", `Failed to load filters: ${errorMessage(err)}`);
   } finally {
     radioFiltersLoading = false;
   }
@@ -225,7 +226,7 @@ async function loadRadioStates(countryName: string): Promise<void> {
     }
   } catch (err) {
     console.error("Failed to load radio states:", err);
-    logEvent("error", "radio", `Failed to load states for "${countryName}": ${err.message}`);
+    logEvent("error", "radio", `Failed to load states for "${countryName}": ${errorMessage(err)}`);
   }
 }
 
@@ -262,7 +263,7 @@ async function runRadioSearch(): Promise<void> {
     renderRadioResults();
     radioEmpty.hidden = false;
     setRadioEmptyText("loadFailed");
-    logEvent("error", "radio", `Search failed: ${err.message}`);
+    logEvent("error", "radio", `Search failed: ${errorMessage(err)}`);
   }
 }
 
