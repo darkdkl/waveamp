@@ -83,6 +83,8 @@ const api = {
   closeSettingsWindow: (): void => ipcRenderer.send("settings-window-close"),
   onSettingsWindowState: (callback: (open: boolean) => void) => ipcRenderer.on("settings-window-state", (_event, open) => callback(!!open)),
   setSettingsWindowScale: (percent: number): void => ipcRenderer.send("settings-window-scale", percent),
+  startSettingsWindowResize: (): void => ipcRenderer.send("settings-window-resize-start"),
+  resizeSettingsWindowBy: (delta: number): void => ipcRenderer.send("settings-window-resize", delta),
   setTrayIconEnabled: (enabled: boolean): void => ipcRenderer.send("set-tray-icon-enabled", enabled),
   setCloseMinimizesToTray: (enabled: boolean): void => ipcRenderer.send("set-close-minimizes-to-tray", enabled),
   sendSettingsAction: (action: SettingsAction): void => ipcRenderer.send("settings-action-from-window", action),

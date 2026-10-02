@@ -62,6 +62,29 @@ settingsTabSystem.addEventListener("click", () => setSettingsView("system"));
 settingsTabHotkeys.addEventListener("click", () => setSettingsView("hotkeys"));
 
 byId("settingsCloseBtn").addEventListener("click", () => window.electronAPI?.closeSettingsWindow?.());
+
+let zoomFactor = 1;
+const settingsResizeHandle = byId("settingsResizeHandle");
+settingsResizeHandle.addEventListener("mousedown", (event) => {
+  event.preventDefault();
+  const startY = event.clientY;
+  let frame = 0;
+  window.electronAPI?.startSettingsWindowResize?.();
+  settingsResizeHandle.classList.add("is-active");
+  document.body.style.cursor = "ns-resize";
+  const onMove = (e: MouseEvent) => {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => window.electronAPI?.resizeSettingsWindowBy?.((e.clientY - startY) * zoomFactor));
+  };
+  const onUp = () => {
+    settingsResizeHandle.classList.remove("is-active");
+    document.body.style.cursor = "";
+    window.removeEventListener("mousemove", onMove);
+    window.removeEventListener("mouseup", onUp);
+  };
+  window.addEventListener("mousemove", onMove);
+  window.addEventListener("mouseup", onUp);
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") window.electronAPI?.closeSettingsWindow?.();
 });
@@ -442,7 +465,10 @@ window.electronAPI?.onSettingsState?.((state) => {
     langSelect.value = i18n.getLanguage();
   }
   if (typeof state.scale === "number") scaleSelect.value = String(state.scale);
-  if (typeof state.zoomFactor === "number") window.electronAPI?.setZoomFactor?.(state.zoomFactor);
+  if (typeof state.zoomFactor === "number") {
+    zoomFactor = state.zoomFactor;
+    window.electronAPI?.setZoomFactor?.(state.zoomFactor);
+  }
   if (typeof state.scale === "number") window.electronAPI?.setSettingsWindowScale?.(state.scale);
   if (state.vizResponse) vizResponseSelect.value = state.vizResponse;
   if (state.windowControlsSide) {

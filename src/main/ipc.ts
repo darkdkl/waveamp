@@ -14,6 +14,8 @@ import {
 import {
   closeSenderWindow,
   closeSettingsWindow,
+  resizeSettingsWindowBy,
+  startSettingsWindowResize,
   minimizeSenderWindow,
   revealSenderWindow,
   openSettingsWindow,
@@ -48,6 +50,9 @@ import type {
 
 export function registerIpcHandlers(): void {
   ipcMain.on("settings-window-scale", (_event, percent: number) => setSettingsWindowScale(percent));
+
+  ipcMain.on("settings-window-resize-start", () => startSettingsWindowResize());
+  ipcMain.on("settings-window-resize", (_event, delta: number) => resizeSettingsWindowBy(Number(delta)));
 
   ipcMain.on("settings-action-from-window", (_event, action: SettingsAction) => {
     sendToMainWindow("settings-action", action);
