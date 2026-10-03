@@ -7,13 +7,17 @@
 на macOS, Windows и Linux.
 
 <p align="center">
-  <img src="docs/screenshot.ru.png" alt="WaveAMP со спектром" width="456" />
+  <img src="docs/header.png" alt="WaveAMP во всех восьми встроенных цветовых схемах" width="100%" />
 </p>
 
 <p align="center">
-  <img src="docs/screenshot-meters.ru.png" alt="Стрелочные индикаторы" width="270" />
-  <img src="docs/screenshot-color.ru.png" alt="Цветовая схема «Синий корпус»" width="270" />
-  <img src="docs/screenshot-settings.ru.png" alt="Настройки" width="270" />
+  <img src="docs/presets.png" alt="Пресеты визуализации в дисплее" width="400" />
+  <img src="docs/radio.png" alt="Радио: трек, который играет на станции, и сохранённые названия" width="400" />
+</p>
+
+<p align="center">
+  <img src="docs/player.png" alt="Эквалайзер и плейлист с обложкой" width="400" />
+  <img src="docs/settings.png" alt="Настройки" width="373" />
 </p>
 
 ## Возможности
@@ -38,6 +42,9 @@
   картинку на [projectM](https://github.com/projectM-visualizer/projectm),
   совместимую с пресетами MilkDrop (`.milk`): встроенная подборка и своя папка,
   автосмена, полный экран
+
+  <img src="docs/presets.gif" alt="Смена пресетов визуализации" width="420" />
+
 - **Интернет-радио** — поиск станций через
   [Radio Browser API](https://www.radio-browser.info/) с фильтрами по стране,
   региону и жанру, избранное. Станцию можно добавить и вручную — по ссылке на

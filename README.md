@@ -7,13 +7,17 @@ classic Winamp: dark chrome, a glowing LCD and a real 10-band equalizer.
 Runs on macOS, Windows and Linux.
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="WaveAMP with the spectrum visualizer" width="456" />
+  <img src="docs/header.png" alt="WaveAMP in its eight built-in color schemes" width="100%" />
 </p>
 
 <p align="center">
-  <img src="docs/screenshot-meters.png" alt="Needle meters" width="270" />
-  <img src="docs/screenshot-color.png" alt="Blue body color scheme" width="270" />
-  <img src="docs/screenshot-settings.png" alt="Settings" width="270" />
+  <img src="docs/presets.png" alt="Visualizer presets in the display" width="400" />
+  <img src="docs/radio.png" alt="Radio: the station's current track and saved track titles" width="400" />
+</p>
+
+<p align="center">
+  <img src="docs/player.png" alt="Equalizer and playlist with cover art" width="400" />
+  <img src="docs/settings.png" alt="Settings" width="373" />
 </p>
 
 ## Features
@@ -38,6 +42,9 @@ Runs on macOS, Windows and Linux.
   picture powered by [projectM](https://github.com/projectM-visualizer/projectm),
   compatible with MilkDrop presets (`.milk`): a built-in selection plus your own
   folder, automatic changes, full screen
+
+  <img src="docs/presets.gif" alt="Visualizer presets changing" width="420" />
+
 - **Internet radio** — station search through the
   [Radio Browser API](https://www.radio-browser.info/) with country, region
   and genre filters, plus favorites. Stations can also be added by hand from a
