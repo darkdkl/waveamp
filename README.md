@@ -7,7 +7,7 @@ classic Winamp: dark chrome, a glowing LCD and a real 10-band equalizer.
 Runs on macOS, Windows and Linux.
 
 <p align="center">
-  <img src="docs/header.png" alt="WaveAMP in its eight built-in color schemes" width="100%" />
+  <img src="docs/header.png" alt="WaveAMP in four of its color schemes" width="100%" />
 </p>
 
 <p align="center">

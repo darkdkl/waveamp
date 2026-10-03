@@ -7,7 +7,7 @@
 на macOS, Windows и Linux.
 
 <p align="center">
-  <img src="docs/header.png" alt="WaveAMP во всех восьми встроенных цветовых схемах" width="100%" />
+  <img src="docs/header.png" alt="WaveAMP в четырёх цветовых схемах" width="100%" />
 </p>
 
 <p align="center">
