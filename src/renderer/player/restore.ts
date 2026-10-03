@@ -12,6 +12,7 @@ import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
 import { setPlayerClockEnabled } from "./clock";
+import { setPresetAutoSwitch, setPresetFolder, setPresetHardCuts } from "./presets/mode";
 import { loadSavedTracks } from "./radio/savedTracks";
 import { applyGlobalHotkeys } from "./playerHotkeys";
 import { setCoverArtEnabled } from "./coverArt";
@@ -59,6 +60,10 @@ export async function restoreConfig(): Promise<void> {
   if (settings?.windowControlsSide === "left" || settings?.windowControlsSide === "right") {
     setWindowControlsSide(settings.windowControlsSide);
   }
+
+  if (typeof settings?.presetAutoSwitch === "boolean") setPresetAutoSwitch(settings.presetAutoSwitch);
+  if (typeof settings?.presetHardCuts === "boolean") setPresetHardCuts(settings.presetHardCuts);
+  if (typeof settings?.presetFolder === "string") setPresetFolder(settings.presetFolder);
 
   if (typeof settings?.playerClockEnabled === "boolean") {
     setPlayerClockEnabled(settings.playerClockEnabled);

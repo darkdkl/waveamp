@@ -42,6 +42,9 @@ export const state = {
   radioTrackTitleEnabled: true,
   playerClockEnabled: false,
   windowControlsSide: (hotkeys.isMac ? "left" : "right") as WindowControlsSide,
+  presetAutoSwitch: true,
+  presetHardCuts: false,
+  presetFolder: "",
   nowPlayingTitle: null as string | null,
   savedTracks: [] as SavedTrack[],
 

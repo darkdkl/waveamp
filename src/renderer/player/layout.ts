@@ -28,12 +28,13 @@ const LIST_MIN_HEIGHT = 60;
 const LIST_MAX_HEIGHT = 1920;
 
 let basePlayerHeight = 0;
+let displayExtraHeight = 0;
 let radioChromeOffset = 72;
 let radioSavedOffset = 38;
 
 export function syncElectronWindowSize(instant = false): void {
   if (!window.electronAPI) return;
-  let target = basePlayerHeight;
+  let target = basePlayerHeight + displayExtraHeight;
   if (state.playlistOpen) target += playlist.scrollHeight;
   if (state.eqOpen) target += eq.scrollHeight;
   if (state.radioOpen) target += radio.scrollHeight;
@@ -172,6 +173,11 @@ export function initListResize(): void {
     radio.classList.remove("is-resizing");
     document.body.style.cursor = "";
   });
+}
+
+export function setDisplayExtraHeight(px: number): void {
+  displayExtraHeight = Math.max(0, px);
+  syncElectronWindowSize();
 }
 
 export function measurePlayerHeight(): void {

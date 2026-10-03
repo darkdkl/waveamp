@@ -26,6 +26,9 @@ const ACTIONS = [
   ["addStation", "hotkeyAddStation", "", "", ""],
   ["saveTrack", "hotkeySaveTrack", "KeyH", "", ""],
   ["cycleVisualizer", "hotkeyCycleVisualizer", "", "", ""],
+  ["nextPreset", "nextPreset", "BracketRight", "", ""],
+  ["previousPreset", "previousPreset", "BracketLeft", "", ""],
+  ["lockPreset", "hotkeyLockPreset", "Backslash", "", ""],
 ].map(([id, nameKey, local, global, macGlobal]) => ({ id, nameKey, local, global: isMac ? macGlobal : global }));
 
 const MODIFIERS = ["Ctrl", "Alt", "Shift", "Meta"];

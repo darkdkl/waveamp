@@ -20,6 +20,13 @@ export const durTime = byId("durTime");
 export const liveTag = byId("liveTag");
 export const playStateIcon = byId("playState");
 export const vizCanvas = byId<HTMLCanvasElement>("vizCanvas");
+export const presetStage = byId("presetStage");
+export const presetCanvas = byId<HTMLCanvasElement>("presetCanvas");
+export const presetMessage = byId("presetMessage");
+export const presetLock = byId("presetLock");
+export const presetName = byId("presetName");
+export const presetPrevBtn = byId<HTMLButtonElement>("presetPrevBtn");
+export const presetNextBtn = byId<HTMLButtonElement>("presetNextBtn");
 export const seek = byId<HTMLInputElement>("seek");
 export const volume = byId<HTMLInputElement>("volume");
 

@@ -39,6 +39,11 @@ const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
 const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
 const radioTrackTitleBtn = byId<HTMLButtonElement>("radioTrackTitleBtn");
 const playerClockBtn = byId<HTMLButtonElement>("playerClockBtn");
+const presetAutoSwitchBtn = byId<HTMLButtonElement>("presetAutoSwitchBtn");
+const presetHardCutsBtn = byId<HTMLButtonElement>("presetHardCutsBtn");
+const presetFolderText = byId("presetFolderText");
+const presetFolderChooseBtn = byId<HTMLButtonElement>("presetFolderChooseBtn");
+const presetFolderResetBtn = byId<HTMLButtonElement>("presetFolderResetBtn");
 const closeMinimizesToTrayBtn = byId<HTMLButtonElement>("closeMinimizesToTrayBtn");
 const accentPresets = byId("accentPresets");
 const accentHueInput = byId<HTMLInputElement>("accentHueInput");
@@ -101,6 +106,9 @@ let trayIconEnabled = false;
 let coverArtEnabled = true;
 let radioTrackTitleEnabled = true;
 let playerClockEnabled = false;
+let presetAutoSwitch = true;
+let presetHardCuts = false;
+let presetFolder = "";
 let closeMinimizesToTrayEnabled = false;
 let updateStatusKey = "";
 let updateVersion = "";
@@ -199,6 +207,39 @@ function setPlayerClockEnabled(enabled: boolean) {
   sendAction("setPlayerClockEnabled", enabled);
 }
 playerClockBtn.addEventListener("click", () => setPlayerClockEnabled(!playerClockEnabled));
+
+function renderPresetSettings() {
+  presetAutoSwitchBtn.textContent = presetAutoSwitch ? i18n.t("on") : i18n.t("off");
+  presetAutoSwitchBtn.classList.toggle("is-active", presetAutoSwitch);
+  presetHardCutsBtn.textContent = presetHardCuts ? i18n.t("on") : i18n.t("off");
+  presetHardCutsBtn.classList.toggle("is-active", presetHardCuts);
+  presetFolderText.textContent = presetFolder || i18n.t("presetFolderBuiltinOnly");
+  presetFolderText.title = presetFolder;
+  presetFolderResetBtn.disabled = !presetFolder;
+}
+
+presetAutoSwitchBtn.addEventListener("click", () => {
+  presetAutoSwitch = !presetAutoSwitch;
+  renderPresetSettings();
+  sendAction("setPresetAutoSwitch", presetAutoSwitch);
+});
+presetHardCutsBtn.addEventListener("click", () => {
+  presetHardCuts = !presetHardCuts;
+  renderPresetSettings();
+  sendAction("setPresetHardCuts", presetHardCuts);
+});
+presetFolderChooseBtn.addEventListener("click", async () => {
+  const folder = await window.electronAPI?.choosePresetFolder?.();
+  if (!folder) return;
+  presetFolder = folder;
+  renderPresetSettings();
+  sendAction("setPresetFolder", presetFolder);
+});
+presetFolderResetBtn.addEventListener("click", () => {
+  presetFolder = "";
+  renderPresetSettings();
+  sendAction("setPresetFolder", presetFolder);
+});
 closeMinimizesToTrayBtn.addEventListener("click", () => setCloseMinimizesToTrayEnabled(!closeMinimizesToTrayEnabled));
 
 const openReleaseBtn = byId<HTMLButtonElement>("openReleaseBtn");
@@ -432,6 +473,7 @@ function refreshTextForLanguage() {
   coverArtBtn.textContent = coverArtEnabled ? i18n.t("on") : i18n.t("off");
   radioTrackTitleBtn.textContent = radioTrackTitleEnabled ? i18n.t("on") : i18n.t("off");
   playerClockBtn.textContent = playerClockEnabled ? i18n.t("on") : i18n.t("off");
+  renderPresetSettings();
   closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? i18n.t("on") : i18n.t("off");
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
@@ -504,6 +546,9 @@ window.electronAPI?.onSettingsState?.((state) => {
   coverArtEnabled = state.coverArtEnabled !== false;
   radioTrackTitleEnabled = state.radioTrackTitleEnabled !== false;
   playerClockEnabled = !!state.playerClockEnabled;
+  presetAutoSwitch = state.presetAutoSwitch !== false;
+  presetHardCuts = !!state.presetHardCuts;
+  presetFolder = typeof state.presetFolder === "string" ? state.presetFolder : "";
   closeMinimizesToTrayEnabled = !!state.closeMinimizesToTray && trayIconEnabled;
   closeMinimizesToTrayBtn.disabled = !trayIconEnabled;
 
