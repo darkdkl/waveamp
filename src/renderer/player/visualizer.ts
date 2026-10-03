@@ -20,6 +20,8 @@ function availableVizModes(): VizMode[] {
 const NEEDLE_PEAK_FALL_TAU_MS = 650;
 const SPECTRUM_PEAK_FALL_TAU_MS = 300;
 const VU_REFERENCE_DBFS = -12;
+const VIZ_SENSITIVITY = 0.85;
+const VIZ_SENSITIVITY_DB = 20 * Math.log10(VIZ_SENSITIVITY);
 const VU_SCALE_MARKS = [-20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3];
 const VU_MAJOR_MARKS = [-20, -10, -5, 0, 3];
 
@@ -55,12 +57,12 @@ function meterTarget(analyser: AnalyserNode): number {
   if (state.vizResponse === "peak") {
     let peak = 0;
     for (const sample of meterSamples) peak = Math.max(peak, Math.abs(sample));
-    return needlePosition(20 * Math.log10(peak) + 3);
+    return needlePosition(20 * Math.log10(peak) + 3 + VIZ_SENSITIVITY_DB);
   }
   let sumSquares = 0;
   for (const sample of meterSamples) sumSquares += sample * sample;
   const rms = Math.sqrt(sumSquares / meterSamples.length);
-  return needlePosition(20 * Math.log10(rms) - VU_REFERENCE_DBFS);
+  return needlePosition(20 * Math.log10(rms) - VU_REFERENCE_DBFS + VIZ_SENSITIVITY_DB);
 }
 
 // Custom properties may hold calc()/color-mix() a canvas can't parse — resolve to rgb().
@@ -216,7 +218,7 @@ function renderSpectrum(dt: number, now: number): void {
   for (let c = 0; c < VIZ_COLUMNS; c++) {
     spectrumLevels[c] = followLevel(
       spectrumLevels[c],
-      vizFreqData[vizBinMap[c]] / 255,
+      (vizFreqData[vizBinMap[c]] / 255) * VIZ_SENSITIVITY,
       dt,
       SPECTRUM_PEAK_FALL_TAU_MS,
       state.vizResponse
