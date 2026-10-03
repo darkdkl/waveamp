@@ -61,7 +61,9 @@ function showMessage(key: string | null): void {
 
 function renderBar(): void {
   const index = playlist.current;
-  presetName.textContent = index !== null ? (presets[index]?.name ?? "") : "";
+  const preset = index !== null ? presets[index] : undefined;
+  const builtinCount = presets.filter((info) => info.builtin).length;
+  presetName.textContent = !preset ? "" : preset.builtin ? `${(index ?? 0) + 1} / ${builtinCount}` : preset.name;
   presetLock.hidden = !frozen;
   presetLock.setAttribute("aria-label", i18n.t("presetFrozen"));
   presetFullscreenBtn.title = i18n.t(fullscreen ? "exitFullscreen" : "presetsFullscreen");
