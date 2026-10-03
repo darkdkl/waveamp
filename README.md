@@ -125,6 +125,11 @@ see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
   components under their own licenses)
 - [music-metadata](https://github.com/Borewit/music-metadata) — audio file tags
   (MIT)
+- [projectM](https://github.com/projectM-visualizer/projectm) — the visualizer
+  presets engine, compiled to WebAssembly (LGPL-2.1)
+- A selection from the ["Cream of the Crop"](https://github.com/projectM-visualizer/presets-cream-of-the-crop)
+  preset collection — the built-in visualizer presets (the collection states no
+  formal license; the presets remain the work of their authors)
 
 The full list with license texts is generated into `THIRD_PARTY_LICENSES.txt`
 before every run and build (`npm run licenses`), shipped next to the app and
@@ -143,7 +148,8 @@ option) any later version. It comes with no warranty — see the license text.
 Winamp is a trademark of its respective owner. WaveAMP is an independent
 project, not affiliated with or endorsed by the owner of Winamp; Winamp is
 mentioned here only to describe the player's style and the origin of the
-equalizer presets.
+equalizer presets. MilkDrop is mentioned only to name the visualizer preset
+format (`.milk`) that projectM supports.
 
 ## Acknowledgements
 
@@ -151,3 +157,9 @@ Internet radio in WaveAMP is powered by [Radio Browser](https://www.radio-browse
 a free, non-commercial station database kept running by volunteers who host
 its API mirrors at their own expense. Thank you for making it exist and keeping
 it open.
+
+The visualizer presets run on [projectM](https://github.com/projectM-visualizer/projectm) —
+the open-source reimplementation of MilkDrop that its team has been developing
+for years. Thank you to the projectM developers, to Ryan Geiss for the original
+MilkDrop, to the preset authors whose work you see on the screen, and to
+ISOSCELES for curating the "Cream of the Crop" collection.
