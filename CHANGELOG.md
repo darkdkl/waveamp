@@ -4,6 +4,15 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.12.0] — 2026-10-03
+
+### Added
+- A Slow visualizer response in Settings; the former Smooth response is now
+  called Medium
+
+### Changed
+- All visualizers show the sound before the equalizer and the preamp
+
 ## [1.11.0] — 2026-10-03
 
 ### Changed

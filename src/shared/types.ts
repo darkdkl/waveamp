@@ -1,6 +1,6 @@
 export type Lang = "ru" | "en";
 export type VizMode = "spectrum" | "meters" | "scope" | "presets";
-export type VizResponse = "smooth" | "peak";
+export type VizResponse = "slow" | "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
 export type WindowControlsSide = "left" | "right";
 

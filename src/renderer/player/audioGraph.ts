@@ -24,13 +24,12 @@ filterNodes.forEach((filter) => {
   audioNode.connect(filter);
   audioNode = filter;
 });
-// Volume sits after the analyser (not audio.volume) so the visualizer ignores it.
 const volumeNode = audioCtx.createGain();
 
 audioNode.connect(preampNode);
-preampNode.connect(analyserNode);
-analyserNode.connect(volumeNode);
+preampNode.connect(volumeNode);
 volumeNode.connect(audioCtx.destination);
+sourceNode.connect(analyserNode);
 
 // A splitter's interpretation is fixed to "discrete"; this node upmixes mono so both needles move.
 const meterStereoNode = audioCtx.createGain();
@@ -39,7 +38,7 @@ meterStereoNode.channelCountMode = "explicit";
 meterStereoNode.channelInterpretation = "speakers";
 const channelSplitter = audioCtx.createChannelSplitter(2);
 export const meterAnalysers = [audioCtx.createAnalyser(), audioCtx.createAnalyser()];
-preampNode.connect(meterStereoNode);
+sourceNode.connect(meterStereoNode);
 meterStereoNode.connect(channelSplitter);
 meterAnalysers.forEach((analyser, channel) => {
   analyser.fftSize = 2048;
