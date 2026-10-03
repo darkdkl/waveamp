@@ -14,6 +14,8 @@ version, fixes bump the patch version.
 ### Changed
 - A new app icon and title mark: the three sliders now form a play sign
 - The LED Spectrum preset moves more smoothly
+- The spectrum and the VU meters are less sensitive and no longer pin on loud
+  tracks
 
 ## [1.12.0] — 2026-10-03
 
