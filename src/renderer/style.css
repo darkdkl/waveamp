@@ -373,6 +373,36 @@ body.is-electron .player::before {
   cursor: pointer;
 }
 
+.display__stage.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  aspect-ratio: auto;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: default;
+}
+
+body.is-presets-fullscreen .player__display {
+  z-index: 1000;
+}
+
+body.is-presets-fullscreen .player > :not(.player__display) {
+  visibility: hidden;
+}
+
+.display__stage.is-fullscreen.is-idle {
+  cursor: none;
+}
+
+.display__stage.is-fullscreen.is-idle .display__stage-bar {
+  opacity: 0;
+}
+
+.display__stage.is-fullscreen .display__stage-bar {
+  padding: 10px 14px;
+}
+
 .display__stage-canvas {
   display: block;
   width: 100%;

@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [Unreleased]
+
+### Added
+- Visualizer presets in full screen: the ⤢ button, F or a double click on the
+  picture; Esc, F or a double click leave it. The cursor and the preset bar
+  hide after a few seconds without mouse movement
+
 ## [1.9.0] — 2026-10-03
 
 ### Added

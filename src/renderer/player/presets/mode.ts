@@ -2,6 +2,7 @@ import { i18n } from "../../i18n";
 import {
   playerDisplay,
   presetCanvas,
+  presetFullscreenBtn,
   presetLock,
   presetMessage,
   presetName,
@@ -13,7 +14,7 @@ import { state } from "../state";
 import { meterAnalysers } from "../audioGraph";
 import { logEvent } from "../log";
 import { persistConfig } from "../config";
-import { setDisplayExtraHeight } from "../layout";
+import { setDisplayExtraHeight, setWindowSizeFrozen } from "../layout";
 import { PresetPlaylist } from "./playlist";
 import type { PresetEngine } from "./engine";
 import type { PresetInfo } from "../../../shared/types";
@@ -23,6 +24,8 @@ const PRESET_DURATION_S = 16;
 const PRESET_DURATION_SPREAD_S = 8;
 const PRESET_BLEND_S = 2.7;
 const MAX_FAILED_PRESETS_IN_A_ROW = 5;
+const DOUBLE_CLICK_WAIT_MS = 250;
+const FULLSCREEN_IDLE_MS = 2500;
 
 let supported: boolean | null = null;
 let active = false;
@@ -35,6 +38,9 @@ let frozen = false;
 let failedInARow = 0;
 let frame = 0;
 let onCycleMode: () => void = () => {};
+let fullscreen = false;
+let clickTimer: ReturnType<typeof setTimeout> | undefined;
+let idleTimer: ReturnType<typeof setTimeout> | undefined;
 const left = new Float32Array(meterAnalysers[0].fftSize);
 const right = new Float32Array(meterAnalysers[1].fftSize);
 
@@ -58,6 +64,8 @@ function renderBar(): void {
   presetName.textContent = index !== null ? (presets[index]?.name ?? "") : "";
   presetLock.hidden = !frozen;
   presetLock.setAttribute("aria-label", i18n.t("presetFrozen"));
+  presetFullscreenBtn.title = i18n.t(fullscreen ? "exitFullscreen" : "presetsFullscreen");
+  presetFullscreenBtn.setAttribute("aria-label", presetFullscreenBtn.title);
 }
 
 function applySwitching(): void {
@@ -163,7 +171,28 @@ export function exitPresetsMode(): void {
   if (!active) return;
   active = false;
   cancelAnimationFrame(frame);
+  if (fullscreen) window.electronAPI?.setFullScreen?.(false);
   setStageVisible(false);
+}
+
+export function togglePresetsFullscreen(): void {
+  if (active) window.electronAPI?.setFullScreen?.(!fullscreen);
+}
+
+function wakeFromIdle(): void {
+  presetStage.classList.remove("is-idle");
+  clearTimeout(idleTimer);
+  if (fullscreen) idleTimer = setTimeout(() => presetStage.classList.add("is-idle"), FULLSCREEN_IDLE_MS);
+}
+
+function applyFullscreen(enabled: boolean): void {
+  fullscreen = enabled;
+  presetStage.classList.toggle("is-fullscreen", enabled);
+  document.body.classList.toggle("is-presets-fullscreen", enabled);
+  if (enabled) setWindowSizeFrozen(true);
+  wakeFromIdle();
+  renderBar();
+  if (!enabled) setWindowSizeFrozen(false);
 }
 
 export function nextPreset(): void {
@@ -210,9 +239,20 @@ export function refreshPresetsText(): void {
 export function initPresetsMode(cycleMode: () => void): void {
   onCycleMode = cycleMode;
   presetStage.addEventListener("click", (e) => {
-    if ((e.target as HTMLElement).closest("button")) return;
-    onCycleMode();
+    clearTimeout(clickTimer);
+    if ((e.target as HTMLElement).closest("button") || fullscreen || e.detail > 1) return;
+    clickTimer = setTimeout(onCycleMode, DOUBLE_CLICK_WAIT_MS);
   });
+  presetStage.addEventListener("dblclick", (e) => {
+    clearTimeout(clickTimer);
+    if (!(e.target as HTMLElement).closest("button")) togglePresetsFullscreen();
+  });
+  presetStage.addEventListener("mousemove", wakeFromIdle);
   presetPrevBtn.addEventListener("click", previousPreset);
   presetNextBtn.addEventListener("click", nextPreset);
+  presetFullscreenBtn.addEventListener("click", togglePresetsFullscreen);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && fullscreen) window.electronAPI?.setFullScreen?.(false);
+  });
+  window.electronAPI?.onFullScreenChanged?.(applyFullscreen);
 }

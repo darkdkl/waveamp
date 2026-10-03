@@ -37,7 +37,7 @@ Runs on macOS, Windows and Linux.
 - **Visualizer presets** — the fourth mode opens the display into a large
   picture powered by [projectM](https://github.com/projectM-visualizer/projectm),
   compatible with MilkDrop presets (`.milk`): a built-in selection plus your own
-  folder, automatic changes
+  folder, automatic changes, full screen
 - **Internet radio** — station search through the
   [Radio Browser API](https://www.radio-browser.info/) with country, region
   and genre filters, plus favorites. Stations can also be added by hand from a

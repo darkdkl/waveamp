@@ -29,11 +29,12 @@ const LIST_MAX_HEIGHT = 1920;
 
 let basePlayerHeight = 0;
 let displayExtraHeight = 0;
+let windowSizeFrozen = false;
 let radioChromeOffset = 72;
 let radioSavedOffset = 38;
 
 export function syncElectronWindowSize(instant = false): void {
-  if (!window.electronAPI) return;
+  if (!window.electronAPI || windowSizeFrozen) return;
   let target = basePlayerHeight + displayExtraHeight;
   if (state.playlistOpen) target += playlist.scrollHeight;
   if (state.eqOpen) target += eq.scrollHeight;
@@ -173,6 +174,11 @@ export function initListResize(): void {
     radio.classList.remove("is-resizing");
     document.body.style.cursor = "";
   });
+}
+
+export function setWindowSizeFrozen(frozen: boolean): void {
+  windowSizeFrozen = frozen;
+  if (!frozen) syncElectronWindowSize();
 }
 
 export function setDisplayExtraHeight(px: number): void {
