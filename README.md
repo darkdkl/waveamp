@@ -43,8 +43,8 @@ Runs on macOS, Windows and Linux.
   and genre filters, plus favorites. Stations can also be added by hand from a
   stream URL or a .pls/.m3u link. The equalizer and visualizer work on radio
   streams too
-- **Saved tracks** — the display shows the track playing on the station; save
-  the ones you like to a list and copy their titles
+- **Saved track titles** — the display shows the track playing on the station;
+  save the titles you like to a list and copy them
 - **Clock** on the display for radio, and optionally alternating with the track
   time during playback
 - **Color scheme** — presets plus hue, saturation and body color sliders

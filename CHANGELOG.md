@@ -11,6 +11,10 @@ version, fixes bump the patch version.
   large picture powered by projectM, compatible with MilkDrop presets — a
   built-in selection plus your own folder and automatic changes
 
+### Changed
+- "Saved tracks" in the radio panel is now "Track titles" (tooltip "Saved track
+  titles"): it keeps titles, not the tracks themselves
+
 ## [1.8.0] — 2026-10-03
 
 ### Added
