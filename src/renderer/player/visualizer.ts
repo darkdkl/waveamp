@@ -3,6 +3,7 @@ import { state } from "./state";
 import { analyserNode, meterAnalysers } from "./audioGraph";
 import { SMOOTH_TAU_MS, followLevel, needlePosition, spectrumBinMap } from "./vizMath";
 import { persistConfig } from "./config";
+import { enterPresetsMode, exitPresetsMode, initPresetsMode, presetsSupported } from "./presets/mode";
 import type { VizMode } from "../../shared/types";
 
 const VIZ_COLUMNS = 26;
@@ -10,7 +11,11 @@ const VIZ_SEGMENTS = 9;
 const vizFreqData = new Uint8Array(analyserNode.frequencyBinCount);
 const vizBinMap = spectrumBinMap(VIZ_COLUMNS, vizFreqData.length);
 
-const VIZ_MODES: VizMode[] = ["spectrum", "meters", "scope"];
+const VIZ_MODES: VizMode[] = ["spectrum", "meters", "scope", "presets"];
+
+function availableVizModes(): VizMode[] {
+  return presetsSupported() ? VIZ_MODES : VIZ_MODES.filter((mode) => mode !== "presets");
+}
 
 const NEEDLE_PEAK_FALL_TAU_MS = 650;
 const SPECTRUM_PEAK_FALL_TAU_MS = 300;
@@ -28,12 +33,16 @@ const needles = [0, 0];
 let lastVizFrame = performance.now();
 
 export function setVizMode(mode: string): void {
-  state.vizMode = VIZ_MODES.includes(mode as VizMode) ? (mode as VizMode) : "spectrum";
+  const modes = availableVizModes();
+  state.vizMode = modes.includes(mode as VizMode) ? (mode as VizMode) : "spectrum";
+  if (state.vizMode === "presets") enterPresetsMode();
+  else exitPresetsMode();
   persistConfig();
 }
 
 export function cycleVizMode(): void {
-  setVizMode(VIZ_MODES[(VIZ_MODES.indexOf(state.vizMode) + 1) % VIZ_MODES.length]);
+  const modes = availableVizModes();
+  setVizMode(modes[(modes.indexOf(state.vizMode) + 1) % modes.length]);
 }
 
 export function setVizResponse(value: string): void {
@@ -237,12 +246,13 @@ function renderViz(now: number): void {
   lastVizFrame = now;
   if (state.vizMode === "meters") renderMeters(dt, now);
   else if (state.vizMode === "scope") renderScope(dt, now);
-  else renderSpectrum(dt, now);
+  else if (state.vizMode === "spectrum") renderSpectrum(dt, now);
   requestAnimationFrame(renderViz);
 }
 
 export function initVisualizerControls(): void {
   vizCanvas.addEventListener("click", cycleVizMode);
+  initPresetsMode(cycleVizMode);
 }
 
 export function startVisualizer(): void {

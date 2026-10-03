@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: http: data:; media-src 'self' file: blob: https: http:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' https: http: data:; media-src 'self' file: blob: https: http:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self';" />
   <title>WaveAMP</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -31,6 +31,20 @@
           <span class="display__state" id="playState" hidden><svg viewBox="0 0 24 24"><path d=""/></svg></span>
           <span id="durTime">00:00</span>
           <span id="liveTag" class="display__live" hidden>LIVE</span>
+        </div>
+      </div>
+      <div class="display__stage" id="presetStage" hidden>
+        <canvas class="display__stage-canvas" id="presetCanvas"></canvas>
+        <p class="display__stage-message" id="presetMessage" hidden></p>
+        <div class="display__stage-bar">
+          <svg class="display__stage-lock" id="presetLock" viewBox="0 0 24 24" hidden><path d="M7 10V7a5 5 0 0110 0v3h1a1 1 0 011 1v9a1 1 0 01-1 1H6a1 1 0 01-1-1v-9a1 1 0 011-1h1zm2 0h6V7a3 3 0 00-6 0v3z"/></svg>
+          <span class="display__stage-name" id="presetName"></span>
+          <button class="display__stage-btn" id="presetPrevBtn" type="button" data-i18n-title="previousPreset" data-i18n-aria="previousPreset" title="Предыдущий пресет" aria-label="Предыдущий пресет">
+            <svg viewBox="0 0 24 24"><path d="M15.5 4l-8 8 8 8 1.6-1.6L10.7 12l6.4-6.4z"/></svg>
+          </button>
+          <button class="display__stage-btn" id="presetNextBtn" type="button" data-i18n-title="nextPreset" data-i18n-aria="nextPreset" title="Следующий пресет" aria-label="Следующий пресет">
+            <svg viewBox="0 0 24 24"><path d="M8.5 4l8 8-8 8-1.6-1.6 6.4-6.4-6.4-6.4z"/></svg>
+          </button>
         </div>
       </div>
     </section>

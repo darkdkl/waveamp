@@ -31,9 +31,13 @@ Runs on macOS, Windows and Linux.
   through the Web Audio API. 18 presets based on the classic Winamp presets,
   with automatic preamp headroom, and a Custom preset that remembers your own
   settings
-- **Visualizer** — three modes in the LCD, switched by clicking it: LED
+- **Visualizer** — modes in the LCD, switched by clicking it: LED
   spectrum, L/R needle meters and an oscilloscope. Smooth or peak response.
   Shows the actual signal, independent of the volume
+- **Visualizer presets** — the fourth mode opens the display into a large
+  picture powered by [projectM](https://github.com/projectM-visualizer/projectm),
+  compatible with MilkDrop presets (`.milk`): a built-in selection plus your own
+  folder, automatic changes
 - **Internet radio** — station search through the
   [Radio Browser API](https://www.radio-browser.info/) with country, region
   and genre filters, plus favorites. Stations can also be added by hand from a

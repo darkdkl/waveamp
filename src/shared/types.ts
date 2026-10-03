@@ -1,5 +1,5 @@
 export type Lang = "ru" | "en";
-export type VizMode = "spectrum" | "meters" | "scope";
+export type VizMode = "spectrum" | "meters" | "scope" | "presets";
 export type VizResponse = "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
 export type WindowControlsSide = "left" | "right";
@@ -26,6 +26,11 @@ export interface Station {
 export interface NowPlayingUpdate {
   url: string;
   title: string | null;
+}
+
+export interface PresetInfo {
+  name: string;
+  builtin: boolean;
 }
 
 export interface SavedTrack {
@@ -114,6 +119,9 @@ export interface AppConfig {
     radioTrackTitleEnabled: boolean;
     playerClockEnabled: boolean;
     windowControlsSide: WindowControlsSide;
+    presetAutoSwitch: boolean;
+    presetHardCuts: boolean;
+    presetFolder: string;
     hotkeys: HotkeyConfig;
     volume: number;
     loggingEnabled: boolean;
@@ -143,6 +151,9 @@ export interface SettingsState {
   radioTrackTitleEnabled: boolean;
   playerClockEnabled: boolean;
   windowControlsSide: WindowControlsSide;
+  presetAutoSwitch: boolean;
+  presetHardCuts: boolean;
+  presetFolder: string;
   hotkeys: HotkeyConfig;
   globalHotkeyFailures: string[];
   proxy: ProxyConfig;
@@ -161,6 +172,9 @@ export type SettingsAction =
   | { type: "setRadioTrackTitleEnabled"; value: boolean }
   | { type: "setPlayerClockEnabled"; value: boolean }
   | { type: "setWindowControlsSide"; value: WindowControlsSide }
+  | { type: "setPresetAutoSwitch"; value: boolean }
+  | { type: "setPresetHardCuts"; value: boolean }
+  | { type: "setPresetFolder"; value: string }
   | { type: "setHotkeys"; value: HotkeyConfig }
   | { type: "setProxyConfig"; value: ProxyConfig }
   | { type: "setLoggingEnabled"; value: boolean }

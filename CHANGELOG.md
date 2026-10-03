@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [Unreleased]
+
+### Added
+- Visualizer presets: the fourth visualizer mode opens the display into a
+  large picture powered by projectM, compatible with MilkDrop presets — a
+  built-in selection plus your own folder and automatic changes
+
 ## [1.8.0] — 2026-10-03
 
 ### Added

@@ -38,6 +38,7 @@ import { checkForUpdates, openReleasePage, setAutoUpdateEnabled } from "./update
 import { openLicenseFile } from "./licenses";
 import { startNowPlaying, stopNowPlaying } from "./nowPlaying";
 import { loadSavedTracks, writeSavedTracks } from "./savedTracks";
+import { choosePresetFolder, listPresets, readPreset } from "./presets";
 import type {
   AppConfig,
   GlobalHotkeyRequest,
@@ -123,6 +124,10 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle("saved-tracks-load", () => loadSavedTracks());
   ipcMain.on("saved-tracks-save", (_event, tracks: unknown) => writeSavedTracks(tracks));
+
+  ipcMain.handle("presets-list", (_event, folder: string) => listPresets(typeof folder === "string" ? folder : ""));
+  ipcMain.handle("presets-read", (_event, index: number) => readPreset(Number(index)));
+  ipcMain.handle("presets-choose-folder", (event) => choosePresetFolder(BrowserWindow.fromWebContents(event.sender)));
 
   ipcMain.on("copy-text", (_event, text: string) => clipboard.writeText(String(text)));
 

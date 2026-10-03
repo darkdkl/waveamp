@@ -8,6 +8,7 @@ import { cycleVizMode } from "./visualizer";
 import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
 import { openStationForm } from "./radio/stationForm";
 import { toggleCurrentTrackSaved } from "./radio/savedTracks";
+import { nextPreset, previousPreset, togglePresetLock } from "./presets/mode";
 import { pushSettingsState } from "./settingsBridge";
 import type { HotkeyConfig } from "../../shared/types";
 
@@ -93,6 +94,15 @@ function runHotkeyAction(action: string): void {
       break;
     case "cycleVisualizer":
       cycleVizMode();
+      break;
+    case "nextPreset":
+      nextPreset();
+      break;
+    case "previousPreset":
+      previousPreset();
+      break;
+    case "lockPreset":
+      togglePresetLock();
       break;
   }
 }

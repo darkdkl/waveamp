@@ -9,6 +9,7 @@ import { renderEqToggle } from "./equalizer";
 import { setCoverArtEnabled } from "./coverArt";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
 import { setPlayerClockEnabled } from "./clock";
+import { refreshPresetsText, setPresetAutoSwitch, setPresetFolder, setPresetHardCuts } from "./presets/mode";
 import { renderSavedTracks } from "./radio/savedTracks";
 import { renderPlaylist } from "./playlist";
 import { updateTrackTitleText } from "./playback";
@@ -75,6 +76,7 @@ export function setLanguage(lang: string): void {
   renderRadioResults();
   renderRadioFavorites();
   renderSavedTracks();
+  refreshPresetsText();
   updateStationFormText();
   persistConfig();
 }
@@ -106,6 +108,9 @@ export function pushSettingsState(): void {
     radioTrackTitleEnabled: state.radioTrackTitleEnabled,
     playerClockEnabled: state.playerClockEnabled,
     windowControlsSide: state.windowControlsSide,
+    presetAutoSwitch: state.presetAutoSwitch,
+    presetHardCuts: state.presetHardCuts,
+    presetFolder: state.presetFolder,
     hotkeys: state.hotkeyConfig,
     globalHotkeyFailures: state.globalHotkeyFailures,
     proxy: getProxyConfig(),
@@ -154,6 +159,15 @@ export function initSettingsBridge(): void {
         break;
       case "setWindowControlsSide":
         setWindowControlsSide(action.value);
+        break;
+      case "setPresetAutoSwitch":
+        setPresetAutoSwitch(!!action.value);
+        break;
+      case "setPresetHardCuts":
+        setPresetHardCuts(!!action.value);
+        break;
+      case "setPresetFolder":
+        setPresetFolder(typeof action.value === "string" ? action.value : "");
         break;
       case "setHotkeys":
         setHotkeys(action.value);
