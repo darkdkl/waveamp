@@ -11,6 +11,10 @@ version, fixes bump the patch version.
   past meteors and speeding up on the beat, and Logo, the WaveAMP sliders
   moving with the bass, mids and treble over a glowing waveform
 
+### Changed
+- A new app icon and title mark: the three sliders now form a play sign
+- The LED Spectrum preset moves more smoothly
+
 ## [1.12.0] — 2026-10-03
 
 ### Added

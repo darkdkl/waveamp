@@ -157,10 +157,11 @@ body.is-electron .player::before {
 
 .player__logo-mark {
   display: inline-block;
-  width: 0.62em;
-  height: 0.72em;
-  margin-right: 0.5em;
-  background: linear-gradient(90deg, currentColor 0 38%, transparent 38% 62%, currentColor 62% 100%);
+  width: 10px;
+  height: 11px;
+  margin-right: 6px;
+  vertical-align: -1.5px;
+  fill: currentColor;
 }
 
 .player__logo-accent {
