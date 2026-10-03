@@ -400,28 +400,28 @@ body.is-presets-fullscreen .player > :not(.player__display) {
 }
 
 .display__stage.is-fullscreen .display__stage-bar {
-  gap: clamp(4px, 1vmin, 20px);
-  padding: clamp(6px, 1.6vmin, 32px) clamp(8px, 2.2vmin, 44px);
+  gap: clamp(4px, 0.75vmin, 15px);
+  padding: clamp(6px, 1.2vmin, 24px) clamp(8px, 1.65vmin, 33px);
 }
 
 .display__stage.is-fullscreen .display__stage-name {
-  font-size: clamp(10px, 1.8vmin, 36px);
+  font-size: clamp(10px, 1.48vmin, 30px);
 }
 
 .display__stage.is-fullscreen .display__stage-lock {
-  width: clamp(10px, 1.8vmin, 36px);
-  height: clamp(10px, 1.8vmin, 36px);
+  width: clamp(10px, 1.48vmin, 30px);
+  height: clamp(10px, 1.48vmin, 30px);
 }
 
 .display__stage.is-fullscreen .display__stage-btn {
-  width: clamp(22px, 4.4vmin, 88px);
-  height: clamp(20px, 4vmin, 80px);
-  border-radius: clamp(4px, 0.8vmin, 16px);
+  width: clamp(22px, 3.27vmin, 66px);
+  height: clamp(20px, 2.97vmin, 60px);
+  border-radius: clamp(4px, 0.6vmin, 12px);
 }
 
 .display__stage.is-fullscreen .display__stage-btn svg {
-  width: clamp(12px, 2.4vmin, 48px);
-  height: clamp(12px, 2.4vmin, 48px);
+  width: clamp(12px, 1.78vmin, 36px);
+  height: clamp(12px, 1.78vmin, 36px);
 }
 
 .display__stage-canvas {
