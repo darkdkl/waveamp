@@ -87,15 +87,6 @@ sections.push(
     "Built into the visualizer as WebAssembly by scripts/build-projectm.sh.",
     "",
     fs.readFileSync(path.join(projectmDir, "LICENSE.txt"), "utf8").trim(),
-  ].join("\n"),
-  [
-    "Visualizer presets: \"Cream of the Crop\" collection (a selection)",
-    "Source: https://github.com/projectM-visualizer/presets-cream-of-the-crop",
-    "",
-    "A small selection of presets from the collection curated by ISOSCELES, which",
-    "its maintainers publish as the default preset pack for projectM-based",
-    "applications. The collection does not state a formal license; the presets",
-    "remain the work of their respective authors, credited in the preset names.",
   ].join("\n")
 );
 
@@ -108,7 +99,7 @@ listed below, each distributed under its own license. Chromium and the
 other components bundled with Electron are listed in
 LICENSES.chromium.html, next to this file in the installed application.
 
-${entries.length} packages, plus projectM and the visualizer presets.`;
+${entries.length} packages, plus projectM.`;
 
 fs.writeFileSync(OUTPUT, [header, ...sections].join(`\n\n${"-".repeat(78)}\n\n`) + "\n");
 console.log(`Wrote ${path.relative(ROOT, OUTPUT)} (${entries.length} packages)`);

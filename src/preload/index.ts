@@ -35,6 +35,8 @@ function pathToFileUrl(filePath: string): string {
 
 const api = {
   minimizeWindow: (): void => ipcRenderer.send("window-minimize"),
+  setFullScreen: (enabled: boolean): void => ipcRenderer.send("set-full-screen", enabled),
+  onFullScreenChanged: (callback: (enabled: boolean) => void) => ipcRenderer.on("full-screen-changed", (_event, enabled) => callback(!!enabled)),
   closeWindow: (): void => ipcRenderer.send("window-close"),
   resizeWindow: (height: number, width: number): void => ipcRenderer.send("window-resize", height, width),
   resizeWindowInstant: (height: number, width: number): void => ipcRenderer.send("window-resize-instant", height, width),

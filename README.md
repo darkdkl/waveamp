@@ -7,13 +7,16 @@ classic Winamp: dark chrome, a glowing LCD and a real 10-band equalizer.
 Runs on macOS, Windows and Linux.
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="WaveAMP with the spectrum visualizer" width="456" />
+  <img src="docs/header.png" alt="WaveAMP in its eight built-in color schemes" width="100%" />
 </p>
 
 <p align="center">
-  <img src="docs/screenshot-meters.png" alt="Needle meters" width="270" />
-  <img src="docs/screenshot-color.png" alt="Blue body color scheme" width="270" />
-  <img src="docs/screenshot-settings.png" alt="Settings" width="270" />
+  <img src="docs/radio.png" alt="Radio: the station's current track and saved track titles" width="400" />
+</p>
+
+<p align="center">
+  <img src="docs/player.png" alt="Equalizer and playlist with cover art" width="400" />
+  <img src="docs/settings.png" alt="Settings" width="373" />
 </p>
 
 ## Features
@@ -36,8 +39,8 @@ Runs on macOS, Windows and Linux.
   Shows the actual signal, independent of the volume
 - **Visualizer presets** — the fourth mode opens the display into a large
   picture powered by [projectM](https://github.com/projectM-visualizer/projectm),
-  compatible with MilkDrop presets (`.milk`): a built-in selection plus your own
-  folder, automatic changes
+  compatible with MilkDrop presets (`.milk`): WaveAMP's own built-in presets plus
+  any folder of `.milk` files, automatic changes, full screen
 - **Internet radio** — station search through the
   [Radio Browser API](https://www.radio-browser.info/) with country, region
   and genre filters, plus favorites. Stations can also be added by hand from a
@@ -125,6 +128,8 @@ see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
   components under their own licenses)
 - [music-metadata](https://github.com/Borewit/music-metadata) — audio file tags
   (MIT)
+- [projectM](https://github.com/projectM-visualizer/projectm) — the visualizer
+  presets engine, compiled to WebAssembly (LGPL-2.1)
 
 The full list with license texts is generated into `THIRD_PARTY_LICENSES.txt`
 before every run and build (`npm run licenses`), shipped next to the app and
@@ -143,7 +148,8 @@ option) any later version. It comes with no warranty — see the license text.
 Winamp is a trademark of its respective owner. WaveAMP is an independent
 project, not affiliated with or endorsed by the owner of Winamp; Winamp is
 mentioned here only to describe the player's style and the origin of the
-equalizer presets.
+equalizer presets. MilkDrop is mentioned only to name the visualizer preset
+format (`.milk`) that projectM supports.
 
 ## Acknowledgements
 
@@ -151,3 +157,11 @@ Internet radio in WaveAMP is powered by [Radio Browser](https://www.radio-browse
 a free, non-commercial station database kept running by volunteers who host
 its API mirrors at their own expense. Thank you for making it exist and keeping
 it open.
+
+The visualizer presets run on [projectM](https://github.com/projectM-visualizer/projectm) —
+the open-source reimplementation of MilkDrop that its team has been developing
+for years. Thank you to the projectM developers and to Ryan Geiss for the
+original MilkDrop. For thousands more presets, download the
+["Cream of the Crop"](https://github.com/projectM-visualizer/presets-cream-of-the-crop)
+collection curated by ISOSCELES and choose its folder in Settings → Interface →
+Visualization.

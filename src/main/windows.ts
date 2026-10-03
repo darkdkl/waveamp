@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, type WebContents } from "electron";
+import { app, BrowserWindow, screen, type Rectangle, type WebContents } from "electron";
 import path from "node:path";
 import { loadConfig } from "./config";
 import { normalizeScalePercent, rescaledSize, scaledSize, type Size } from "./windowSizing";
@@ -18,6 +18,7 @@ let mainWindow: BrowserWindow | null = null;
 // config.json); this window only relays changes, never writes config.
 let settingsWindow: BrowserWindow | null = null;
 let settingsScale = 100;
+let boundsBeforeFullScreen: Rectangle | null = null;
 
 function isAlive(win: BrowserWindow | null): win is BrowserWindow {
   return !!win && !win.isDestroyed();
@@ -128,6 +129,16 @@ export function resizeSenderWindow(sender: WebContents, height: number, width: n
   }
 }
 
+export function setMainWindowFullScreen(enabled: boolean): void {
+  const win = getMainWindow();
+  if (!win || win.isFullScreen() === enabled) return;
+  if (enabled) {
+    boundsBeforeFullScreen = win.getBounds();
+    win.setResizable(true);
+  }
+  win.setFullScreen(enabled);
+}
+
 export function minimizeSenderWindow(sender: WebContents): void {
   const win = BrowserWindow.fromWebContents(sender);
   if (win && !win.isDestroyed()) win.minimize();
@@ -167,6 +178,13 @@ export function createWindow(): Promise<void> {
   });
 
   mainWindow = win;
+  win.on("enter-full-screen", () => sendToMainWindow("full-screen-changed", true));
+  win.on("leave-full-screen", () => {
+    win.setResizable(false);
+    if (boundsBeforeFullScreen) win.setBounds(boundsBeforeFullScreen);
+    boundsBeforeFullScreen = null;
+    sendToMainWindow("full-screen-changed", false);
+  });
   win.on("closed", () => {
     if (mainWindow === win) mainWindow = null;
     if (isAlive(settingsWindow)) settingsWindow.close();

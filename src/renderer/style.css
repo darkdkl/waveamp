@@ -373,6 +373,57 @@ body.is-electron .player::before {
   cursor: pointer;
 }
 
+.display__stage.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  aspect-ratio: auto;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: default;
+}
+
+body.is-presets-fullscreen .player__display {
+  z-index: 1000;
+}
+
+body.is-presets-fullscreen .player > :not(.player__display) {
+  visibility: hidden;
+}
+
+.display__stage.is-fullscreen.is-idle {
+  cursor: none;
+}
+
+.display__stage.is-fullscreen.is-idle .display__stage-bar {
+  opacity: 0;
+}
+
+.display__stage.is-fullscreen .display__stage-bar {
+  gap: clamp(4px, 0.6vmin, 12px);
+  padding: clamp(6px, 0.96vmin, 19px) clamp(8px, 1.32vmin, 26px);
+}
+
+.display__stage.is-fullscreen .display__stage-name {
+  font-size: clamp(10px, 1.19vmin, 24px);
+}
+
+.display__stage.is-fullscreen .display__stage-lock {
+  width: clamp(10px, 1.19vmin, 24px);
+  height: clamp(10px, 1.19vmin, 24px);
+}
+
+.display__stage.is-fullscreen .display__stage-btn {
+  width: clamp(22px, 2.61vmin, 52px);
+  height: clamp(20px, 2.38vmin, 48px);
+  border-radius: clamp(4px, 0.48vmin, 10px);
+}
+
+.display__stage.is-fullscreen .display__stage-btn svg {
+  width: clamp(12px, 1.42vmin, 28px);
+  height: clamp(12px, 1.42vmin, 28px);
+}
+
 .display__stage-canvas {
   display: block;
   width: 100%;

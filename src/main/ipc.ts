@@ -22,6 +22,7 @@ import {
   resizeSenderWindow,
   sendToMainWindow,
   sendToSettingsWindow,
+  setMainWindowFullScreen,
   setSettingsWindowScale,
 } from "./windows";
 import {
@@ -78,6 +79,8 @@ export function registerIpcHandlers(): void {
   ipcMain.on("set-close-minimizes-to-tray", (_event, enabled: boolean) => setCloseMinimizesToTray(!!enabled));
 
   ipcMain.on("window-ready", (event) => revealSenderWindow(event.sender));
+
+  ipcMain.on("set-full-screen", (_event, enabled: boolean) => setMainWindowFullScreen(!!enabled));
 
   ipcMain.on("window-minimize", (event) => minimizeSenderWindow(event.sender));
 

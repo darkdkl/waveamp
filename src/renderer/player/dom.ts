@@ -27,6 +27,7 @@ export const presetLock = byId("presetLock");
 export const presetName = byId("presetName");
 export const presetPrevBtn = byId<HTMLButtonElement>("presetPrevBtn");
 export const presetNextBtn = byId<HTMLButtonElement>("presetNextBtn");
+export const presetFullscreenBtn = byId<HTMLButtonElement>("presetFullscreenBtn");
 export const seek = byId<HTMLInputElement>("seek");
 export const volume = byId<HTMLInputElement>("volume");
 

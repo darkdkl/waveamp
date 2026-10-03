@@ -29,6 +29,7 @@ const ACTIONS = [
   ["nextPreset", "nextPreset", "BracketRight", "", ""],
   ["previousPreset", "previousPreset", "BracketLeft", "", ""],
   ["lockPreset", "hotkeyLockPreset", "Backslash", "", ""],
+  ["presetsFullscreen", "presetsFullscreen", "KeyF", "", ""],
 ].map(([id, nameKey, local, global, macGlobal]) => ({ id, nameKey, local, global: isMac ? macGlobal : global }));
 
 const MODIFIERS = ["Ctrl", "Alt", "Shift", "Meta"];
