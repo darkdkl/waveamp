@@ -40,8 +40,8 @@ Runs on macOS, Windows and Linux.
   Shows the actual signal, independent of the volume
 - **Visualizer presets** — the fourth mode opens the display into a large
   picture powered by [projectM](https://github.com/projectM-visualizer/projectm),
-  compatible with MilkDrop presets (`.milk`): a built-in selection plus your own
-  folder, automatic changes, full screen
+  compatible with MilkDrop presets (`.milk`): WaveAMP's own built-in presets plus
+  any folder of `.milk` files, automatic changes, full screen
 
   <img src="docs/presets.gif" alt="Visualizer presets changing" width="420" />
 
@@ -134,9 +134,6 @@ see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
   (MIT)
 - [projectM](https://github.com/projectM-visualizer/projectm) — the visualizer
   presets engine, compiled to WebAssembly (LGPL-2.1)
-- A selection from the ["Cream of the Crop"](https://github.com/projectM-visualizer/presets-cream-of-the-crop)
-  preset collection — the built-in visualizer presets (the collection states no
-  formal license; the presets remain the work of their authors)
 
 The full list with license texts is generated into `THIRD_PARTY_LICENSES.txt`
 before every run and build (`npm run licenses`), shipped next to the app and
@@ -167,6 +164,8 @@ it open.
 
 The visualizer presets run on [projectM](https://github.com/projectM-visualizer/projectm) —
 the open-source reimplementation of MilkDrop that its team has been developing
-for years. Thank you to the projectM developers, to Ryan Geiss for the original
-MilkDrop, to the preset authors whose work you see on the screen, and to
-ISOSCELES for curating the "Cream of the Crop" collection.
+for years. Thank you to the projectM developers and to Ryan Geiss for the
+original MilkDrop. For thousands more presets, download the
+["Cream of the Crop"](https://github.com/projectM-visualizer/presets-cream-of-the-crop)
+collection curated by ISOSCELES and choose its folder in Settings → Interface →
+Visualization.

@@ -40,8 +40,8 @@
   Показывает реальный сигнал и не зависит от громкости
 - **Пресеты визуализации** — четвёртый режим раскрывает дисплей в большую
   картинку на [projectM](https://github.com/projectM-visualizer/projectm),
-  совместимую с пресетами MilkDrop (`.milk`): встроенная подборка и своя папка,
-  автосмена, полный экран
+  совместимую с пресетами MilkDrop (`.milk`): собственные встроенные пресеты
+  WaveAMP и любая папка с файлами `.milk`, автосмена, полный экран
 
   <img src="docs/presets.gif" alt="Смена пресетов визуализации" width="420" />
 
@@ -135,9 +135,6 @@ npm run build:win
   аудиофайлов (MIT)
 - [projectM](https://github.com/projectM-visualizer/projectm) — движок пресетов
   визуализации, собранный в WebAssembly (LGPL-2.1)
-- Подборка из коллекции пресетов [«Cream of the Crop»](https://github.com/projectM-visualizer/presets-cream-of-the-crop) —
-  встроенные пресеты визуализации (формальная лицензия у коллекции не указана;
-  пресеты остаются работой их авторов)
 
 Полный список со всеми зависимостями и текстами лицензий собирается в
 `THIRD_PARTY_LICENSES.txt` перед каждым запуском и сборкой (`npm run licenses`),
@@ -170,6 +167,8 @@ Winamp — товарный знак соответствующего право
 
 Пресеты визуализации работают на [projectM](https://github.com/projectM-visualizer/projectm) —
 открытой реализации MilkDrop, которую его команда развивает уже много лет.
-Спасибо разработчикам projectM, Райану Гайссу (Ryan Geiss) за оригинальный
-MilkDrop, авторам пресетов, чью работу вы видите на экране, и ISOSCELES за
-составление коллекции «Cream of the Crop».
+Спасибо разработчикам projectM и Райану Гайссу (Ryan Geiss) за оригинальный
+MilkDrop. Тысячи других пресетов — в коллекции
+[«Cream of the Crop»](https://github.com/projectM-visualizer/presets-cream-of-the-crop),
+которую составил ISOSCELES: скачайте её и укажите папку в Настройки →
+Интерфейс → Визуализация.

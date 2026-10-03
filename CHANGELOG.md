@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.11.0] — 2026-10-03
+
+### Changed
+- The built-in visualizer presets are now WaveAMP's own. Any folder of
+  MilkDrop presets (`.milk`) can still be added in Settings; the README links
+  a large free collection
+
 ## [1.10.0] — 2026-10-03
 
 ### Added
