@@ -1,7 +1,7 @@
 import { vizCanvas } from "./dom";
 import { state } from "./state";
 import { analyserNode, meterAnalysers } from "./audioGraph";
-import { SMOOTH_TAU_MS, followLevel, needlePosition, spectrumBinMap } from "./vizMath";
+import { followLevel, needlePosition, parseVizResponse, responseTauMs, spectrumBinMap } from "./vizMath";
 import { persistConfig } from "./config";
 import { enterPresetsMode, exitPresetsMode, initPresetsMode, presetsSupported } from "./presets/mode";
 import type { VizMode } from "../../shared/types";
@@ -46,7 +46,7 @@ export function cycleVizMode(): void {
 }
 
 export function setVizResponse(value: string): void {
-  state.vizResponse = value === "peak" ? "peak" : "smooth";
+  state.vizResponse = parseVizResponse(value);
   persistConfig();
 }
 
@@ -184,7 +184,7 @@ function renderScope(dt: number, now: number): void {
       break;
     }
   }
-  const blend = state.vizResponse === "smooth" ? 1 - Math.exp(-dt / SMOOTH_TAU_MS) : 1;
+  const blend = state.vizResponse === "peak" ? 1 : 1 - Math.exp(-dt / responseTauMs(state.vizResponse));
   for (let i = 0; i < SCOPE_WINDOW; i++) {
     scopeTrace[i] += (mixAt(start + i) - scopeTrace[i]) * blend;
   }

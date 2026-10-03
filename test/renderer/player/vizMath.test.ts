@@ -1,10 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { PEAK_RISE_TAU_MS, SMOOTH_TAU_MS, followLevel, needlePosition, spectrumBinMap } from "../../../src/renderer/player/vizMath";
+import {
+  PEAK_RISE_TAU_MS,
+  SLOW_TAU_MS,
+  SMOOTH_TAU_MS,
+  followLevel,
+  needlePosition,
+  parseVizResponse,
+  spectrumBinMap,
+} from "../../../src/renderer/player/vizMath";
 
 describe("followLevel", () => {
   it("moves toward the target with the smooth time constant", () => {
     const next = followLevel(0, 1, SMOOTH_TAU_MS, 300, "smooth");
     expect(next).toBeCloseTo(1 - Math.exp(-1));
+  });
+
+  it("moves toward the target with the slow time constant both ways", () => {
+    expect(followLevel(0, 1, SLOW_TAU_MS, 300, "slow")).toBeCloseTo(1 - Math.exp(-1));
+    expect(followLevel(1, 0, SLOW_TAU_MS, 300, "slow")).toBeCloseTo(Math.exp(-1));
   });
 
   it("rises fast and falls with the given time constant in peak mode", () => {
@@ -14,6 +27,15 @@ describe("followLevel", () => {
 
   it("stays put when already at the target", () => {
     expect(followLevel(0.5, 0.5, 16, 300, "peak")).toBe(0.5);
+  });
+});
+
+describe("parseVizResponse", () => {
+  it("keeps known modes and falls back to medium", () => {
+    expect(parseVizResponse("slow")).toBe("slow");
+    expect(parseVizResponse("smooth")).toBe("smooth");
+    expect(parseVizResponse("peak")).toBe("peak");
+    expect(parseVizResponse("fast")).toBe("smooth");
   });
 });
 
