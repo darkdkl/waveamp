@@ -11,7 +11,6 @@ Runs on macOS, Windows and Linux.
 </p>
 
 <p align="center">
-  <img src="docs/presets.png" alt="Visualizer presets in the display" width="400" />
   <img src="docs/radio.png" alt="Radio: the station's current track and saved track titles" width="400" />
 </p>
 
@@ -42,9 +41,6 @@ Runs on macOS, Windows and Linux.
   picture powered by [projectM](https://github.com/projectM-visualizer/projectm),
   compatible with MilkDrop presets (`.milk`): WaveAMP's own built-in presets plus
   any folder of `.milk` files, automatic changes, full screen
-
-  <img src="docs/presets.gif" alt="Visualizer presets changing" width="420" />
-
 - **Internet radio** — station search through the
   [Radio Browser API](https://www.radio-browser.info/) with country, region
   and genre filters, plus favorites. Stations can also be added by hand from a

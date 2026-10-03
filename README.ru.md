@@ -11,7 +11,6 @@
 </p>
 
 <p align="center">
-  <img src="docs/presets.png" alt="Пресеты визуализации в дисплее" width="400" />
   <img src="docs/radio.png" alt="Радио: трек, который играет на станции, и сохранённые названия" width="400" />
 </p>
 
@@ -42,9 +41,6 @@
   картинку на [projectM](https://github.com/projectM-visualizer/projectm),
   совместимую с пресетами MilkDrop (`.milk`): собственные встроенные пресеты
   WaveAMP и любая папка с файлами `.milk`, автосмена, полный экран
-
-  <img src="docs/presets.gif" alt="Смена пресетов визуализации" width="420" />
-
 - **Интернет-радио** — поиск станций через
   [Radio Browser API](https://www.radio-browser.info/) с фильтрами по стране,
   региону и жанру, избранное. Станцию можно добавить и вручную — по ссылке на
