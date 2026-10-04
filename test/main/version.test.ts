@@ -23,6 +23,13 @@ describe("isNewerVersion", () => {
     expect(isNewerVersion("2.0", "1.9.9")).toBe(true);
     expect(isNewerVersion("1.3", "1.3.0")).toBe(false);
   });
+
+  it("puts a test build after the previous release and before its own release", () => {
+    expect(isNewerVersion("1.13.2", "1.13.2-test.12")).toBe(true);
+    expect(isNewerVersion("1.13.3", "1.13.2-test.12")).toBe(true);
+    expect(isNewerVersion("1.13.1", "1.13.2-test.12")).toBe(false);
+    expect(isNewerVersion("1.13.2-test.13", "1.13.2")).toBe(false);
+  });
 });
 
 describe("parseLatestRelease", () => {

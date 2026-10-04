@@ -4,6 +4,18 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.13.3] — 2026-10-04
+
+### Changed
+- Test builds report a -test version everywhere, so they can't be mistaken for
+  a release, and offer the release of the same version as an update
+
+## [1.13.2] — 2026-10-04
+
+### Changed
+- The Starship preset runs smoothly in full screen, with a steel ship, grey
+  rocks and distant stars behind the nebula; the engine flame follows the bass
+
 ## [1.13.1] — 2026-10-04
 
 ### Changed

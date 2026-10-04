@@ -1,10 +1,12 @@
 export function isNewerVersion(candidate: string, current: string): boolean {
-  const a = candidate.split(".").map(Number);
-  const b = current.split(".").map(Number);
+  const [candidateCore, candidatePre] = candidate.split("-", 2);
+  const [currentCore, currentPre] = current.split("-", 2);
+  const a = candidateCore.split(".").map(Number);
+  const b = currentCore.split(".").map(Number);
   for (let i = 0; i < 3; i++) {
     if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
   }
-  return false;
+  return Boolean(currentPre) && !candidatePre;
 }
 
 export const RELEASES_URL = "https://github.com/darkdkl/waveamp/releases/";
