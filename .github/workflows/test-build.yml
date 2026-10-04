@@ -19,12 +19,15 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Recreate the test prerelease
         run: |
           gh release delete test-build --cleanup-tag --yes --repo "$GITHUB_REPOSITORY" || true
           gh release create test-build --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
             --title "Test build" \
-            --notes "Not a release. Built from \`test\` at ${GITHUB_SHA::7} on $(date -u '+%Y-%m-%d %H:%M UTC'). Replaced on every push to \`test\`."
+            --notes "Not a release. Version $(node -p "require('./package.json').version")-test.$GITHUB_RUN_NUMBER, built from \`test\` at ${GITHUB_SHA::7} on $(date -u '+%Y-%m-%d %H:%M UTC'). Replaced on every push to \`test\`."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -54,6 +57,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Set the test version
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          npm version --no-git-tag-version "$version-test.$GITHUB_RUN_NUMBER"
+
       - name: Build installer
         run: npm run ${{ matrix.script }}
         env:
@@ -62,12 +71,10 @@ jobs:
       - name: Upload to the test prerelease
         shell: bash
         run: |
-          version=$(node -p "require('./package.json').version")
           cd dist
           for file in *.dmg *-mac.zip *.AppImage *.exe; do
             [ -e "$file" ] || continue
-            renamed="${file//$version/$version-test}"
-            renamed="${renamed// /-}"
+            renamed="${file// /-}"
             mv "$file" "$renamed"
             gh release upload test-build "$renamed" --clobber --repo "$GITHUB_REPOSITORY"
           done
