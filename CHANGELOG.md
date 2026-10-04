@@ -8,7 +8,7 @@ version, fixes bump the patch version.
 
 ### Changed
 - The Starship preset runs smoothly in full screen, with a steel ship, grey
-  rocks and distant stars behind the nebula
+  rocks and distant stars behind the nebula; the engine flame follows the bass
 
 ## [1.13.1] — 2026-10-04
 
