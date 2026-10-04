@@ -75,7 +75,7 @@ jobs:
           for file in *.dmg *-mac.zip *.AppImage *.exe; do
             [ -e "$file" ] || continue
             renamed="${file// /-}"
-            mv "$file" "$renamed"
+            [ "$file" = "$renamed" ] || mv "$file" "$renamed"
             gh release upload test-build "$renamed" --clobber --repo "$GITHUB_REPOSITORY"
           done
         env:
