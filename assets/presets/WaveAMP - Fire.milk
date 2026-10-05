@@ -370,21 +370,23 @@ comp_48=`  s1 += (b1 == 15) * q20;
 comp_49=`  float spec = lerp(s0, s1, smoothstep(0.0, 1.0, bx - b0));
 comp_50=`  float h = 0.28 + 0.58 * spec + 0.10 * q2 + 0.08 * q3;
 comp_51=`  float edge = 1.0 - 0.18 * pow(abs(p.x) / halfW, 3.0);
-comp_52=`  float heat = saturate((f * 1.35 - 0.12 - q.y / (h * edge)) * 1.3);
-comp_53=`  float3 col = float3(0.012, 0.004, 0.002);
-comp_54=`  col += float3(saturate(heat * 1.6), saturate(pow(heat, 1.8) * 0.9), saturate(pow(heat, 6.0) * 0.35));
-comp_55=`  col += float3(0.30, 0.07, 0.01) * saturate(1.0 - q.y * 1.4) * 0.35;
-comp_56=`  float sparks = 0;
-comp_57=`  for (int k = 0; k < 2; k++) {
-comp_58=`    float d = 22.0 + k * 14.0;
-comp_59=`    float2 g = float2(q.x * d, (q.y - t * (0.32 + k * 0.14)) * d);
-comp_60=`    float2 c = floor(g);
-comp_61=`    float hs = fr(sin(dot(c, float2(12.9898, 78.233)) + k * 4.1) * 43758.5453);
-comp_62=`    float2 o = float2(fr(hs * 17.3) - 0.5, fr(hs * 41.7) - 0.5) * 0.6;
-comp_63=`    float sway = sin(t * 2.0 + hs * 30.0) * 0.18;
-comp_64=`    float s = smoothstep(0.09, 0.0, length(g - c - 0.5 - o - float2(sway, 0)));
-comp_65=`    sparks += s * step(0.93 - 0.05 * q4, hs) * saturate(1.0 - q.y * 1.15) * (0.6 + 0.4 * fr(hs * 91.1));
-comp_66=`  }
-comp_67=`  col += float3(1.0, 0.62, 0.25) * sparks * 1.6;
-comp_68=`  ret = col;
-comp_69=`}
+comp_52=`  float top = (f * 1.35 - 0.12) * h * edge;
+comp_53=`  float heat = saturate((f * 1.35 - 0.12 - q.y / (h * edge)) * 1.3);
+comp_54=`  float above = q.y - top;
+comp_55=`  float3 col = float3(0.012, 0.004, 0.002);
+comp_56=`  col += float3(saturate(heat * 1.6), saturate(pow(heat, 1.8) * 0.9), saturate(pow(heat, 6.0) * 0.35));
+comp_57=`  col += float3(0.30, 0.07, 0.01) * saturate(1.0 - q.y * 1.4) * 0.35;
+comp_58=`  float sparks = 0;
+comp_59=`  for (int k = 0; k < 2; k++) {
+comp_60=`    float d = 22.0 + k * 14.0;
+comp_61=`    float2 g = float2(q.x * d, (q.y - t * (0.32 + k * 0.14)) * d);
+comp_62=`    float2 c = floor(g);
+comp_63=`    float hs = fr(sin(dot(c, float2(12.9898, 78.233)) + k * 4.1) * 43758.5453);
+comp_64=`    float2 o = float2(fr(hs * 17.3) - 0.5, fr(hs * 41.7) - 0.5) * 0.6;
+comp_65=`    float sway = sin(t * 2.0 + hs * 30.0) * 0.18;
+comp_66=`    float s = smoothstep(0.09, 0.0, length(g - c - 0.5 - o - float2(sway, 0)));
+comp_67=`    sparks += s * step(0.9 - 0.05 * q4, hs) * smoothstep(-0.01, 0.03, above) * (1.0 - smoothstep(0.02, 0.32, above)) * (0.6 + 0.4 * fr(hs * 91.1));
+comp_68=`  }
+comp_69=`  col += float3(1.0, 0.62, 0.25) * sparks * 1.6;
+comp_70=`  ret = col;
+comp_71=`}
