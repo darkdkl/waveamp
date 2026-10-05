@@ -24,7 +24,8 @@ export const SCALE_MAX = 150;
 export const SCALE_STEP = 10;
 
 const WINDOW_WIDTH_BASE = 480;
-const LIST_MIN_HEIGHT = 60;
+const LIST_MIN_HEIGHT = 240;
+const FRAME_MIN_HEIGHT = 60;
 const LIST_MAX_HEIGHT = 1920;
 
 let basePlayerHeight = 0;
@@ -100,12 +101,12 @@ function activeRadioOffset(): number {
 }
 
 function applyListHeight(px: number): void {
-  const searchPx = Math.max(LIST_MIN_HEIGHT, px - radioChromeOffset);
+  const searchPx = Math.max(FRAME_MIN_HEIGHT, px - radioChromeOffset);
   playlistListFrame.style.height = px + "px";
   radioResultsFrame.style.height = searchPx + "px";
   radioFavoritesFrame.style.height = px + "px";
   radioAddFrame.style.height = px + "px";
-  radioSavedFrame.style.height = Math.max(LIST_MIN_HEIGHT, px - radioSavedOffset) + "px";
+  radioSavedFrame.style.height = Math.max(FRAME_MIN_HEIGHT, px - radioSavedOffset) + "px";
   if (state.playlistOpen) playlist.style.maxHeight = playlist.scrollHeight + "px";
   if (state.radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
 }

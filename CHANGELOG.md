@@ -4,6 +4,20 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.15.1] — 2026-10-05
+
+### Fixed
+- The radio filters list every country and region alphabetically in a
+  scrollable list
+- The playlist and radio lists can't be made shorter than four stations
+
+## [1.15.0] — 2026-10-05
+
+### Added
+- A new built-in visualizer preset, Fire: flames that rise higher where the
+  music is louder — low notes on the left, high notes on the right — with
+  sparks and a flare on the beat
+
 ## [1.14.0] — 2026-10-05
 
 ### Changed

@@ -71,30 +71,33 @@ describe("filterStationsByTag", () => {
 });
 
 describe("filter options", () => {
-  it("builds countries with codes, sorted by station count", () => {
+  it("builds every country with a code, sorted by name without a leading The", () => {
     const data = [
+      { name: "The United States Of America", iso_3166_1: "US", stationcount: 6000 },
       { name: "France", iso_3166_1: "FR", stationcount: 10 },
       { name: "Nowhere", iso_3166_1: "", stationcount: 99 },
       { name: "Empty", iso_3166_1: "EM", stationcount: 0 },
+      { name: " ", iso_3166_1: "XX", stationcount: 1 },
+      { name: "israel", iso_3166_1: "IL", stationcount: 181 },
+      { name: "The Netherlands", iso_3166_1: "NL", stationcount: 900 },
       { name: "Germany", iso_3166_1: "DE", stationcount: 30 },
     ];
-    expect(toCountryOptions(data, 5)).toEqual([
-      { code: "DE", name: "Germany", count: 30 },
-      { code: "FR", name: "France", count: 10 },
-    ]);
-    expect(toCountryOptions(data, 1)).toHaveLength(1);
+    expect(toCountryOptions(data).map((c) => c.code)).toEqual(["FR", "DE", "IL", "NL", "US"]);
+    expect(toCountryOptions(data)[0]).toEqual({ code: "FR", name: "France", count: 10 });
   });
 
-  it("builds regions, skipping empty names and counts", () => {
+  it("builds every region alphabetically, skipping empty names and counts", () => {
     const data = [
       { name: "Bavaria", stationcount: 5 },
       { name: "", stationcount: 9 },
       { name: "Berlin", stationcount: 7 },
       { name: "Ghost", stationcount: 0 },
+      { name: " Saarland", stationcount: 1 },
     ];
-    expect(toStateOptions(data, 10)).toEqual([
-      { name: "Berlin", count: 7 },
+    expect(toStateOptions(data)).toEqual([
       { name: "Bavaria", count: 5 },
+      { name: "Berlin", count: 7 },
+      { name: "Saarland", count: 1 },
     ]);
   });
 
