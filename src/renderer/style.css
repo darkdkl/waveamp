@@ -1862,3 +1862,64 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
     width: 100%;
   }
 }
+
+.radio__select,
+.radio__select::picker(select) {
+  appearance: base-select;
+}
+
+.radio__select::picker-icon {
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.radio__select::picker(select) {
+  position-area: bottom span-right;
+  position-try-fallbacks: none;
+  margin-top: 2px;
+  min-width: max(anchor-size(width), 230px);
+  max-height: var(--picker-max-height, 240px);
+  overflow-y: auto;
+  padding: 4px 0;
+  border: 1px solid #000;
+  border-radius: 6px;
+  background: var(--btn-bg-active);
+  color: var(--text);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+}
+
+.radio__select::picker(select)::-webkit-scrollbar {
+  width: 8px;
+}
+
+.radio__select::picker(select)::-webkit-scrollbar-track {
+  background: var(--well);
+  border-radius: 3px;
+}
+
+.radio__select::picker(select)::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--knob-1), var(--knob-2));
+  border: 1px solid #000;
+  border-radius: 3px;
+}
+
+.radio__select option {
+  padding: 4px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.radio__select option::checkmark {
+  display: none;
+}
+
+.radio__select option:hover,
+.radio__select option:focus-visible {
+  background: var(--btn-bg-hover);
+  outline: none;
+}
+
+.radio__select option:checked {
+  background: var(--accent-dim);
+  color: #fff;
+}

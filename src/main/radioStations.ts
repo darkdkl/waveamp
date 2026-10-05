@@ -46,20 +46,26 @@ export function filterStationsByTag(stations: Station[], tag: string, limit: num
     .slice(0, limit);
 }
 
-export function toCountryOptions(data: RadioBrowserNamedCount[], limit: number): CountryOption[] {
-  return data
-    .filter((c): c is RadioBrowserNamedCount & { iso_3166_1: string } => !!c.iso_3166_1 && c.stationcount > 0)
-    .map((c) => ({ code: c.iso_3166_1, name: c.name, count: c.stationcount }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
+function sortKey(name: string): string {
+  return name.replace(/^the\s+/i, "");
 }
 
-export function toStateOptions(data: RadioBrowserNamedCount[], limit: number): CountedOption[] {
+function byName(a: { name: string }, b: { name: string }): number {
+  return sortKey(a.name).localeCompare(sortKey(b.name), "en", { sensitivity: "base" });
+}
+
+export function toCountryOptions(data: RadioBrowserNamedCount[]): CountryOption[] {
   return data
-    .filter((s) => s.name && s.stationcount > 0)
-    .map((s) => ({ name: s.name, count: s.stationcount }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
+    .filter((c): c is RadioBrowserNamedCount & { iso_3166_1: string } => !!c.iso_3166_1 && !!c.name.trim() && c.stationcount > 0)
+    .map((c) => ({ code: c.iso_3166_1, name: c.name.trim(), count: c.stationcount }))
+    .sort(byName);
+}
+
+export function toStateOptions(data: RadioBrowserNamedCount[]): CountedOption[] {
+  return data
+    .filter((s) => s.name?.trim() && s.stationcount > 0)
+    .map((s) => ({ name: s.name.trim(), count: s.stationcount }))
+    .sort(byName);
 }
 
 export function toTagOptions(data: RadioBrowserNamedCount[]): CountedOption[] {

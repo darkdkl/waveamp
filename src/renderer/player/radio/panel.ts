@@ -8,6 +8,7 @@ import {
   radioFavEmpty,
   radioFavoritesList,
   radioFavoritesView,
+  radioResultsFrame,
   radioResultsList,
   radioSearchForm,
   radioSearchInput,
@@ -281,7 +282,19 @@ export function initRadioTabs(): void {
   radioTabSaved.addEventListener("click", () => setRadioView("saved"));
 }
 
+const PICKER_GAP_PX = 2;
+
+function fitPickerToResults(select: HTMLSelectElement): void {
+  const height = radioResultsFrame.getBoundingClientRect().bottom - select.getBoundingClientRect().bottom - PICKER_GAP_PX;
+  select.style.setProperty("--picker-max-height", `${Math.max(0, Math.floor(height))}px`);
+}
+
 export function initRadioSearch(): void {
+  for (const select of [radioCountrySelect, radioStateSelect, radioTagSelect]) {
+    select.addEventListener("pointerdown", () => fitPickerToResults(select));
+    select.addEventListener("keydown", () => fitPickerToResults(select));
+  }
+
   radioCountrySelect.addEventListener("change", async () => {
     radioCountry = radioCountrySelect.value;
     radioState = "";

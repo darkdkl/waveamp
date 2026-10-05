@@ -25,8 +25,6 @@ const PLAYLIST_MAX_BYTES = 256 * 1024;
 const TAG_MATCH_SAMPLE_SIZE = 250;
 
 // Native <select> popups can't be height-limited, so cap the number of options.
-const COUNTRY_LIMIT = 40;
-const STATE_LIMIT = 30;
 const TAG_LIMIT = 30;
 const TAG_SAMPLE_SIZE = 500;
 
@@ -76,12 +74,12 @@ export async function searchStations(params: StationSearchParams = {}): Promise<
 }
 
 export async function fetchCountries(): Promise<CountryOption[]> {
-  return toCountryOptions(await radioApiFetch("/json/countries"), COUNTRY_LIMIT);
+  return toCountryOptions(await radioApiFetch("/json/countries"));
 }
 
 // Despite its path, this endpoint takes the country name, not the ISO code.
 export async function fetchStates(countryName: string): Promise<CountedOption[]> {
-  return toStateOptions(await radioApiFetch(`/json/states/${encodeURIComponent(countryName)}/`), STATE_LIMIT);
+  return toStateOptions(await radioApiFetch(`/json/states/${encodeURIComponent(countryName)}/`));
 }
 
 export async function fetchTags(): Promise<CountedOption[]> {
