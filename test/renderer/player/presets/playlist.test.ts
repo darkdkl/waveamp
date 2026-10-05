@@ -19,6 +19,19 @@ describe("PresetPlaylist", () => {
     expect(playlist.next()).toBe(1);
   });
 
+  it("starts with the given preset and keeps it in history", () => {
+    const playlist = new PresetPlaylist(5, sequence([0.9]));
+    expect(playlist.start(2)).toBe(2);
+    expect(playlist.current).toBe(2);
+    expect(playlist.next()).toBe(4);
+    expect(playlist.previous()).toBe(2);
+  });
+
+  it("falls back to a random preset when the start preset is missing", () => {
+    const playlist = new PresetPlaylist(5, sequence([0.5]));
+    expect(playlist.start(-1)).toBe(2);
+  });
+
   it("goes back through history and forward again", () => {
     const playlist = new PresetPlaylist(10, sequence([0.25, 0.55, 0.85]));
     const first = playlist.next();

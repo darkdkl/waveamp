@@ -4,6 +4,11 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.14.0] — 2026-10-05
+
+### Changed
+- The presets mode always starts with the LED Spectrum preset
+
 ## [1.13.3] — 2026-10-04
 
 ### Changed
