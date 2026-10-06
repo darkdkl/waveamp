@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.20.1] — 2026-10-06
+
+### Changed
+- Settings → About shows the standard GPL notice that the program comes
+  without any warranty
+
 ## [1.20.0] — 2026-10-06
 
 ### Added
