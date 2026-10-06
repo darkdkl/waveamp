@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECTM_VERSION="v4.1.7"
+PROJECTM_VERSION="v4.1.8"
 EMSDK_VERSION="6.0.11"
 CMAKE_VERSION="4.4.4"
 

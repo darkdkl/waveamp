@@ -26,7 +26,6 @@ const PRESET_BLEND_S = 2.7;
 const MAX_FAILED_PRESETS_IN_A_ROW = 5;
 const DOUBLE_CLICK_WAIT_MS = 250;
 const FULLSCREEN_IDLE_MS = 2500;
-const START_PRESET_NAME = "WaveAMP - LED Spectrum";
 
 let supported: boolean | null = null;
 let active = false;
@@ -162,7 +161,7 @@ export async function enterPresetsMode(): Promise<void> {
     showMessage("noPresets");
     return;
   }
-  await showPreset(playlist.start(presets.findIndex((p) => p.builtin && p.name === START_PRESET_NAME)), false);
+  if (playlist.current === null) await showPreset(playlist.next(), false);
   cancelAnimationFrame(frame);
   frame = requestAnimationFrame(renderFrame);
   renderBar();
