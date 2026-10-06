@@ -100,3 +100,5 @@ export const radioResultsFrame = byId("radioResultsFrame");
 export const radioEmpty = byId("radioEmpty");
 export const radioFavEmpty = byId("radioFavEmpty");
 export const radioResizeHandle = byId("radioResizeHandle");
+export const windowEdgeResize = byId("windowEdgeResize");
+export const windowGripResize = byId("windowGripResize");

@@ -75,26 +75,29 @@ byId("settingsCloseBtn").addEventListener("click", () => window.electronAPI?.clo
 
 let zoomFactor = 1;
 const settingsResizeHandle = byId("settingsResizeHandle");
-settingsResizeHandle.addEventListener("mousedown", (event) => {
+const settingsGripResize = byId("settingsGripResize");
+function startSettingsResize(event: MouseEvent, handle: HTMLElement, cursor: string) {
   event.preventDefault();
   const startY = event.clientY;
   let frame = 0;
   window.electronAPI?.startSettingsWindowResize?.();
-  settingsResizeHandle.classList.add("is-active");
-  document.body.style.cursor = "ns-resize";
+  handle.classList.add("is-active");
+  document.body.style.cursor = cursor;
   const onMove = (e: MouseEvent) => {
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => window.electronAPI?.resizeSettingsWindowBy?.((e.clientY - startY) * zoomFactor));
   };
   const onUp = () => {
-    settingsResizeHandle.classList.remove("is-active");
+    handle.classList.remove("is-active");
     document.body.style.cursor = "";
     window.removeEventListener("mousemove", onMove);
     window.removeEventListener("mouseup", onUp);
   };
   window.addEventListener("mousemove", onMove);
   window.addEventListener("mouseup", onUp);
-});
+}
+settingsResizeHandle.addEventListener("mousedown", (event) => startSettingsResize(event, settingsResizeHandle, "ns-resize"));
+settingsGripResize.addEventListener("mousedown", (event) => startSettingsResize(event, settingsGripResize, "nwse-resize"));
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") window.electronAPI?.closeSettingsWindow?.();
 });

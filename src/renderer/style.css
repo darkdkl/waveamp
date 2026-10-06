@@ -772,19 +772,6 @@ input[type="range"]:disabled {
   justify-content: center;
 }
 
-.playlist__resize-handle::before {
-  content: "";
-  width: 28px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--btn-bg);
-  transition: background 0.12s ease;
-}
-
-.playlist__resize-handle:hover::before,
-.playlist__resize-handle.is-active::before {
-  background: var(--accent-dim);
-}
 
 .playlist__item {
   display: flex;
@@ -1480,19 +1467,6 @@ input[type="range"].eq__slider {
   justify-content: center;
 }
 
-.radio__resize-handle::before {
-  content: "";
-  width: 28px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--btn-bg);
-  transition: background 0.12s ease;
-}
-
-.radio__resize-handle:hover::before,
-.radio__resize-handle.is-active::before {
-  background: var(--accent-dim);
-}
 
 .settings-panel__inner {
   display: flex;
@@ -1582,19 +1556,6 @@ body.settings-window .settings-panel__inner {
   justify-content: center;
 }
 
-.settings-window__resize-handle::before {
-  content: "";
-  width: 28px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--btn-bg);
-  transition: background 0.12s ease;
-}
-
-.settings-window__resize-handle:hover::before,
-.settings-window__resize-handle.is-active::before {
-  background: var(--accent-dim);
-}
 
 body.settings-window .settings-panel__inner::-webkit-scrollbar {
   width: 8px;
@@ -1967,4 +1928,56 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
   justify-content: space-between;
   font-size: 10px;
   color: var(--text-muted);
+}
+
+.window-edge {
+  position: fixed;
+  left: 0;
+  right: 28px;
+  bottom: 0;
+  height: 6px;
+  z-index: 20;
+  display: none;
+  cursor: ns-resize;
+}
+
+.window-grip {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  height: 28px;
+  z-index: 20;
+  cursor: nwse-resize;
+}
+
+.window-grip svg {
+  position: absolute;
+  right: calc(var(--grip-right) - 1px);
+  bottom: calc(var(--grip-bottom) - 1px);
+  width: 14px;
+  height: 14px;
+  fill: var(--btn-bg);
+  transition: fill 0.12s ease;
+}
+
+.window-grip:hover svg,
+.window-grip.is-active svg {
+  fill: var(--accent-dim);
+}
+
+.window-grip--player {
+  --grip-right: calc(var(--player-padding) / 2 - 1.5px);
+  --grip-bottom: 8.5px;
+  display: none;
+}
+
+.window-grip--settings {
+  --grip-right: 10px;
+  --grip-bottom: 5px;
+}
+
+body:has(.playlist.is-open, .radio.is-open) .window-edge,
+body:has(.playlist.is-open, .radio.is-open) .window-grip--player {
+  display: block;
 }
