@@ -1,4 +1,4 @@
-import { audio, pauseBtn, playBtn, playStateIcon } from "./dom";
+import { audio, durTime, pauseBtn, playBtn, playStateIcon } from "./dom";
 import { state } from "./state";
 
 type PlayState = "playing" | "paused" | "stopped";
@@ -26,6 +26,7 @@ export function renderPlayState(): void {
     playStateIcon.dataset.state = current;
     playStateIcon.querySelector("path")?.setAttribute("d", STATE_ICONS[current]);
   }
+  durTime.classList.toggle("is-idle", current !== "playing");
   playBtn.classList.toggle("is-current", current === "playing");
   pauseBtn.classList.toggle("is-current", current === "paused");
 }

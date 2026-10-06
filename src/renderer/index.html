@@ -26,10 +26,11 @@
             <svg viewBox="0 0 24 24"><path d="M6 2.5h12v19l-6-4.8-6 4.8z"/></svg>
           </button>
         </div>
+        <span id="channelsTag" class="display__live display__channels" hidden>STEREO</span>
         <div class="display__scale">
           <canvas class="display__viz-canvas" id="vizCanvas" data-i18n-title="vizModeHint"></canvas>
           <span class="display__state" id="playState" hidden><svg viewBox="0 0 24 24"><path d=""/></svg></span>
-          <span id="durTime">00:00</span>
+          <span id="durTime" class="display__live is-idle">00:00</span>
           <span id="liveTag" class="display__live" hidden>LIVE</span>
         </div>
       </div>

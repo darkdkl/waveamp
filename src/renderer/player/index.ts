@@ -24,6 +24,7 @@ import { initPlayState } from "./playState";
 import { applyWindowControlsSide, initSettingsBridge, initSettingsButton, initSkipUpdateVersion } from "./settingsBridge";
 import { initPlayerHotkeys } from "./playerHotkeys";
 import { restoreConfig } from "./restore";
+import { initStereo } from "./stereo";
 
 initVisualizerControls();
 initEqualizerControls();
@@ -44,6 +45,7 @@ initNowPlaying();
 initSavedTracks();
 initClock();
 initPlayState();
+initStereo();
 initMediaSession();
 initAudioErrorHandling();
 initSeekAndVolume();

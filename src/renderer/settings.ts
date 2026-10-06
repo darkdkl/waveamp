@@ -1,6 +1,7 @@
 import { i18n } from "./i18n";
 import { hotkeys } from "./hotkeys";
 import { accentColor as accentColorTheme } from "./theme";
+import { snapStereoStrength, STEREO_STRENGTH_DEFAULT } from "../shared/stereo";
 import type {
   AccentColor,
   ProxyConfig,
@@ -39,6 +40,10 @@ const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
 const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
 const radioTrackTitleBtn = byId<HTMLButtonElement>("radioTrackTitleBtn");
 const playerClockBtn = byId<HTMLButtonElement>("playerClockBtn");
+const stereoStrengthInput = byId<HTMLInputElement>("stereoStrengthInput");
+const stereoRadioBtn = byId<HTMLButtonElement>("stereoRadioBtn");
+const stereoTracksBtn = byId<HTMLButtonElement>("stereoTracksBtn");
+const stereoPseudoBtn = byId<HTMLButtonElement>("stereoPseudoBtn");
 const presetAutoSwitchBtn = byId<HTMLButtonElement>("presetAutoSwitchBtn");
 const presetHardCutsBtn = byId<HTMLButtonElement>("presetHardCutsBtn");
 const presetFolderText = byId("presetFolderText");
@@ -105,6 +110,9 @@ let autoUpdateEnabled = true;
 let trayIconEnabled = false;
 let coverArtEnabled = true;
 let radioTrackTitleEnabled = true;
+let stereoRadio = false;
+let stereoTracks = false;
+let stereoPseudo = true;
 let playerClockEnabled = false;
 let presetAutoSwitch = true;
 let presetHardCuts = false;
@@ -207,6 +215,32 @@ function setPlayerClockEnabled(enabled: boolean) {
   sendAction("setPlayerClockEnabled", enabled);
 }
 playerClockBtn.addEventListener("click", () => setPlayerClockEnabled(!playerClockEnabled));
+
+function renderToggle(button: HTMLButtonElement, enabled: boolean) {
+  button.textContent = enabled ? i18n.t("on") : i18n.t("off");
+  button.classList.toggle("is-active", enabled);
+}
+
+stereoRadioBtn.addEventListener("click", () => {
+  stereoRadio = !stereoRadio;
+  renderToggle(stereoRadioBtn, stereoRadio);
+  sendAction("setStereoRadio", stereoRadio);
+});
+stereoTracksBtn.addEventListener("click", () => {
+  stereoTracks = !stereoTracks;
+  renderToggle(stereoTracksBtn, stereoTracks);
+  sendAction("setStereoTracks", stereoTracks);
+});
+stereoPseudoBtn.addEventListener("click", () => {
+  stereoPseudo = !stereoPseudo;
+  renderToggle(stereoPseudoBtn, stereoPseudo);
+  sendAction("setStereoPseudo", stereoPseudo);
+});
+stereoStrengthInput.addEventListener("input", () => {
+  const strength = snapStereoStrength(Number(stereoStrengthInput.value));
+  stereoStrengthInput.value = String(strength);
+  sendAction("setStereoStrength", strength);
+});
 
 function renderPresetSettings() {
   presetAutoSwitchBtn.textContent = presetAutoSwitch ? i18n.t("on") : i18n.t("off");
@@ -473,6 +507,9 @@ function refreshTextForLanguage() {
   coverArtBtn.textContent = coverArtEnabled ? i18n.t("on") : i18n.t("off");
   radioTrackTitleBtn.textContent = radioTrackTitleEnabled ? i18n.t("on") : i18n.t("off");
   playerClockBtn.textContent = playerClockEnabled ? i18n.t("on") : i18n.t("off");
+  renderToggle(stereoRadioBtn, stereoRadio);
+  renderToggle(stereoTracksBtn, stereoTracks);
+  renderToggle(stereoPseudoBtn, stereoPseudo);
   renderPresetSettings();
   closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? i18n.t("on") : i18n.t("off");
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
@@ -545,6 +582,10 @@ window.electronAPI?.onSettingsState?.((state) => {
   trayIconEnabled = !!state.showTrayIcon;
   coverArtEnabled = state.coverArtEnabled !== false;
   radioTrackTitleEnabled = state.radioTrackTitleEnabled !== false;
+  stereoRadio = !!state.stereoRadio;
+  stereoTracks = !!state.stereoTracks;
+  stereoPseudo = state.stereoPseudo !== false;
+  stereoStrengthInput.value = String(typeof state.stereoStrength === "number" ? state.stereoStrength : STEREO_STRENGTH_DEFAULT);
   playerClockEnabled = !!state.playerClockEnabled;
   presetAutoSwitch = state.presetAutoSwitch !== false;
   presetHardCuts = !!state.presetHardCuts;
