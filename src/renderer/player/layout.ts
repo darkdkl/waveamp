@@ -13,6 +13,8 @@ import {
   radioResizeHandle,
   radioResultsFrame,
   radioSavedFrame,
+  windowEdgeResize,
+  windowGripResize,
 } from "./dom";
 import { state } from "./state";
 import { persistConfig } from "./config";
@@ -114,14 +116,16 @@ function applyListHeight(px: number): void {
 let resizingList = false;
 let resizeStartY = 0;
 let resizeStartHeight = 0;
+let activeResizeHandle: HTMLElement | null = null;
 
-function startListResize(e: MouseEvent, handle: HTMLElement, section: HTMLElement, startHeight: number): void {
+function startListResize(e: MouseEvent, handle: HTMLElement, section: HTMLElement, startHeight: number, cursor = "ns-resize"): void {
   resizingList = true;
   resizeStartY = e.clientY;
   resizeStartHeight = startHeight;
+  activeResizeHandle = handle;
   handle.classList.add("is-active");
   section.classList.add("is-resizing");
-  document.body.style.cursor = "ns-resize";
+  document.body.style.cursor = cursor;
   e.preventDefault();
 }
 
@@ -147,16 +151,23 @@ export function initListResize(): void {
   radioChromeOffset = parseFloat(rootStyle.getPropertyValue("--radio-chrome-offset")) || 72;
   radioSavedOffset = parseFloat(rootStyle.getPropertyValue("--radio-saved-offset")) || 38;
 
-  playlistResizeHandle.addEventListener("mousedown", (e) => {
+  const startPlaylistResize = (e: MouseEvent, handle: HTMLElement, cursor?: string) => {
     const playlistHeight = playlistListFrame.getBoundingClientRect().height / cssZoomFactor();
-    startListResize(e, playlistResizeHandle, playlist, playlistHeight);
-  });
-
-  radioResizeHandle.addEventListener("mousedown", (e) => {
+    startListResize(e, handle, playlist, playlistHeight, cursor);
+  };
+  const startRadioResize = (e: MouseEvent, handle: HTMLElement, cursor?: string) => {
     const radioHeight = activeRadioFrame().getBoundingClientRect().height / cssZoomFactor();
-    const canonicalHeight = radioHeight + activeRadioOffset();
-    startListResize(e, radioResizeHandle, radio, canonicalHeight);
-  });
+    startListResize(e, handle, radio, radioHeight + activeRadioOffset(), cursor);
+  };
+  const startOpenListResize = (e: MouseEvent, handle: HTMLElement, cursor: string) => {
+    if (state.radioOpen) startRadioResize(e, handle, cursor);
+    else if (state.playlistOpen) startPlaylistResize(e, handle, cursor);
+  };
+
+  playlistResizeHandle.addEventListener("mousedown", (e) => startPlaylistResize(e, playlistResizeHandle));
+  radioResizeHandle.addEventListener("mousedown", (e) => startRadioResize(e, radioResizeHandle));
+  windowEdgeResize.addEventListener("mousedown", (e) => startOpenListResize(e, windowEdgeResize, "ns-resize"));
+  windowGripResize.addEventListener("mousedown", (e) => startOpenListResize(e, windowGripResize, "nwse-resize"));
 
   window.addEventListener("mousemove", (e) => {
     if (!resizingList) return;
@@ -169,8 +180,8 @@ export function initListResize(): void {
   window.addEventListener("mouseup", () => {
     if (!resizingList) return;
     resizingList = false;
-    playlistResizeHandle.classList.remove("is-active");
-    radioResizeHandle.classList.remove("is-active");
+    activeResizeHandle?.classList.remove("is-active");
+    activeResizeHandle = null;
     playlist.classList.remove("is-resizing");
     radio.classList.remove("is-resizing");
     document.body.style.cursor = "";

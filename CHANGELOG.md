@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.18.0] — 2026-10-06
+
+### Changed
+- Resize the playlist, the radio list and the Settings window by the bottom
+  edge or the bottom-right corner, like a regular window
+
 ## [1.17.1] — 2026-10-06
 
 ### Fixed
