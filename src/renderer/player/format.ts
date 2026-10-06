@@ -82,7 +82,7 @@ export function safeStreamUrl(value: string): string | null {
 export function safeTrackUrl(value: string): string | null {
   try {
     const url = new URL(value);
-    return url.protocol === "file:" || url.protocol === "blob:" ? url.href : null;
+    return url.protocol === "file:" || url.protocol === "blob:" || url.protocol === "waveamp-alac:" ? url.href : null;
   } catch {
     return null;
   }

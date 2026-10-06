@@ -90,6 +90,18 @@ sections.push(
   ].join("\n")
 );
 
+sections.push(
+  [
+    "Apple Lossless Audio Codec (ALAC)",
+    "Copyright (c) 2011 Apple Inc.",
+    "License: Apache-2.0",
+    "Source: https://github.com/macosforge/alac",
+    "The ALAC decoder in src/main/alac follows Apple's reference decoder.",
+    "",
+    fs.readFileSync(path.join(ROOT, "src", "main", "alac", "LICENSE.txt"), "utf8").trim(),
+  ].join("\n")
+);
+
 const header = `WaveAMP — third-party software notices
 ======================================
 
@@ -99,7 +111,7 @@ listed below, each distributed under its own license. Chromium and the
 other components bundled with Electron are listed in
 LICENSES.chromium.html, next to this file in the installed application.
 
-${entries.length} packages, plus projectM.`;
+${entries.length} packages, plus projectM and the ALAC decoder.`;
 
 fs.writeFileSync(OUTPUT, [header, ...sections].join(`\n\n${"-".repeat(78)}\n\n`) + "\n");
 console.log(`Wrote ${path.relative(ROOT, OUTPUT)} (${entries.length} packages)`);

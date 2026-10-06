@@ -57,6 +57,9 @@ export function scheduleTagRender(): void {
 let lastObjectUrl: string | null = null;
 
 export function getTrackSrc(track: Track): string {
+  if (track.path && track.alac && window.electronAPI?.getAlacUrl) {
+    return window.electronAPI.getAlacUrl(track.path);
+  }
   if (track.path && window.electronAPI?.getFileUrl) {
     return window.electronAPI.getFileUrl(track.path);
   }

@@ -14,7 +14,7 @@ import {
   trackTitle,
   volume,
 } from "./dom";
-import { state } from "./state";
+import { state, type Track } from "./state";
 import { formatTime, safeTrackUrl, trackDisplayName } from "./format";
 import { resumeAudioContext, setVolume } from "./audioGraph";
 import { logEvent } from "./log";
@@ -247,14 +247,31 @@ export function initAudioEvents(): void {
   audio.addEventListener("ended", playNext);
 }
 
+const MP4_AUDIO_RE = /\.(m4a|m4b|mp4)$/i;
+
+function canTryAlac(track: Track, code: number): boolean {
+  return (
+    !track.alac &&
+    !!track.path &&
+    MP4_AUDIO_RE.test(track.path) &&
+    !!window.electronAPI?.getAlacUrl &&
+    (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || code === MediaError.MEDIA_ERR_DECODE)
+  );
+}
+
 export function initAudioErrorHandling(): void {
   // Not "stalled": it fires routinely while healthy streams buffer.
   audio.addEventListener("error", () => {
     if (state.playbackMode === "radio") {
       attemptRadioReconnect();
     } else if (audio.error && audio.error.code !== MediaError.MEDIA_ERR_ABORTED) {
-      logEvent("error", "audio", `Local playback error (code ${audio.error.code}): ${audio.error.message}`);
       const track = state.queue[state.currentIndex];
+      if (track && canTryAlac(track, audio.error.code)) {
+        for (const other of state.queue) if (other.path === track.path) other.alac = true;
+        loadTrack(state.currentIndex, state.localPlayRequested, state.skipDirection);
+        return;
+      }
+      logEvent("error", "audio", `Local playback error (code ${audio.error.code}): ${audio.error.message}`);
       if (!track) return;
       track.unplayable = true;
       renderPlaylist();

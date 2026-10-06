@@ -55,6 +55,7 @@ const api = {
     }
   },
   getFileUrl: (filePath: string): string => pathToFileUrl(filePath),
+  getAlacUrl: (filePath: string): string => `waveamp-alac://local/${encodeURIComponent(filePath)}`,
   searchStations: (params: StationSearchParams): Promise<Station[]> => ipcRenderer.invoke("radio-search", params),
   loadCountries: (): Promise<CountryOption[]> => ipcRenderer.invoke("radio-countries"),
   loadStates: (countryName: string): Promise<CountedOption[]> => ipcRenderer.invoke("radio-states", countryName),
