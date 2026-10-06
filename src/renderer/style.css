@@ -1951,22 +1951,19 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
   cursor: nwse-resize;
 }
 
-.window-grip::after {
-  content: "";
+.window-grip svg {
   position: absolute;
-  right: var(--grip-right);
-  bottom: var(--grip-bottom);
-  width: 12px;
-  height: 12px;
-  border-right: 3px solid var(--btn-bg);
-  border-bottom: 3px solid var(--btn-bg);
-  border-bottom-right-radius: 3px;
-  transition: border-color 0.12s ease;
+  right: calc(var(--grip-right) - 1px);
+  bottom: calc(var(--grip-bottom) - 1px);
+  width: 14px;
+  height: 14px;
+  fill: var(--btn-bg);
+  transition: fill 0.12s ease;
 }
 
-.window-grip:hover::after,
-.window-grip.is-active::after {
-  border-color: var(--accent-dim);
+.window-grip:hover svg,
+.window-grip.is-active svg {
+  fill: var(--accent-dim);
 }
 
 .window-grip--player {
