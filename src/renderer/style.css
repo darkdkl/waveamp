@@ -221,6 +221,7 @@ body.is-electron .player::before {
 }
 
 .display__meta {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -518,6 +519,24 @@ body.is-presets-fullscreen .player > :not(.player__display) {
 .display__live.is-idle {
   color: var(--lcd-fg-dim);
   text-shadow: none;
+}
+
+.display__channels {
+  position: absolute;
+  right: 0;
+  bottom: 15px;
+  font-family: "DejaVu Sans Mono", "Courier New", monospace;
+  font-size: 10px;
+}
+
+.display__channels[hidden] {
+  display: none;
+}
+
+.player__display.is-presets .display__channels {
+  position: static;
+  align-self: flex-end;
+  margin: -3px 0;
 }
 
 .player__seek {
@@ -1922,4 +1941,25 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
 .radio__select option:checked {
   background: var(--accent-dim);
   color: #fff;
+}
+
+.settings-panel__stops {
+  flex: 1;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-panel__stops .settings-panel__range {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
+.settings-panel__stop-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
 }

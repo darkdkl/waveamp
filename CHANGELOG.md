@@ -4,6 +4,24 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.16.0] — 2026-10-06
+
+### Added
+- Stereo widening in Settings → System → Stereo width, switched on separately
+  for radio and for tracks: one strength slider that snaps to weak, medium and
+  strong, plus pseudo-stereo for mono sources
+- A STEREO / MONO indicator on the display for tracks and radio
+
+### Changed
+- The track length on the display is as bright as LIVE
+- The System tab of Settings starts with Stereo width, followed by tray,
+  updates, proxy, logging and about
+
+## [1.15.2] — 2026-10-06
+
+### Removed
+- The Starship preset
+
 ## [1.15.1] — 2026-10-05
 
 ### Fixed

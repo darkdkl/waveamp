@@ -9,6 +9,7 @@ import { renderEqToggle } from "./equalizer";
 import { setCoverArtEnabled } from "./coverArt";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
 import { setPlayerClockEnabled } from "./clock";
+import { setStereoPseudo, setStereoRadio, setStereoStrength, setStereoTracks } from "./stereo";
 import { refreshPresetsText, setPresetAutoSwitch, setPresetFolder, setPresetHardCuts } from "./presets/mode";
 import { renderSavedTracks } from "./radio/savedTracks";
 import { renderPlaylist } from "./playlist";
@@ -107,6 +108,10 @@ export function pushSettingsState(): void {
     coverArtEnabled: state.coverArtEnabled,
     radioTrackTitleEnabled: state.radioTrackTitleEnabled,
     playerClockEnabled: state.playerClockEnabled,
+    stereoRadio: state.stereoRadio,
+    stereoTracks: state.stereoTracks,
+    stereoStrength: state.stereoStrength,
+    stereoPseudo: state.stereoPseudo,
     windowControlsSide: state.windowControlsSide,
     presetAutoSwitch: state.presetAutoSwitch,
     presetHardCuts: state.presetHardCuts,
@@ -153,6 +158,18 @@ export function initSettingsBridge(): void {
         break;
       case "setRadioTrackTitleEnabled":
         setRadioTrackTitleEnabled(!!action.value);
+        break;
+      case "setStereoRadio":
+        setStereoRadio(!!action.value);
+        break;
+      case "setStereoTracks":
+        setStereoTracks(!!action.value);
+        break;
+      case "setStereoStrength":
+        setStereoStrength(Number(action.value));
+        break;
+      case "setStereoPseudo":
+        setStereoPseudo(!!action.value);
         break;
       case "setPlayerClockEnabled":
         setPlayerClockEnabled(!!action.value);

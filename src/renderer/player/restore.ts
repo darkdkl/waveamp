@@ -11,6 +11,7 @@ import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
+import { setStereoPseudo, setStereoRadio, setStereoStrength, setStereoTracks } from "./stereo";
 import { setPlayerClockEnabled } from "./clock";
 import { setPresetAutoSwitch, setPresetFolder, setPresetHardCuts } from "./presets/mode";
 import { loadSavedTracks } from "./radio/savedTracks";
@@ -68,6 +69,11 @@ export async function restoreConfig(): Promise<void> {
   if (typeof settings?.playerClockEnabled === "boolean") {
     setPlayerClockEnabled(settings.playerClockEnabled);
   }
+
+  if (typeof settings?.stereoRadio === "boolean") setStereoRadio(settings.stereoRadio);
+  if (typeof settings?.stereoTracks === "boolean") setStereoTracks(settings.stereoTracks);
+  if (typeof settings?.stereoStrength === "number") setStereoStrength(settings.stereoStrength);
+  if (typeof settings?.stereoPseudo === "boolean") setStereoPseudo(settings.stereoPseudo);
 
   if (typeof settings?.radioTrackTitleEnabled === "boolean") {
     setRadioTrackTitleEnabled(settings.radioTrackTitleEnabled);

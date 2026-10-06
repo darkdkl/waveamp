@@ -118,6 +118,10 @@ export interface AppConfig {
     coverArtEnabled: boolean;
     radioTrackTitleEnabled: boolean;
     playerClockEnabled: boolean;
+    stereoRadio: boolean;
+    stereoTracks: boolean;
+    stereoStrength: number;
+    stereoPseudo: boolean;
     windowControlsSide: WindowControlsSide;
     presetAutoSwitch: boolean;
     presetHardCuts: boolean;
@@ -150,6 +154,10 @@ export interface SettingsState {
   coverArtEnabled: boolean;
   radioTrackTitleEnabled: boolean;
   playerClockEnabled: boolean;
+  stereoRadio: boolean;
+  stereoTracks: boolean;
+  stereoStrength: number;
+  stereoPseudo: boolean;
   windowControlsSide: WindowControlsSide;
   presetAutoSwitch: boolean;
   presetHardCuts: boolean;
@@ -171,6 +179,10 @@ export type SettingsAction =
   | { type: "setCoverArtEnabled"; value: boolean }
   | { type: "setRadioTrackTitleEnabled"; value: boolean }
   | { type: "setPlayerClockEnabled"; value: boolean }
+  | { type: "setStereoRadio"; value: boolean }
+  | { type: "setStereoTracks"; value: boolean }
+  | { type: "setStereoStrength"; value: number }
+  | { type: "setStereoPseudo"; value: boolean }
   | { type: "setWindowControlsSide"; value: WindowControlsSide }
   | { type: "setPresetAutoSwitch"; value: boolean }
   | { type: "setPresetHardCuts"; value: boolean }

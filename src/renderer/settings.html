@@ -144,6 +144,59 @@
     </div>
 
     <div class="settings-panel__view" id="settingsSystemView" hidden>
+      <div class="settings-panel__section-label" data-i18n="stereoSection">Стереобаза</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="stereoStrength">Сила</span>
+          <div class="settings-panel__stops">
+            <input type="range" class="settings-panel__range" id="stereoStrengthInput" min="0" max="100" step="1" />
+            <div class="settings-panel__stop-labels">
+              <span data-i18n="stereoWeak">Слабо</span>
+              <span data-i18n="stereoMedium">Средне</span>
+              <span data-i18n="stereoStrong">Сильно</span>
+            </div>
+          </div>
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="stereoRadio">Расширение для радио</span>
+          <button type="button" class="settings-panel__toggle" id="stereoRadioBtn">Выкл</button>
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="stereoTracks">Расширение для треков</span>
+          <button type="button" class="settings-panel__toggle" id="stereoTracksBtn">Выкл</button>
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="stereoPseudo">Псевдостерео для моно</span>
+          <button type="button" class="settings-panel__toggle" id="stereoPseudoBtn">Вкл</button>
+        </div>
+        <p class="settings-panel__hint" data-i18n="stereoHint">Расширяет стерео: всё, что разнесено по каналам, звучит шире, а голос и бас остаются в центре. Для моно-источников псевдостерео создаёт объём.</p>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="traySection">Трей</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="trayEnable">Показывать иконку в трее</span>
+          <button type="button" class="settings-panel__toggle" id="trayEnabledBtn">Выкл</button>
+        </div>
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="closeMinimizesToTray">Закрытие окна сворачивает в трей</span>
+          <button type="button" class="settings-panel__toggle" id="closeMinimizesToTrayBtn">Выкл</button>
+        </div>
+      </div>
+
+      <div class="settings-panel__section-label" data-i18n="updatesSection">Обновления</div>
+      <div class="settings-panel__card">
+        <div class="settings-panel__row">
+          <span class="settings-panel__row-label" data-i18n="updatesCheckOnLaunch">Проверять при запуске</span>
+          <button type="button" class="settings-panel__toggle" id="autoUpdateEnabledBtn">Вкл</button>
+        </div>
+        <div class="settings-panel__actions">
+          <button type="button" class="settings-panel__action-btn" id="checkUpdatesBtn" data-i18n="checkForUpdatesNow">Проверить сейчас</button>
+          <button type="button" class="settings-panel__action-btn" id="openReleaseBtn" data-i18n="openReleasePage" hidden>Открыть страницу релиза</button>
+        </div>
+        <p class="settings-panel__hint" id="updateStatusText"></p>
+      </div>
+
       <div class="settings-panel__section-label" data-i18n="proxySection">Прокси</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
@@ -165,31 +218,6 @@
             <input type="text" class="settings-panel__input" id="proxyUsernameInput" data-i18n-placeholder="proxyUsernamePlaceholder" placeholder="логин" autocomplete="off" disabled />
             <input type="password" class="settings-panel__input" id="proxyPasswordInput" data-i18n-placeholder="proxyPasswordPlaceholder" placeholder="пароль" autocomplete="off" disabled />
           </div>
-        </div>
-      </div>
-
-      <div class="settings-panel__section-label" data-i18n="updatesSection">Обновления</div>
-      <div class="settings-panel__card">
-        <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="updatesCheckOnLaunch">Проверять при запуске</span>
-          <button type="button" class="settings-panel__toggle" id="autoUpdateEnabledBtn">Вкл</button>
-        </div>
-        <div class="settings-panel__actions">
-          <button type="button" class="settings-panel__action-btn" id="checkUpdatesBtn" data-i18n="checkForUpdatesNow">Проверить сейчас</button>
-          <button type="button" class="settings-panel__action-btn" id="openReleaseBtn" data-i18n="openReleasePage" hidden>Открыть страницу релиза</button>
-        </div>
-        <p class="settings-panel__hint" id="updateStatusText"></p>
-      </div>
-
-      <div class="settings-panel__section-label" data-i18n="traySection">Трей</div>
-      <div class="settings-panel__card">
-        <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="trayEnable">Показывать иконку в трее</span>
-          <button type="button" class="settings-panel__toggle" id="trayEnabledBtn">Выкл</button>
-        </div>
-        <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="closeMinimizesToTray">Закрытие окна сворачивает в трей</span>
-          <button type="button" class="settings-panel__toggle" id="closeMinimizesToTrayBtn">Выкл</button>
         </div>
       </div>
 
