@@ -8,8 +8,9 @@ version, fixes bump the patch version.
 
 ### Added
 - Stereo widening in Settings → System → Stereo width, switched on separately
-  for radio and for tracks: one strength slider that snaps to weak, medium and
-  strong, plus pseudo-stereo for mono sources
+  for tracks and for radio: whatever is spread between the channels sounds
+  wider, while vocals and bass stay in the centre. One strength slider snaps to
+  weak, medium and strong, and pseudo-stereo gives mono sources some space
 - A STEREO / MONO indicator on the display for tracks and radio
 
 ### Changed
