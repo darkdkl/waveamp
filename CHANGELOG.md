@@ -4,6 +4,26 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.20.1] — 2026-10-06
+
+### Changed
+- Settings → About shows the standard GPL notice that the program comes
+  without any warranty
+
+## [1.20.0] — 2026-10-06
+
+### Added
+- Apple Lossless (ALAC) in `.m4a` files now plays, with seeking, the
+  equalizer and the visualizer. It also works for CUE albums ripped to ALAC
+
+## [1.19.0] — 2026-10-06
+
+### Added
+- CUE sheets: an album ripped as one file plays as separate tracks with
+  their own titles, times and seeking. Add the audio file, its `.cue` or the
+  whole folder. Tracks inside one file follow each other without a pause.
+  Sheets in UTF-8, UTF-16 and Windows-1251 are read correctly
+
 ## [1.18.0] — 2026-10-06
 
 ### Changed

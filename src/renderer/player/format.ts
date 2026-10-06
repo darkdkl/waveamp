@@ -1,4 +1,5 @@
 import type { Track } from "./state";
+import type { PlaylistEntry } from "../../shared/types";
 
 export function formatTime(seconds: number): string {
   if (!isFinite(seconds) || seconds < 0) seconds = 0;
@@ -26,6 +27,24 @@ export function trackDisplayName(track: Pick<Track, "name" | "tags">): string {
 // file.type is empty for some formats on some systems — fall back to the extension.
 const AUDIO_EXT_RE = /\.(mp3|wav|ogg|oga|flac|m4a|aac|opus|weba)$/i;
 const UNSUPPORTED_EXT_RE = /\.(wma|ape|mid|midi|aif|aiff|amr|wv|mpc)$/i;
+
+export function isCueFile(file: Pick<File, "name">): boolean {
+  return /\.cue$/i.test(file.name);
+}
+
+export function trackFromEntry(entry: PlaylistEntry & { name?: string }): Omit<Track, "file"> {
+  const fileName = trackLabel(entry.path.split(/[\\/]/).pop() ?? "");
+  if (entry.start == null) return { name: entry.name || fileName, path: entry.path };
+  const end = typeof entry.end === "number" ? entry.end : null;
+  return {
+    name: entry.name || entry.tags?.title || fileName,
+    path: entry.path,
+    start: entry.start,
+    end,
+    tags: entry.tags,
+    duration: end === null ? null : end - entry.start,
+  };
+}
 
 export function isAddableAudioFile(file: Pick<File, "name" | "type">): boolean {
   return AUDIO_EXT_RE.test(file.name) || (file.type.startsWith("audio/") && !UNSUPPORTED_EXT_RE.test(file.name));
@@ -63,7 +82,7 @@ export function safeStreamUrl(value: string): string | null {
 export function safeTrackUrl(value: string): string | null {
   try {
     const url = new URL(value);
-    return url.protocol === "file:" || url.protocol === "blob:" ? url.href : null;
+    return url.protocol === "file:" || url.protocol === "blob:" || url.protocol === "waveamp-alac:" ? url.href : null;
   } catch {
     return null;
   }

@@ -63,6 +63,13 @@ export interface TrackTags {
   duration: number | null;
 }
 
+export interface PlaylistEntry {
+  path: string;
+  start?: number;
+  end?: number | null;
+  tags?: TrackTags;
+}
+
 export interface AccentColor {
   hue: number;
   saturation: number;
@@ -97,7 +104,7 @@ export interface EqCustomPreset {
 export interface AppConfig {
   version: number;
   playlist: {
-    tracks: { name: string; path: string }[];
+    tracks: (PlaylistEntry & { name: string })[];
     currentIndex: number;
   };
   eq: {

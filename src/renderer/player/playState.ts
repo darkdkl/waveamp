@@ -1,5 +1,6 @@
 import { audio, durTime, pauseBtn, playBtn, playStateIcon } from "./dom";
 import { state } from "./state";
+import { trackPosition } from "./trackTime";
 
 type PlayState = "playing" | "paused" | "stopped";
 
@@ -15,7 +16,7 @@ function currentPlayState(): PlayState | null {
   const hasSource = state.playbackMode === "radio" ? !!state.currentStation : !!state.queue[state.currentIndex];
   if (!hasSource) return null;
   if (!audio.paused) return "playing";
-  if (stopRequested || (state.playbackMode === "local" && audio.currentTime === 0)) return "stopped";
+  if (stopRequested || (state.playbackMode === "local" && trackPosition() === 0)) return "stopped";
   return "paused";
 }
 

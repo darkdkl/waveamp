@@ -2,6 +2,7 @@ import { audio, timeDisplay } from "./dom";
 import { state } from "./state";
 import { formatClock, formatTime } from "./format";
 import { persistConfig } from "./config";
+import { trackPosition } from "./trackTime";
 
 const TRACK_TIME_PHASE_MS = 10_000;
 const CLOCK_PHASE_MS = 4000;
@@ -39,7 +40,7 @@ function applyView(showClock: boolean): void {
     startTicking();
   } else {
     stopTicking();
-    timeDisplay.textContent = formatTime(audio.currentTime);
+    timeDisplay.textContent = formatTime(trackPosition());
   }
 }
 
