@@ -25,13 +25,6 @@ export class PresetPlaylist {
     return index;
   }
 
-  start(index: number): number | null {
-    if (index < 0 || index >= this.count) return this.next();
-    this.history.push(index);
-    this.position = this.history.length - 1;
-    return index;
-  }
-
   previous(): number | null {
     if (this.position <= 0) return null;
     this.position -= 1;

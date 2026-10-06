@@ -1,1 +1,1 @@
-projectM v4.1.7, Emscripten 6.0.11
+projectM v4.1.8, Emscripten 6.0.11

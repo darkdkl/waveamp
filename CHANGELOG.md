@@ -4,6 +4,20 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.17.1] — 2026-10-06
+
+### Fixed
+- With a preset on the display, switching tracks or stations no longer makes
+  the display jump while STEREO / MONO is being detected
+
+## [1.17.0] — 2026-10-06
+
+### Changed
+- Visualizer presets load several times faster, and broken presets no longer
+  crash or hang the app (projectM 4.1.8)
+- The presets mode starts with a random preset again and, within a session,
+  continues with the preset you left
+
 ## [1.16.0] — 2026-10-06
 
 ### Added
