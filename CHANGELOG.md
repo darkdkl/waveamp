@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.17.1] — 2026-10-06
+
+### Fixed
+- With a preset on the display, switching tracks or stations no longer makes
+  the display jump while STEREO / MONO is being detected
+
 ## [1.17.0] — 2026-10-06
 
 ### Changed

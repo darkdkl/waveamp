@@ -539,6 +539,11 @@ body.is-presets-fullscreen .player > :not(.player__display) {
   margin: -3px 0;
 }
 
+.player__display.is-presets .display__channels[hidden] {
+  display: inline;
+  visibility: hidden;
+}
+
 .player__seek {
   margin-top: 12px;
 }
