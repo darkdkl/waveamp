@@ -15,7 +15,7 @@ import {
   playlistList,
 } from "./dom";
 import { state, type Track } from "./state";
-import { formatTime, isAddableAudioFile, trackDisplayName, trackLabel } from "./format";
+import { formatTime, isAddableAudioFile, isCueFile, trackDisplayName, trackFromEntry, trackLabel } from "./format";
 import { logEvent } from "./log";
 import { persistConfig } from "./config";
 import { syncElectronWindowSize } from "./layout";
@@ -27,7 +27,7 @@ const TAG_READ_CONCURRENCY = 4;
 export async function loadTrackTags(tracks: Track[]): Promise<void> {
   const api = window.electronAPI;
   if (!api?.readTrackTags) return;
-  const pending = tracks.filter((track): track is Track & { path: string } => !!track.path);
+  const pending = tracks.filter((track): track is Track & { path: string } => !!track.path && track.start == null);
   const worker = async () => {
     for (let track = pending.shift(); track; track = pending.shift()) {
       const tags = await api.readTrackTags(track.path);
@@ -161,17 +161,33 @@ function clearPlaylist(): void {
   persistConfig();
 }
 
-function addFiles(fileList: FileList | File[]): void {
-  const files = Array.from(fileList).filter(isAddableAudioFile);
-  if (files.length === 0) return;
-  const wasEmpty = state.queue.length === 0;
-  const tracks = files.map((file) => {
-    const path = window.electronAPI?.getFilePath ? window.electronAPI.getFilePath(file) : null;
-    if (window.electronAPI?.getFilePath && !path) {
+async function tracksFromFiles(files: File[]): Promise<Track[]> {
+  const api = window.electronAPI;
+  const resolved = files.map((file) => {
+    const path = api?.getFilePath ? api.getFilePath(file) : null;
+    if (api?.getFilePath && !path) {
       logEvent("warn", "playlist", `Could not resolve a file path for "${file.name}"`);
     }
-    return { name: trackLabel(file.name), file, path };
+    return { file, path };
   });
+  const plain = (file: File, path: string | null): Track => ({ name: trackLabel(file.name), file, path });
+  if (!api?.expandPlaylistPaths) {
+    return resolved.filter(({ file }) => isAddableAudioFile(file)).map(({ file, path }) => plain(file, path));
+  }
+  const withPath = resolved.filter((entry): entry is { file: File; path: string } => !!entry.path);
+  const fileByPath = new Map(withPath.map(({ file, path }) => [path, file]));
+  const entries = await api.expandPlaylistPaths(withPath.map(({ path }) => path));
+  const tracks = entries.map((entry) => ({ ...trackFromEntry(entry), file: fileByPath.get(entry.path) ?? null }));
+  const unresolved = resolved.filter(({ file, path }) => !path && isAddableAudioFile(file));
+  return [...tracks, ...unresolved.map(({ file }) => plain(file, null))];
+}
+
+async function addFiles(fileList: FileList | File[]): Promise<void> {
+  const files = Array.from(fileList).filter((file) => isAddableAudioFile(file) || isCueFile(file));
+  if (files.length === 0) return;
+  const tracks = await tracksFromFiles(files);
+  if (tracks.length === 0) return;
+  const wasEmpty = state.queue.length === 0;
   state.queue.push(...tracks);
   renderPlaylist();
   if (wasEmpty) {
@@ -202,13 +218,15 @@ export function initPlaylistAddMenu(): void {
 
 export function initFileInputs(): void {
   fileInput.addEventListener("change", () => {
-    addFiles(fileInput.files ?? []);
+    const files = Array.from(fileInput.files ?? []);
     fileInput.value = "";
+    void addFiles(files);
   });
 
   folderInput.addEventListener("change", () => {
-    addFiles(folderInput.files ?? []);
+    const files = Array.from(folderInput.files ?? []);
     folderInput.value = "";
+    void addFiles(files);
   });
 }
 
@@ -230,7 +248,7 @@ export function initDragAndDrop(): void {
 
   player.addEventListener("drop", (e) => {
     if (e.dataTransfer?.files?.length) {
-      addFiles(e.dataTransfer.files);
+      void addFiles(e.dataTransfer.files);
     }
   });
 }

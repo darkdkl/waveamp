@@ -6,6 +6,7 @@ import { persistConfig } from "./config";
 import { setEqOpen, setPlaylistOpen, setRadioOpen } from "./layout";
 import { cycleVizMode } from "./visualizer";
 import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
+import { seekTrack, trackLength, trackPosition } from "./trackTime";
 import { openStationForm } from "./radio/stationForm";
 import { toggleCurrentTrackSaved } from "./radio/savedTracks";
 import { nextPreset, previousPreset, togglePresetLock, togglePresetsFullscreen } from "./presets/mode";
@@ -47,9 +48,9 @@ function runHotkeyAction(action: string): void {
       break;
     case "seekForward":
     case "seekBackward":
-      if (state.playbackMode === "local" && isFinite(audio.duration)) {
+      if (state.playbackMode === "local" && isFinite(trackLength())) {
         const delta = action === "seekForward" ? SEEK_STEP_SECONDS : -SEEK_STEP_SECONDS;
-        audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + delta));
+        seekTrack(trackPosition() + delta);
       }
       break;
     case "volumeUp":

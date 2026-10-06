@@ -17,7 +17,11 @@ export function persistConfig(): void {
       playlist: {
         tracks: state.queue
           .filter((track): track is Track & { path: string } => !!track.path)
-          .map((track) => ({ name: track.name, path: track.path })),
+          .map((track) =>
+            track.start == null
+              ? { name: track.name, path: track.path }
+              : { name: track.name, path: track.path, start: track.start, end: track.end ?? null, tags: track.tags }
+          ),
         currentIndex: state.currentIndex,
       },
       eq: {

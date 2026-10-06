@@ -23,6 +23,8 @@ export interface Track {
   path: string | null;
   tags?: TrackTags;
   duration?: number | null;
+  start?: number;
+  end?: number | null;
   unplayable?: boolean;
 }
 

@@ -2,7 +2,7 @@ import { hotkeys } from "../hotkeys";
 import { eqPresetSelect, volume } from "./dom";
 import { state } from "./state";
 import { EQ_BANDS, findEqPreset } from "./eqPresets";
-import { safeStreamUrl, trackLabel } from "./format";
+import { safeStreamUrl, trackFromEntry } from "./format";
 import { applyEqState, setVolume } from "./audioGraph";
 import { syncEqControlsFromState } from "./equalizer";
 import { setVizMode, setVizResponse } from "./visualizer";
@@ -27,7 +27,25 @@ import {
   setTrayIconEnabled,
   setWindowControlsSide,
 } from "./settingsBridge";
-import type { Station } from "../../shared/types";
+import type { PlaylistEntry, Station, TrackTags } from "../../shared/types";
+
+function restoredTags(tags: Partial<TrackTags> | undefined): TrackTags | undefined {
+  if (!tags || typeof tags !== "object") return undefined;
+  const text = (value: unknown) => (typeof value === "string" && value ? value : null);
+  return {
+    title: text(tags.title),
+    artist: text(tags.artist),
+    album: text(tags.album),
+    duration: typeof tags.duration === "number" ? tags.duration : null,
+  };
+}
+
+function restoredEntry(t: PlaylistEntry & { name?: string }): PlaylistEntry & { name?: string } {
+  const start = typeof t.start === "number" && t.start >= 0 ? t.start : undefined;
+  if (start === undefined) return { name: t.name, path: t.path };
+  const end = typeof t.end === "number" && t.end > start ? t.end : null;
+  return { name: t.name, path: t.path, start, end, tags: restoredTags(t.tags) };
+}
 
 export async function restoreConfig(): Promise<void> {
   if (!window.electronAPI?.loadConfig) return;
@@ -146,8 +164,8 @@ export async function restoreConfig(): Promise<void> {
 
   if (config.playlist?.tracks?.length) {
     state.queue = config.playlist.tracks
-      .filter((t): t is { name?: string; path: string } => !!t && !!t.path)
-      .map((t) => ({ name: t.name || trackLabel(t.path.split("/").pop() ?? ""), path: t.path, file: null }));
+      .filter((t): t is PlaylistEntry & { name?: string } => !!t && typeof t.path === "string" && !!t.path)
+      .map((t) => ({ ...trackFromEntry(restoredEntry(t)), file: null }));
     renderPlaylist();
 
     const idx = config.playlist.currentIndex;

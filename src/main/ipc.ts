@@ -34,6 +34,7 @@ import {
 } from "./menus";
 import { applyGlobalHotkeys } from "./shortcuts";
 import { readTrackTags } from "./tags";
+import { expandPlaylistPaths } from "./cue";
 import { readCoverArt } from "./coverArt";
 import { checkForUpdates, openReleasePage, setAutoUpdateEnabled } from "./updates";
 import { openLicenseFile } from "./licenses";
@@ -107,6 +108,13 @@ export function registerIpcHandlers(): void {
     readTrackTags(filePath).catch((err) => {
       writeLog("warn", "tags", `Could not read tags for "${filePath}": ${err.message}`);
       return null;
+    })
+  );
+
+  ipcMain.handle("expand-playlist-paths", (_event, paths: string[]) =>
+    expandPlaylistPaths(Array.isArray(paths) ? paths.filter((p) => typeof p === "string") : []).catch((err) => {
+      writeLog("warn", "cue", `Could not expand playlist paths: ${err.message}`);
+      return paths.map((p) => ({ path: p }));
     })
   );
 

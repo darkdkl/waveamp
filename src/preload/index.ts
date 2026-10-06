@@ -7,6 +7,7 @@ import type {
   LogLevel,
   MediaKeyAction,
   NowPlayingUpdate,
+  PlaylistEntry,
   PresetInfo,
   ProxyConfig,
   ResolveStreamResult,
@@ -44,6 +45,7 @@ const api = {
   loadConfig: (): Promise<StoredConfig | null> => ipcRenderer.invoke("config-load"),
   saveConfig: (config: AppConfig): void => ipcRenderer.send("config-save", config),
   readTrackTags: (filePath: string): Promise<TrackTags> => ipcRenderer.invoke("read-track-tags", filePath),
+  expandPlaylistPaths: (paths: string[]): Promise<PlaylistEntry[]> => ipcRenderer.invoke("expand-playlist-paths", paths),
   readTrackCover: (filePath: string): Promise<string | null> => ipcRenderer.invoke("read-track-cover", filePath),
   getFilePath: (file: File): string | null => {
     try {

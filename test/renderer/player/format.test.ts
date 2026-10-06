@@ -6,10 +6,12 @@ import {
   formatClock,
   formatTime,
   isAddableAudioFile,
+  isCueFile,
   isHttpUrl,
   safeStreamUrl,
   safeTrackUrl,
   stationHost,
+  trackFromEntry,
   trackDisplayName,
   trackLabel,
 } from "../../../src/renderer/player/format";
@@ -115,5 +117,36 @@ describe("formatClock", () => {
   it("shows 24-hour time with a blinking colon", () => {
     expect(formatClock(new Date(2026, 9, 2, 9, 5))).toBe("09:05");
     expect(formatClock(new Date(2026, 9, 2, 21, 47), false)).toBe("21 47");
+  });
+});
+
+describe("isCueFile", () => {
+  it("accepts .cue in any case", () => {
+    expect(isCueFile({ name: "Album.cue" })).toBe(true);
+    expect(isCueFile({ name: "Album.CUE" })).toBe(true);
+    expect(isCueFile({ name: "Album.flac" })).toBe(false);
+  });
+});
+
+describe("trackFromEntry", () => {
+  it("names a whole file after the file", () => {
+    expect(trackFromEntry({ path: "/music/Night Drive - Ignition.flac" })).toEqual({
+      name: "Night Drive - Ignition",
+      path: "/music/Night Drive - Ignition.flac",
+    });
+  });
+
+  it("turns a CUE segment into a track with its own duration and tags", () => {
+    const tags = { title: "Long Way Home", artist: "Night Drive", album: "Open Road", duration: 318 };
+    expect(trackFromEntry({ path: "/music/Open Road.flac", start: 252, end: 570, tags })).toEqual({
+      name: "Long Way Home",
+      path: "/music/Open Road.flac",
+      start: 252,
+      end: 570,
+      tags,
+      duration: 318,
+    });
+    expect(trackFromEntry({ path: "C:\\music\\Open Road.flac", start: 570, end: null }).duration).toBeNull();
+    expect(trackFromEntry({ path: "C:\\music\\Open Road.flac", start: 570, end: null }).name).toBe("Open Road");
   });
 });
