@@ -1,3 +1,5 @@
+// Modified TypeScript rewrite of Apple's ALAC reference decoder (Apache-2.0) and the FFmpeg ALAC decoder (LGPL-2.1+); see THIRD_PARTY_LICENSES.txt.
+
 export interface AlacConfig {
   frameLength: number;
   bitDepth: number;
