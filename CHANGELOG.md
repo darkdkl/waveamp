@@ -9,6 +9,7 @@ version, fixes bump the patch version.
 ### Changed
 - The bookmark for saving a radio track on the display is easier to hit: its
   click area is taller and lights up on hover
+- The app icon drops the small tip after the bars
 
 ## [1.22.0] — 2026-10-10
 
