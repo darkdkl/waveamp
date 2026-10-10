@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.22.2] — 2026-10-10
+
+### Changed
+- Dim text on the display (scale, station name, EQ values, placeholders) is
+  easier to read in every color scheme: its brightness now adapts to the hue
+  so it always keeps the same contrast against the display
+
 ## [1.22.1] — 2026-10-10
 
 ### Changed

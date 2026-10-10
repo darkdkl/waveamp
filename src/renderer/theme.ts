@@ -1,4 +1,5 @@
 import type { AccentColor } from "../shared/types";
+import { dimLightness } from "../shared/contrast";
 
 const DEFAULT: AccentColor = { hue: 134, saturation: 96, tint: 0 };
 
@@ -32,6 +33,7 @@ function apply(color: Partial<AccentColor> | null | undefined): void {
   const root = document.documentElement.style;
   root.setProperty("--accent-h", String(hue));
   root.setProperty("--accent-s", `${saturation}%`);
+  root.setProperty("--accent-dim-l", `${dimLightness(hue, saturation)}%`);
   root.setProperty("--chrome-tint", `${tint}%`);
 }
 
