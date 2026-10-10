@@ -103,10 +103,10 @@
     <section class="eq" id="eq">
       <div class="eq__inner">
         <div class="eq__header">
-          <span data-i18n="eq">Эквалайзер</span>
+          <span id="eqTitle" data-i18n="eq">Эквалайзер</span>
           <div class="eq__header-actions">
             <select class="eq__preset-select" id="eqPresetSelect" data-i18n-title="eqPreset"></select>
-            <button class="eq__toggle is-active" id="eqToggleBtn" type="button" data-i18n="eqOn">Вкл</button>
+            <button class="switch is-active" id="eqToggleBtn" type="button" role="switch" aria-checked="true" aria-labelledby="eqTitle"></button>
             <button class="eq__reset" id="eqResetBtn" type="button" data-i18n="reset">Сброс</button>
           </div>
         </div>

@@ -4,6 +4,15 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.23.0] — 2026-10-10
+
+### Changed
+- On/off settings and the equalizer use one sliding switch instead of
+  "On/Off" buttons and links
+- The equalizer's Reset is a button
+- When the equalizer is off, its bands are dimmed; they can still be moved
+- Disabled controls look the same everywhere
+
 ## [1.22.2] — 2026-10-10
 
 ### Changed

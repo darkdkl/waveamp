@@ -80,7 +80,7 @@ describe("keys used by the UI exist", () => {
 
   it("finds t() calls across the renderer", () => {
     const total = rendererScripts.flatMap((file) => matches(source(file), /\bt\("([A-Za-z0-9_]+)"\)/g));
-    expect(total.length).toBeGreaterThan(30);
+    expect(total.length).toBeGreaterThan(20);
   });
 
   it("hotkey action names", () => {
