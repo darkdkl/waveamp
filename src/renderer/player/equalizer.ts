@@ -79,8 +79,12 @@ export function syncEqControlsFromState(): void {
 }
 
 export function renderEqToggle(): void {
+  const locked = !state.eqEnabled;
   renderSwitch(eqToggleBtn, state.eqEnabled);
-  eq.classList.toggle("is-off", !state.eqEnabled);
+  eq.classList.toggle("is-off", locked);
+  eq.querySelectorAll<HTMLInputElement>(".eq__slider").forEach((slider) => (slider.disabled = locked));
+  eqPresetSelect.disabled = locked;
+  eqResetBtn.disabled = locked;
 }
 
 function resetEq(): void {

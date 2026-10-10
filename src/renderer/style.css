@@ -1027,13 +1027,23 @@ input[type="range"]:disabled {
   cursor: pointer;
 }
 
-.eq__reset:hover {
+.eq__reset:hover:not(:disabled) {
   background: linear-gradient(180deg, var(--btn-bg-hover), var(--btn-bg));
   color: var(--text);
 }
 
+.eq__reset:disabled,
+.eq__preset-select:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .eq.is-off .eq__bands {
   opacity: 0.4;
+}
+
+.eq.is-off .eq__bands input[type="range"]:disabled {
+  opacity: 1;
 }
 
 .eq__bands {
