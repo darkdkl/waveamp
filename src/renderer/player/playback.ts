@@ -11,7 +11,6 @@ import {
   seek,
   stopBtn,
   timeDisplay,
-  trackTitle,
   volume,
 } from "./dom";
 import { state, type Track } from "./state";
@@ -24,6 +23,7 @@ import { getTrackSrc, releaseObjectUrl, renderPlaylist, scheduleTagRender } from
 import { renderRadioFavorites, renderRadioResults } from "./radio/panel";
 import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./radio/stream";
 import { refreshCoverArt } from "./coverArt";
+import { setTrackTitleText } from "./titleScroll";
 import { clearNowPlaying, renderRadioTitle, resetRadioTitle } from "./radio/nowPlaying";
 import { isClockShown, showTrackTimeNow, syncTimeDisplay } from "./clock";
 import { markStopped, renderPlayState } from "./playState";
@@ -64,10 +64,8 @@ export function updateTrackTitleText(): void {
     renderRadioTitle();
   } else {
     resetRadioTitle();
-    trackTitle.textContent =
-      state.playbackMode === "local" && state.queue[state.currentIndex]
-        ? trackDisplayName(state.queue[state.currentIndex])
-        : i18n.t("noTrack");
+    const track = state.playbackMode === "local" ? state.queue[state.currentIndex] : undefined;
+    setTrackTitleText(track ? trackDisplayName(track) : i18n.t("noTrack"), track ? "track" : "status");
   }
   renderPlayState();
   updateMediaSessionMetadata();

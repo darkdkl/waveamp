@@ -17,6 +17,7 @@ import { setPresetAutoSwitch, setPresetFolder, setPresetHardCuts } from "./prese
 import { loadSavedTracks } from "./radio/savedTracks";
 import { applyGlobalHotkeys } from "./playerHotkeys";
 import { setCoverArtEnabled } from "./coverArt";
+import { setTitleScroll, setTitleScrollSpeed } from "./titleScroll";
 import {
   setAccentColor,
   setAutoUpdateEnabled,
@@ -75,6 +76,9 @@ export async function restoreConfig(): Promise<void> {
   if (typeof settings?.coverArtEnabled === "boolean") {
     setCoverArtEnabled(settings.coverArtEnabled);
   }
+
+  if (settings?.titleScroll !== undefined) setTitleScroll(settings.titleScroll);
+  if (settings?.titleScrollSpeed !== undefined) setTitleScrollSpeed(settings.titleScrollSpeed);
 
   if (settings?.windowControlsSide === "left" || settings?.windowControlsSide === "right") {
     setWindowControlsSide(settings.windowControlsSide);

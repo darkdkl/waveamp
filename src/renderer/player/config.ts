@@ -40,6 +40,8 @@ export function persistConfig(): void {
         accentColor: state.accentColor,
         vizResponse: state.vizResponse,
         coverArtEnabled: state.coverArtEnabled,
+        titleScroll: state.titleScroll,
+        titleScrollSpeed: state.titleScrollSpeed,
         radioTrackTitleEnabled: state.radioTrackTitleEnabled,
         playerClockEnabled: state.playerClockEnabled,
         stereoRadio: state.stereoRadio,

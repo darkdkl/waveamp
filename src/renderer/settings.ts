@@ -2,6 +2,7 @@ import { i18n } from "./i18n";
 import { hotkeys } from "./hotkeys";
 import { accentColor as accentColorTheme } from "./theme";
 import { snapStereoStrength, STEREO_STRENGTH_DEFAULT } from "../shared/stereo";
+import { normalizeTitleScrollMode, normalizeTitleScrollSpeed, type TitleScrollMode } from "../shared/titleScroll";
 import type {
   AccentColor,
   ProxyConfig,
@@ -38,6 +39,9 @@ const checkUpdatesBtn = byId<HTMLButtonElement>("checkUpdatesBtn");
 const updateStatusText = byId("updateStatusText");
 const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
 const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
+const titleScrollSelect = byId<HTMLSelectElement>("titleScrollSelect");
+const titleScrollSpeedRow = byId("titleScrollSpeedRow");
+const titleScrollSpeedInput = byId<HTMLInputElement>("titleScrollSpeedInput");
 const radioTrackTitleBtn = byId<HTMLButtonElement>("radioTrackTitleBtn");
 const playerClockBtn = byId<HTMLButtonElement>("playerClockBtn");
 const stereoStrengthInput = byId<HTMLInputElement>("stereoStrengthInput");
@@ -239,6 +243,19 @@ stereoPseudoBtn.addEventListener("click", () => {
   renderToggle(stereoPseudoBtn, stereoPseudo);
   sendAction("setStereoPseudo", stereoPseudo);
 });
+function renderTitleScroll(mode: TitleScrollMode) {
+  titleScrollSelect.value = mode;
+  titleScrollSpeedInput.disabled = mode === "off";
+  titleScrollSpeedRow.classList.toggle("is-disabled", mode === "off");
+}
+
+titleScrollSelect.addEventListener("change", () => {
+  const mode = normalizeTitleScrollMode(titleScrollSelect.value);
+  renderTitleScroll(mode);
+  sendAction("setTitleScroll", mode);
+});
+titleScrollSpeedInput.addEventListener("input", () => sendAction("setTitleScrollSpeed", Number(titleScrollSpeedInput.value)));
+
 stereoStrengthInput.addEventListener("input", () => {
   const strength = snapStereoStrength(Number(stereoStrengthInput.value));
   stereoStrengthInput.value = String(strength);
@@ -553,6 +570,10 @@ window.electronAPI?.onSettingsState?.((state) => {
   }
   if (typeof state.scale === "number") window.electronAPI?.setSettingsWindowScale?.(state.scale);
   if (state.vizResponse) vizResponseSelect.value = state.vizResponse;
+  renderTitleScroll(normalizeTitleScrollMode(state.titleScroll));
+  if (document.activeElement !== titleScrollSpeedInput) {
+    titleScrollSpeedInput.value = String(normalizeTitleScrollSpeed(state.titleScrollSpeed));
+  }
   if (state.windowControlsSide) {
     windowControlsSelect.value = state.windowControlsSide;
     document.body.classList.toggle("window-controls-right", state.windowControlsSide === "right");

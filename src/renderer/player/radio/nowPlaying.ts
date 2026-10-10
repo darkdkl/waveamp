@@ -4,6 +4,7 @@ import { safeStreamUrl } from "../format";
 import { persistConfig } from "../config";
 import { updateMediaSessionMetadata } from "../mediaSession";
 import { renderSaveTrackButton, toggleCurrentTrackSaved } from "./savedTracks";
+import { setTrackTitleText, titleScrollCycleMs } from "../titleScroll";
 
 const TRACK_PHASE_MS = 8000;
 const STATION_PHASE_MS = 4000;
@@ -32,7 +33,7 @@ function schedulePhase(): void {
         schedulePhase();
       }, CROSSFADE_MS / 2);
     },
-    showingStation ? STATION_PHASE_MS : TRACK_PHASE_MS
+    Math.max(showingStation ? STATION_PHASE_MS : TRACK_PHASE_MS, titleScrollCycleMs())
   );
 }
 
@@ -47,7 +48,7 @@ export function renderRadioTitle(): void {
   if (!station) return;
   const track = state.nowPlayingTitle;
   const showStation = !track || showingStation;
-  trackTitle.textContent = showStation ? station.name : track;
+  setTrackTitleText(showStation ? station.name : track, showStation ? "station" : "track");
   trackTitle.classList.toggle("is-station", !!track && showingStation);
   trackTitle.title = track ? `${track}\n${station.name}` : station.name;
   renderSaveTrackButton();
@@ -57,8 +58,8 @@ function setNowPlayingTitle(title: string | null): void {
   if (title === state.nowPlayingTitle) return;
   state.nowPlayingTitle = title;
   stopCycle();
-  if (title) schedulePhase();
   if (state.playbackMode === "radio") renderRadioTitle();
+  if (title) schedulePhase();
   updateMediaSessionMetadata();
 }
 

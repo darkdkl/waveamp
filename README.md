@@ -26,7 +26,8 @@ Runs on macOS, Windows and Linux.
 - **Playlist** — resizable, plays through to the next track automatically
 - **Tags** — "Artist — Title" and duration from file tags (ID3, FLAC/Vorbis,
   MP4 and more); legacy Cyrillic (cp1251) and mis-decoded UTF-8 tags are
-  repaired
+  repaired. Long titles scroll on the display — back and forth, in a loop or
+  once, at the speed you choose
 - **Cover art** — the album cover (embedded in the file or `cover.jpg` /
   `folder.jpg` next to it) or the radio station's logo shows dimmed behind the
   display and in the system "Now Playing"; can be turned off in Settings

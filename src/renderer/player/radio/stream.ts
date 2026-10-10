@@ -1,5 +1,6 @@
 import { i18n } from "../../i18n";
-import { audio, durTime, liveTag, seek, trackTitle } from "../dom";
+import { audio, durTime, liveTag, seek } from "../dom";
+import { setTrackTitleText } from "../titleScroll";
 import { state } from "../state";
 import { safeStreamUrl } from "../format";
 import { logEvent } from "../log";
@@ -27,7 +28,7 @@ function playStream(station: Station): void {
   if (!url) {
     logEvent("error", "radio", `"${station.name}" has an unsupported stream URL`);
     clearNowPlaying();
-    trackTitle.textContent = station.name + i18n.t("noConnection");
+    setTrackTitleText(station.name + i18n.t("noConnection"));
     return;
   }
   audio.src = url;
@@ -90,7 +91,7 @@ export function attemptRadioReconnect(): void {
 
   if (radioReconnectAttempts >= RADIO_MAX_RECONNECT) {
     logEvent("error", "radio", `"${station.name}" giving up after ${RADIO_MAX_RECONNECT} attempts (${errorInfo})`);
-    trackTitle.textContent = station.name + i18n.t("noConnection");
+    setTrackTitleText(station.name + i18n.t("noConnection"));
     return;
   }
   radioReconnectAttempts += 1;
@@ -99,7 +100,7 @@ export function attemptRadioReconnect(): void {
     "radio",
     `"${station.name}" reconnect attempt ${radioReconnectAttempts}/${RADIO_MAX_RECONNECT} (${errorInfo})`
   );
-  trackTitle.textContent = station.name + i18n.t("reconnecting");
+  setTrackTitleText(station.name + i18n.t("reconnecting"));
   radioReconnectTimer = setTimeout(() => {
     if (state.playbackMode === "radio" && state.currentStation) playStream(state.currentStation);
   }, 1500);

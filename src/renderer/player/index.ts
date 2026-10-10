@@ -18,6 +18,7 @@ import { initRadioSearch, initRadioTabs, refreshRadioEmptyText } from "./radio/p
 import { initStationForm } from "./radio/stationForm";
 import { initRadioStream } from "./radio/stream";
 import { initNowPlaying } from "./radio/nowPlaying";
+import { initTitleScroll } from "./titleScroll";
 import { initSavedTracks } from "./radio/savedTracks";
 import { initClock } from "./clock";
 import { initPlayState } from "./playState";
@@ -42,6 +43,7 @@ initFileInputs();
 initAudioEvents();
 initRadioStream();
 initNowPlaying();
+initTitleScroll();
 initSavedTracks();
 initClock();
 initPlayState();

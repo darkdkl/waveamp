@@ -252,6 +252,15 @@ body.is-electron .player::before {
   transition: opacity 200ms ease, color 200ms ease;
 }
 
+.display__track.is-scrolling {
+  text-overflow: clip;
+}
+
+.display__track-scroll {
+  display: inline-block;
+  will-change: transform;
+}
+
 .display__track.is-station {
   color: var(--lcd-fg-dim);
   text-shadow: none;
@@ -1683,6 +1692,14 @@ body.settings-window .settings-panel__inner::-webkit-scrollbar-thumb:hover {
 .settings-panel__input:disabled,
 .settings-panel__select:disabled {
   opacity: 0.4;
+  cursor: default;
+}
+
+.settings-panel__row.is-disabled {
+  opacity: 0.4;
+}
+
+.settings-panel__row.is-disabled .settings-panel__range {
   cursor: default;
 }
 
