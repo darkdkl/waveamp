@@ -64,8 +64,8 @@
       </div>
 
       <div class="settings-panel__row">
-        <span class="settings-panel__row-label" data-i18n="coverArt">Обложка на дисплее</span>
-        <button type="button" class="settings-panel__toggle" id="coverArtBtn">Вкл</button>
+        <span class="settings-panel__row-label" id="coverArtLabel" data-i18n="coverArt">Обложка на дисплее</span>
+        <button type="button" class="switch" id="coverArtBtn" role="switch" aria-checked="false" aria-labelledby="coverArtLabel"></button>
       </div>
 
       <div class="settings-panel__row">
@@ -91,8 +91,8 @@
       </div>
 
       <div class="settings-panel__row">
-        <span class="settings-panel__row-label" data-i18n="playerClock">Часы в режиме плеера</span>
-        <button type="button" class="settings-panel__toggle" id="playerClockBtn">Выкл</button>
+        <span class="settings-panel__row-label" id="playerClockLabel" data-i18n="playerClock">Часы в режиме плеера</span>
+        <button type="button" class="switch" id="playerClockBtn" role="switch" aria-checked="false" aria-labelledby="playerClockLabel"></button>
       </div>
 
       <div class="settings-panel__section-label" data-i18n="colorSection">Цветовая схема</div>
@@ -118,20 +118,20 @@
       <div class="settings-panel__section-label" data-i18n="radio">Радио</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="radioTrackTitle">Название трека со станции</span>
-          <button type="button" class="settings-panel__toggle" id="radioTrackTitleBtn">Вкл</button>
+          <span class="settings-panel__row-label" id="radioTrackTitleLabel" data-i18n="radioTrackTitle">Название трека со станции</span>
+          <button type="button" class="switch" id="radioTrackTitleBtn" role="switch" aria-checked="false" aria-labelledby="radioTrackTitleLabel"></button>
         </div>
       </div>
 
       <div class="settings-panel__section-label" data-i18n="visualizationSection">Визуализация</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="presetAutoSwitch">Автосмена пресетов</span>
-          <button type="button" class="settings-panel__toggle" id="presetAutoSwitchBtn">Вкл</button>
+          <span class="settings-panel__row-label" id="presetAutoSwitchLabel" data-i18n="presetAutoSwitch">Автосмена пресетов</span>
+          <button type="button" class="switch" id="presetAutoSwitchBtn" role="switch" aria-checked="false" aria-labelledby="presetAutoSwitchLabel"></button>
         </div>
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="presetHardCuts">Резкие переключения на сильных долях</span>
-          <button type="button" class="settings-panel__toggle" id="presetHardCutsBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="presetHardCutsLabel" data-i18n="presetHardCuts">Резкие переключения на сильных долях</span>
+          <button type="button" class="switch" id="presetHardCutsBtn" role="switch" aria-checked="false" aria-labelledby="presetHardCutsLabel"></button>
         </div>
         <div class="settings-panel__row">
           <span class="settings-panel__row-label" data-i18n="presetFolder">Папка пресетов</span>
@@ -146,8 +146,8 @@
 
     <div class="settings-panel__view" id="settingsHotkeysView" hidden>
       <div class="settings-panel__row">
-        <span class="settings-panel__row-label" data-i18n="globalHotkeysEnable">Глобальные клавиши</span>
-        <button type="button" class="settings-panel__toggle" id="globalHotkeysBtn">Выкл</button>
+        <span class="settings-panel__row-label" id="globalHotkeysLabel" data-i18n="globalHotkeysEnable">Глобальные клавиши</span>
+        <button type="button" class="switch" id="globalHotkeysBtn" role="switch" aria-checked="false" aria-labelledby="globalHotkeysLabel"></button>
       </div>
       <p class="settings-panel__hint" id="globalHotkeysHint" data-i18n="globalHotkeysHint" hidden>Работают, даже когда WaveAMP свёрнут или в фоне.</p>
       <div class="settings-panel__card">
@@ -169,12 +169,12 @@
       <div class="settings-panel__section-label" data-i18n="stereoSection">Стереобаза</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="stereoTracks">Расширение для треков</span>
-          <button type="button" class="settings-panel__toggle" id="stereoTracksBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="stereoTracksLabel" data-i18n="stereoTracks">Расширение для треков</span>
+          <button type="button" class="switch" id="stereoTracksBtn" role="switch" aria-checked="false" aria-labelledby="stereoTracksLabel"></button>
         </div>
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="stereoRadio">Расширение для радио</span>
-          <button type="button" class="settings-panel__toggle" id="stereoRadioBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="stereoRadioLabel" data-i18n="stereoRadio">Расширение для радио</span>
+          <button type="button" class="switch" id="stereoRadioBtn" role="switch" aria-checked="false" aria-labelledby="stereoRadioLabel"></button>
         </div>
         <div class="settings-panel__row">
           <span class="settings-panel__row-label" data-i18n="stereoStrength">Сила</span>
@@ -188,28 +188,28 @@
           </div>
         </div>
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="stereoPseudo">Псевдостерео для моно</span>
-          <button type="button" class="settings-panel__toggle" id="stereoPseudoBtn">Вкл</button>
+          <span class="settings-panel__row-label" id="stereoPseudoLabel" data-i18n="stereoPseudo">Псевдостерео для моно</span>
+          <button type="button" class="switch" id="stereoPseudoBtn" role="switch" aria-checked="false" aria-labelledby="stereoPseudoLabel"></button>
         </div>
       </div>
 
       <div class="settings-panel__section-label" data-i18n="traySection">Трей</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="trayEnable">Показывать иконку в трее</span>
-          <button type="button" class="settings-panel__toggle" id="trayEnabledBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="trayEnabledLabel" data-i18n="trayEnable">Показывать иконку в трее</span>
+          <button type="button" class="switch" id="trayEnabledBtn" role="switch" aria-checked="false" aria-labelledby="trayEnabledLabel"></button>
         </div>
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="closeMinimizesToTray">Закрытие окна сворачивает в трей</span>
-          <button type="button" class="settings-panel__toggle" id="closeMinimizesToTrayBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="closeMinimizesToTrayLabel" data-i18n="closeMinimizesToTray">Закрытие окна сворачивает в трей</span>
+          <button type="button" class="switch" id="closeMinimizesToTrayBtn" role="switch" aria-checked="false" aria-labelledby="closeMinimizesToTrayLabel"></button>
         </div>
       </div>
 
       <div class="settings-panel__section-label" data-i18n="updatesSection">Обновления</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="updatesCheckOnLaunch">Проверять при запуске</span>
-          <button type="button" class="settings-panel__toggle" id="autoUpdateEnabledBtn">Вкл</button>
+          <span class="settings-panel__row-label" id="autoUpdateEnabledLabel" data-i18n="updatesCheckOnLaunch">Проверять при запуске</span>
+          <button type="button" class="switch" id="autoUpdateEnabledBtn" role="switch" aria-checked="false" aria-labelledby="autoUpdateEnabledLabel"></button>
         </div>
         <div class="settings-panel__actions">
           <button type="button" class="settings-panel__action-btn" id="checkUpdatesBtn" data-i18n="checkForUpdatesNow">Проверить сейчас</button>
@@ -221,8 +221,8 @@
       <div class="settings-panel__section-label" data-i18n="proxySection">Прокси</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="proxyEnable">Использовать прокси</span>
-          <button type="button" class="settings-panel__toggle" id="proxyEnabledBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="proxyEnabledLabel" data-i18n="proxyEnable">Использовать прокси</span>
+          <button type="button" class="switch" id="proxyEnabledBtn" role="switch" aria-checked="false" aria-labelledby="proxyEnabledLabel"></button>
         </div>
         <div class="settings-panel__proxy-fields" id="proxyFields">
           <div class="settings-panel__proxy-row">
@@ -245,8 +245,8 @@
       <div class="settings-panel__section-label" data-i18n="loggingSection">Логирование</div>
       <div class="settings-panel__card">
         <div class="settings-panel__row">
-          <span class="settings-panel__row-label" data-i18n="loggingEnable">Логировать работу приложения</span>
-          <button type="button" class="settings-panel__toggle" id="loggingEnabledBtn">Выкл</button>
+          <span class="settings-panel__row-label" id="loggingEnabledLabel" data-i18n="loggingEnable">Логировать работу приложения</span>
+          <button type="button" class="switch" id="loggingEnabledBtn" role="switch" aria-checked="false" aria-labelledby="loggingEnabledLabel"></button>
         </div>
         <p class="settings-panel__hint" data-i18n="loggingHint">Пишет ошибки и события приложения в файл — полезно, если что-то работает не так без понятной причины.</p>
         <div class="settings-panel__actions">

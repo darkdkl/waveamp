@@ -1,5 +1,6 @@
 import { i18n } from "./i18n";
 import { hotkeys } from "./hotkeys";
+import { renderSwitch } from "./switchControl";
 import { accentColor as accentColorTheme } from "./theme";
 import { snapStereoStrength, STEREO_STRENGTH_DEFAULT } from "../shared/stereo";
 import { normalizeTitleScrollMode, normalizeTitleScrollSpeed, type TitleScrollMode } from "../shared/titleScroll";
@@ -142,8 +143,7 @@ function sendProxyConfig() {
 
 function setProxyEnabled(enabled: boolean) {
   proxyEnabled = enabled;
-  proxyEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  proxyEnabledBtn.classList.toggle("is-active", enabled);
+  renderSwitch(proxyEnabledBtn, enabled);
   [proxyTypeSelect, proxyHostInput, proxyPortInput, proxyUsernameInput, proxyPasswordInput].forEach((el) => {
     el.disabled = !enabled;
   });
@@ -157,8 +157,7 @@ proxyEnabledBtn.addEventListener("click", () => setProxyEnabled(!proxyEnabled));
 
 function setLoggingEnabled(enabled: boolean) {
   loggingEnabled = enabled;
-  loggingEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  loggingEnabledBtn.classList.toggle("is-active", enabled);
+  renderSwitch(loggingEnabledBtn, enabled);
   sendAction("setLoggingEnabled", enabled);
 }
 loggingEnabledBtn.addEventListener("click", () => setLoggingEnabled(!loggingEnabled));
@@ -176,23 +175,20 @@ clearLogBtn.addEventListener("click", () => window.electronAPI?.clearLogs?.());
 
 function setAutoUpdateEnabled(enabled: boolean) {
   autoUpdateEnabled = enabled;
-  autoUpdateEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  autoUpdateEnabledBtn.classList.toggle("is-active", enabled);
+  renderSwitch(autoUpdateEnabledBtn, enabled);
   sendAction("setAutoUpdateEnabled", enabled);
 }
 autoUpdateEnabledBtn.addEventListener("click", () => setAutoUpdateEnabled(!autoUpdateEnabled));
 
 function setCloseMinimizesToTrayEnabled(enabled: boolean) {
   closeMinimizesToTrayEnabled = enabled;
-  closeMinimizesToTrayBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  closeMinimizesToTrayBtn.classList.toggle("is-active", enabled);
+  renderSwitch(closeMinimizesToTrayBtn, enabled);
   sendAction("setCloseMinimizesToTrayEnabled", enabled);
 }
 
 function setTrayIconEnabled(enabled: boolean) {
   trayIconEnabled = enabled;
-  trayEnabledBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  trayEnabledBtn.classList.toggle("is-active", enabled);
+  renderSwitch(trayEnabledBtn, enabled);
   closeMinimizesToTrayBtn.disabled = !enabled;
   if (!enabled && closeMinimizesToTrayEnabled) setCloseMinimizesToTrayEnabled(false);
   sendAction("setTrayIconEnabled", enabled);
@@ -201,46 +197,38 @@ trayEnabledBtn.addEventListener("click", () => setTrayIconEnabled(!trayIconEnabl
 
 function setCoverArtEnabled(enabled: boolean) {
   coverArtEnabled = enabled;
-  coverArtBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  coverArtBtn.classList.toggle("is-active", enabled);
+  renderSwitch(coverArtBtn, enabled);
   sendAction("setCoverArtEnabled", enabled);
 }
 coverArtBtn.addEventListener("click", () => setCoverArtEnabled(!coverArtEnabled));
 
 function setRadioTrackTitleEnabled(enabled: boolean) {
   radioTrackTitleEnabled = enabled;
-  radioTrackTitleBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  radioTrackTitleBtn.classList.toggle("is-active", enabled);
+  renderSwitch(radioTrackTitleBtn, enabled);
   sendAction("setRadioTrackTitleEnabled", enabled);
 }
 radioTrackTitleBtn.addEventListener("click", () => setRadioTrackTitleEnabled(!radioTrackTitleEnabled));
 
 function setPlayerClockEnabled(enabled: boolean) {
   playerClockEnabled = enabled;
-  playerClockBtn.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  playerClockBtn.classList.toggle("is-active", enabled);
+  renderSwitch(playerClockBtn, enabled);
   sendAction("setPlayerClockEnabled", enabled);
 }
 playerClockBtn.addEventListener("click", () => setPlayerClockEnabled(!playerClockEnabled));
 
-function renderToggle(button: HTMLButtonElement, enabled: boolean) {
-  button.textContent = enabled ? i18n.t("on") : i18n.t("off");
-  button.classList.toggle("is-active", enabled);
-}
-
 stereoRadioBtn.addEventListener("click", () => {
   stereoRadio = !stereoRadio;
-  renderToggle(stereoRadioBtn, stereoRadio);
+  renderSwitch(stereoRadioBtn, stereoRadio);
   sendAction("setStereoRadio", stereoRadio);
 });
 stereoTracksBtn.addEventListener("click", () => {
   stereoTracks = !stereoTracks;
-  renderToggle(stereoTracksBtn, stereoTracks);
+  renderSwitch(stereoTracksBtn, stereoTracks);
   sendAction("setStereoTracks", stereoTracks);
 });
 stereoPseudoBtn.addEventListener("click", () => {
   stereoPseudo = !stereoPseudo;
-  renderToggle(stereoPseudoBtn, stereoPseudo);
+  renderSwitch(stereoPseudoBtn, stereoPseudo);
   sendAction("setStereoPseudo", stereoPseudo);
 });
 function renderTitleScroll(mode: TitleScrollMode) {
@@ -263,10 +251,8 @@ stereoStrengthInput.addEventListener("input", () => {
 });
 
 function renderPresetSettings() {
-  presetAutoSwitchBtn.textContent = presetAutoSwitch ? i18n.t("on") : i18n.t("off");
-  presetAutoSwitchBtn.classList.toggle("is-active", presetAutoSwitch);
-  presetHardCutsBtn.textContent = presetHardCuts ? i18n.t("on") : i18n.t("off");
-  presetHardCutsBtn.classList.toggle("is-active", presetHardCuts);
+  renderSwitch(presetAutoSwitchBtn, presetAutoSwitch);
+  renderSwitch(presetHardCutsBtn, presetHardCuts);
   presetFolderText.textContent = presetFolder || i18n.t("presetFolderBuiltinOnly");
   presetFolderText.title = presetFolder;
   presetFolderResetBtn.disabled = !presetFolder;
@@ -423,8 +409,7 @@ function renderHotkeys() {
   });
   hotkeysList.replaceChildren(...rows);
 
-  globalHotkeysBtn.textContent = i18n.t(hotkeyConfig.globalEnabled ? "on" : "off");
-  globalHotkeysBtn.classList.toggle("is-active", hotkeyConfig.globalEnabled);
+  renderSwitch(globalHotkeysBtn, hotkeyConfig.globalEnabled);
   globalHotkeysHint.hidden = !hotkeyConfig.globalEnabled;
 
   const failedMessage: typeof hotkeyMessage = hotkeyConfig.globalEnabled && hotkeyFailures.length ? { key: "hotkeyFailedMessage" } : null;
@@ -520,18 +505,7 @@ function refreshTextForLanguage() {
     presetButtons[i].title = i18n.t(preset.nameKey);
     presetButtons[i].setAttribute("aria-label", i18n.t(preset.nameKey));
   });
-  proxyEnabledBtn.textContent = proxyEnabled ? i18n.t("on") : i18n.t("off");
-  loggingEnabledBtn.textContent = loggingEnabled ? i18n.t("on") : i18n.t("off");
-  autoUpdateEnabledBtn.textContent = autoUpdateEnabled ? i18n.t("on") : i18n.t("off");
-  trayEnabledBtn.textContent = trayIconEnabled ? i18n.t("on") : i18n.t("off");
-  coverArtBtn.textContent = coverArtEnabled ? i18n.t("on") : i18n.t("off");
-  radioTrackTitleBtn.textContent = radioTrackTitleEnabled ? i18n.t("on") : i18n.t("off");
-  playerClockBtn.textContent = playerClockEnabled ? i18n.t("on") : i18n.t("off");
-  renderToggle(stereoRadioBtn, stereoRadio);
-  renderToggle(stereoTracksBtn, stereoTracks);
-  renderToggle(stereoPseudoBtn, stereoPseudo);
   renderPresetSettings();
-  closeMinimizesToTrayBtn.textContent = closeMinimizesToTrayEnabled ? i18n.t("on") : i18n.t("off");
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
 
@@ -617,14 +591,17 @@ window.electronAPI?.onSettingsState?.((state) => {
   closeMinimizesToTrayEnabled = !!state.closeMinimizesToTray && trayIconEnabled;
   closeMinimizesToTrayBtn.disabled = !trayIconEnabled;
 
-  proxyEnabledBtn.classList.toggle("is-active", proxyEnabled);
-  loggingEnabledBtn.classList.toggle("is-active", loggingEnabled);
-  autoUpdateEnabledBtn.classList.toggle("is-active", autoUpdateEnabled);
-  trayEnabledBtn.classList.toggle("is-active", trayIconEnabled);
-  coverArtBtn.classList.toggle("is-active", coverArtEnabled);
-  radioTrackTitleBtn.classList.toggle("is-active", radioTrackTitleEnabled);
-  playerClockBtn.classList.toggle("is-active", playerClockEnabled);
-  closeMinimizesToTrayBtn.classList.toggle("is-active", closeMinimizesToTrayEnabled);
+  renderSwitch(proxyEnabledBtn, proxyEnabled);
+  renderSwitch(loggingEnabledBtn, loggingEnabled);
+  renderSwitch(autoUpdateEnabledBtn, autoUpdateEnabled);
+  renderSwitch(trayEnabledBtn, trayIconEnabled);
+  renderSwitch(coverArtBtn, coverArtEnabled);
+  renderSwitch(radioTrackTitleBtn, radioTrackTitleEnabled);
+  renderSwitch(playerClockBtn, playerClockEnabled);
+  renderSwitch(closeMinimizesToTrayBtn, closeMinimizesToTrayEnabled);
+  renderSwitch(stereoRadioBtn, stereoRadio);
+  renderSwitch(stereoTracksBtn, stereoTracks);
+  renderSwitch(stereoPseudoBtn, stereoPseudo);
 
   refreshTextForLanguage();
   if (!windowReadySent) {

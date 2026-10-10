@@ -4,6 +4,7 @@ import { state } from "./state";
 import { EQ_BANDS, EQ_PRESETS, findEqPreset, presetPreampDb } from "./eqPresets";
 import { formatBandLabel, formatDb } from "./format";
 import { applyEqState } from "./audioGraph";
+import { renderSwitch } from "../switchControl";
 import { persistConfig } from "./config";
 
 function createEqBandControl(label: string, onChange: (db: number) => void): HTMLElement {
@@ -78,8 +79,8 @@ export function syncEqControlsFromState(): void {
 }
 
 export function renderEqToggle(): void {
-  eqToggleBtn.textContent = state.eqEnabled ? i18n.t("eqOn") : i18n.t("eqOff");
-  eqToggleBtn.classList.toggle("is-active", state.eqEnabled);
+  renderSwitch(eqToggleBtn, state.eqEnabled);
+  eq.classList.toggle("is-off", !state.eqEnabled);
 }
 
 function resetEq(): void {
