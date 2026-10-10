@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.21.0] — 2026-10-10
+
+### Changed
+- New app icon and a matching logo in the window title. On macOS the icon
+  now has the same size as other apps in the Dock
+
 ## [1.20.1] — 2026-10-06
 
 ### Changed

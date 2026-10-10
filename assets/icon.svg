@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#474b52"/>
+      <stop offset="0.5" stop-color="#25282d"/>
+      <stop offset="1" stop-color="#15171a"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a5fdbf"/>
+      <stop offset="1" stop-color="#56d980"/>
+    </linearGradient>
+    <linearGradient id="knob" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1f2f4"/>
+      <stop offset="1" stop-color="#d2d4da"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="9" result="near"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="26" result="far"/>
+      <feMerge><feMergeNode in="far"/><feMergeNode in="near"/></feMerge>
+    </filter>
+    <filter id="knobShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <rect id="plate" x="31" y="31" width="962" height="962" rx="208"/>
+    <path id="bars" d="M247 174.67Q247 168.67 252.24 171.58L361.76 232.42Q367 235.33 367 241.33L367 782.67Q367 788.67 361.76 791.58L252.24 852.42Q247 855.33 247 849.33ZM427 274.67Q427 268.67 432.24 271.58L541.76 332.42Q547 335.33 547 341.33L547 682.67Q547 688.67 541.76 691.58L432.24 752.42Q427 755.33 427 749.33ZM607 374.67Q607 368.67 612.24 371.58L721.76 432.42Q727 435.33 727 441.33L727 582.67Q727 588.67 721.76 591.58L612.24 652.42Q607 655.33 607 649.33ZM787 474.67Q787 468.67 792.24 471.58L831.76 493.53Q837 496.44 837 502.44L837 521.56Q837 527.56 831.76 530.47L792.24 552.42Q787 555.33 787 549.33Z"/>
+    <clipPath id="barsClip"><use href="#bars"/></clipPath>
+    <g id="knobs">
+      <circle cx="307" cy="480" r="46"/>
+      <circle cx="487" cy="553" r="46"/>
+      <circle cx="667" cy="525" r="46"/>
+    </g>
+  </defs>
+  <use href="#plate" fill="url(#background)"/>
+  <rect x="32.5" y="32.5" width="959" height="959" rx="206.5" fill="none" stroke="#9aa3b5" stroke-opacity="0.35" stroke-width="3"/>
+  <use href="#bars" fill="#8af5ad" opacity="0.95" filter="url(#glow)"/>
+  <use href="#bars" fill="url(#bar)"/>
+  <g clip-path="url(#barsClip)">
+    <use href="#knobs" fill="#1f6b3a" opacity="0.45" filter="url(#knobShadow)" transform="translate(0 9)"/>
+  </g>
+  <use href="#knobs" fill="url(#knob)" stroke="#000" stroke-width="6"/>
+</svg>
