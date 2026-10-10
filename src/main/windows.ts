@@ -21,7 +21,7 @@ let settingsScale = 100;
 let boundsBeforeFullScreen: Rectangle | null = null;
 
 function isAlive(win: BrowserWindow | null): win is BrowserWindow {
-  return !!win && !win.isDestroyed();
+  return !!win && !win.isDestroyed() && !win.webContents.isDestroyed();
 }
 
 export function getMainWindow(): BrowserWindow | null {

@@ -4,6 +4,14 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.23.1] — 2026-10-10
+
+### Fixed
+- When the equalizer is off, its bands, preset list and Reset are locked
+  instead of only looking dimmed
+- Closing the player while Settings is open no longer shows an "Object has
+  been destroyed" error
+
 ## [1.23.0] — 2026-10-10
 
 ### Changed
