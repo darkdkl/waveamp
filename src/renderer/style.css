@@ -279,11 +279,17 @@ body.is-electron .player::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 12px;
+  height: 18px;
   padding: 0;
+  margin: -3px 0;
   border: none;
+  border-radius: 3px;
   background: none;
   cursor: pointer;
+}
+
+.display__save:hover {
+  background: hsl(var(--accent-h) var(--accent-s) 50% / 0.16);
 }
 
 .display__save svg {

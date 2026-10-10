@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.22.1] — 2026-10-10
+
+### Changed
+- The bookmark for saving a radio track on the display is easier to hit: its
+  click area is taller and lights up on hover
+- The app icon drops the small tip after the bars
+
 ## [1.22.0] — 2026-10-10
 
 ### Added
