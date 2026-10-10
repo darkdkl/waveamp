@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.22.0] — 2026-10-10
+
+### Added
+- Long track titles scroll on the display: back and forth (the default), in a
+  loop or once. Settings → Interface sets the mode and the speed. On the radio
+  the station name waits until a long track title has scrolled through
+
 ## [1.21.0] — 2026-10-10
 
 ### Changed

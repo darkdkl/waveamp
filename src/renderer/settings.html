@@ -69,6 +69,28 @@
       </div>
 
       <div class="settings-panel__row">
+        <span class="settings-panel__row-label" data-i18n="titleScroll">Длинные названия, прокрутка</span>
+        <select class="settings-panel__select" id="titleScrollSelect">
+          <option value="off" data-i18n="off">Выкл</option>
+          <option value="loop" data-i18n="titleScrollLoop">По кругу</option>
+          <option value="bounce" data-i18n="titleScrollBounce">Туда-обратно</option>
+          <option value="once" data-i18n="titleScrollOnce">Один раз</option>
+        </select>
+      </div>
+
+      <div class="settings-panel__row" id="titleScrollSpeedRow">
+        <span class="settings-panel__row-label" data-i18n="titleScrollSpeed">Скорость прокрутки</span>
+        <div class="settings-panel__stops">
+          <input type="range" class="settings-panel__range" id="titleScrollSpeedInput" min="10" max="50" step="1" />
+          <div class="settings-panel__stop-labels">
+            <span data-i18n="scrollSlow">Медленно</span>
+            <span data-i18n="scrollMedium">Средне</span>
+            <span data-i18n="scrollFast">Быстро</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-panel__row">
         <span class="settings-panel__row-label" data-i18n="playerClock">Часы в режиме плеера</span>
         <button type="button" class="settings-panel__toggle" id="playerClockBtn">Выкл</button>
       </div>

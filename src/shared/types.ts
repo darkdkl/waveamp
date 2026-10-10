@@ -1,3 +1,5 @@
+import type { TitleScrollMode } from "./titleScroll";
+
 export type Lang = "ru" | "en";
 export type VizMode = "spectrum" | "meters" | "scope" | "presets";
 export type VizResponse = "slow" | "smooth" | "peak";
@@ -123,6 +125,8 @@ export interface AppConfig {
     accentColor: AccentColor;
     vizResponse: VizResponse;
     coverArtEnabled: boolean;
+    titleScroll: TitleScrollMode;
+    titleScrollSpeed: number;
     radioTrackTitleEnabled: boolean;
     playerClockEnabled: boolean;
     stereoRadio: boolean;
@@ -159,6 +163,8 @@ export interface SettingsState {
   accentColor: AccentColor;
   vizResponse: VizResponse;
   coverArtEnabled: boolean;
+  titleScroll: TitleScrollMode;
+  titleScrollSpeed: number;
   radioTrackTitleEnabled: boolean;
   playerClockEnabled: boolean;
   stereoRadio: boolean;
@@ -184,6 +190,8 @@ export type SettingsAction =
   | { type: "setAccentColor"; value: AccentColor }
   | { type: "setVizResponse"; value: VizResponse }
   | { type: "setCoverArtEnabled"; value: boolean }
+  | { type: "setTitleScroll"; value: TitleScrollMode }
+  | { type: "setTitleScrollSpeed"; value: number }
   | { type: "setRadioTrackTitleEnabled"; value: boolean }
   | { type: "setPlayerClockEnabled"; value: boolean }
   | { type: "setStereoRadio"; value: boolean }

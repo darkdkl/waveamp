@@ -7,6 +7,7 @@ import { BASE_ZOOM, setScale } from "./layout";
 import { setVizResponse } from "./visualizer";
 import { renderEqToggle } from "./equalizer";
 import { setCoverArtEnabled } from "./coverArt";
+import { setTitleScroll, setTitleScrollSpeed } from "./titleScroll";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
 import { setPlayerClockEnabled } from "./clock";
 import { setStereoPseudo, setStereoRadio, setStereoStrength, setStereoTracks } from "./stereo";
@@ -106,6 +107,8 @@ export function pushSettingsState(): void {
     accentColor: state.accentColor,
     vizResponse: state.vizResponse,
     coverArtEnabled: state.coverArtEnabled,
+    titleScroll: state.titleScroll,
+    titleScrollSpeed: state.titleScrollSpeed,
     radioTrackTitleEnabled: state.radioTrackTitleEnabled,
     playerClockEnabled: state.playerClockEnabled,
     stereoRadio: state.stereoRadio,
@@ -155,6 +158,12 @@ export function initSettingsBridge(): void {
         break;
       case "setCoverArtEnabled":
         setCoverArtEnabled(!!action.value);
+        break;
+      case "setTitleScroll":
+        setTitleScroll(action.value);
+        break;
+      case "setTitleScrollSpeed":
+        setTitleScrollSpeed(Number(action.value));
         break;
       case "setRadioTrackTitleEnabled":
         setRadioTrackTitleEnabled(!!action.value);

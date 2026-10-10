@@ -1,6 +1,7 @@
 import { hotkeys } from "../hotkeys";
 import { accentColor as accentColorTheme } from "../theme";
 import { EQ_BANDS } from "./eqPresets";
+import { TITLE_SCROLL_DEFAULT, TITLE_SCROLL_SPEED_DEFAULT, type TitleScrollMode } from "../../shared/titleScroll";
 import type {
   AccentColor,
   EqCustomPreset,
@@ -70,6 +71,8 @@ export const state = {
   vizResponse: "smooth" as VizResponse,
   coverArtEnabled: true,
   coverArt: null as string | null,
+  titleScroll: TITLE_SCROLL_DEFAULT as TitleScrollMode,
+  titleScrollSpeed: TITLE_SCROLL_SPEED_DEFAULT,
 
   proxy: { enabled: false, type: "http", host: "", port: "", username: "", password: "" } as ProxyConfig,
   loggingEnabled: false,
