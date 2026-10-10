@@ -9,6 +9,8 @@ version, fixes bump the patch version.
 ### Fixed
 - When the equalizer is off, its bands, preset list and Reset are locked
   instead of only looking dimmed
+- Closing the player while Settings is open no longer shows an "Object has
+  been destroyed" error
 
 ## [1.23.0] — 2026-10-10
 
