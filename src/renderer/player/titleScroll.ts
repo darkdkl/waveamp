@@ -47,6 +47,7 @@ function start(): void {
 }
 
 export function setTrackTitleText(next: string, nextKind: TitleKind = "status"): void {
+  if (next === text && nextKind === kind && (animation || trackTitle.textContent === next)) return;
   text = next;
   kind = nextKind;
   trackTitle.textContent = next;
