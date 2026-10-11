@@ -137,6 +137,7 @@ function setup(options: {
   found?: Record<string, string[] | Error>;
   up?: string[];
   reject?: Record<string, Error>;
+  skip?: string[];
 }) {
   const saved: MirrorCache[] = [];
   const logs: string[] = [];
@@ -154,6 +155,7 @@ function setup(options: {
       if (answer instanceof Error) throw answer;
       return answer ?? [];
     },
+    skipReason: (source) => (options.skip?.includes(source.type) ? "proxy is on" : null),
     isMirrorFailure: (err) => !(err instanceof HttpError && err.status === 404),
     log: (level, message) => logs.push(`${level}: ${message}`),
     now: () => NOW,
@@ -207,6 +209,17 @@ describe("createMirrorClient", () => {
     const viaFallback = setup({ up: ["https://fallback.user.example.org"] });
     expect(await viaFallback.get("/x")).toBe("https://fallback.user.example.org/x");
     expect(viaFallback.discovered).toEqual(["_api._tcp.user.example.org", "https://all.user.example.org/json/servers"]);
+  });
+
+  it("skips a discovery source that would bypass the proxy", async () => {
+    const env = setup({
+      skip: ["dns-srv"],
+      found: { "_api._tcp.user.example.org": ["https://srv.example.org"], "https://all.user.example.org/json/servers": ["https://h.example.org"] },
+      up: ["https://srv.example.org", "https://h.example.org"],
+    });
+    expect(await env.get("/x")).toBe("https://h.example.org/x");
+    expect(env.discovered).toEqual(["https://all.user.example.org/json/servers"]);
+    expect(env.logs).toContain("info: Skipped mirror discovery via dns-srv (user list): proxy is on");
   });
 
   it("rediscovers when every cached mirror fails", async () => {

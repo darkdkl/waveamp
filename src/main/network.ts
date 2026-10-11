@@ -13,9 +13,15 @@ export class HttpStatusError extends Error {
 }
 
 let currentProxyAuth: { username: string; password: string } | null = null;
+let proxyEnabled = false;
+
+export function isProxyEnabled(): boolean {
+  return proxyEnabled;
+}
 
 export async function applyProxyConfig(proxyConfig: Partial<ProxyConfig> | null): Promise<void> {
-  if (!proxyConfig?.enabled || !proxyConfig.host || !proxyConfig.port) {
+  proxyEnabled = !!(proxyConfig?.enabled && proxyConfig.host && proxyConfig.port);
+  if (!proxyEnabled || !proxyConfig) {
     await session.defaultSession.setProxy({ proxyRules: "direct://" });
     // setProxy() keeps reusing pooled connections; drop them so the change applies now.
     await session.defaultSession.closeAllConnections();

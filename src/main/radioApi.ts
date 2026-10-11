@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Resolver } from "node:dns/promises";
 import { writeLog } from "./logging";
-import { HttpStatusError, REQUEST_TIMEOUT_MS, USER_AGENT, netRequestJson, netRequestText } from "./network";
+import { HttpStatusError, REQUEST_TIMEOUT_MS, USER_AGENT, isProxyEnabled, netRequestJson, netRequestText } from "./network";
 import {
   CatalogUnavailableError,
   createMirrorClient,
@@ -112,6 +112,7 @@ const mirrors = createMirrorClient({
   loadCache: loadMirrorCache,
   saveCache: saveMirrorCache,
   discover: discoverMirrors,
+  skipReason: (source) => (source.type === "dns-srv" && isProxyEnabled() ? "DNS would bypass the proxy" : null),
   isMirrorFailure,
   log: (level, message) => writeLog(level, "radio-api", message),
   now: Date.now,

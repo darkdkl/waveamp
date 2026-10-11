@@ -126,6 +126,7 @@ export interface MirrorClientDeps {
   loadCache: () => MirrorCache | null;
   saveCache: (cache: MirrorCache) => void;
   discover: (source: DiscoverySource) => Promise<string[]>;
+  skipReason: (source: DiscoverySource) => string | null;
   isMirrorFailure: (err: unknown) => boolean;
   log: (level: "info" | "warn" | "error", message: string) => void;
   now: () => number;
@@ -155,6 +156,11 @@ export function createMirrorClient(deps: MirrorClientDeps) {
 
   async function discoverMirrors(sources: RadioSources, label: string): Promise<string[]> {
     for (const source of sources.discovery) {
+      const reason = deps.skipReason(source);
+      if (reason) {
+        deps.log("info", `Skipped mirror discovery via ${source.type} (${label}): ${reason}`);
+        continue;
+      }
       try {
         const mirrors = await deps.discover(source);
         if (mirrors.length) {
