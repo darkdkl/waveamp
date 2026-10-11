@@ -14,7 +14,7 @@ registerAlacScheme();
 registerProxyLogin();
 registerIpcHandlers();
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const config = loadConfig();
   const settings = config?.settings;
   setLoggingEnabled(!!settings?.loggingEnabled);
@@ -23,15 +23,15 @@ app.whenReady().then(() => {
   pruneOldLogs();
   handleAlacProtocol();
   writeLog("info", "app", `App starting (v${app.getVersion()})`);
-  const proxyReady = settings?.proxy
-    ? applyProxyConfig(settings.proxy).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`))
-    : Promise.resolve();
+  if (settings?.proxy) {
+    await applyProxyConfig(settings.proxy).catch((err) => writeLog("error", "proxy", `Failed to apply: ${err.message}`));
+  }
 
   setAppMenu();
   setDockIcon();
 
   const windowShown = createWindow();
-  Promise.all([proxyReady, windowShown]).then(() => checkForUpdatesOnLaunch());
+  windowShown.then(() => checkForUpdatesOnLaunch());
   registerMediaKeys();
   syncTray();
   syncDockMenu();

@@ -4,6 +4,14 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.24.1] — 2026-10-12
+
+### Fixed
+- With a proxy turned on, radio catalog mirrors are looked up only through
+  the proxy (the direct DNS lookup is skipped)
+- The proxy is applied before the player window opens, so no early request
+  can go around it
+
 ## [1.24.0] — 2026-10-12
 
 ### Added
