@@ -211,6 +211,8 @@ export type SettingsAction =
 
 export type SettingsActionValue<T extends SettingsAction["type"]> = Extract<SettingsAction, { type: T }>["value"];
 
+export type StationSearchResult = { ok: true; stations: Station[] } | { ok: false; error: "unavailable" | "failed" };
+
 export type ResolveStreamResult = { ok: true; url: string } | { ok: false; error: "invalid" | "playlist" };
 
 export type UpdateCheckResult =

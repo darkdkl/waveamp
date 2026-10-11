@@ -4,6 +4,18 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.24.0] — 2026-10-12
+
+### Added
+- Radio catalog mirrors are found automatically (DNS SRV record, then the
+  catalog's server list) and cached for a day; the last working mirror is
+  tried first, so a dead mirror no longer slows down every request
+- The mirror list lives in `radio-sources.json` in the app's settings
+  folder (copied from the built-in list on first use); if it stops working,
+  the player falls back to the built-in list
+- When no mirror answers, the radio search says that the station catalog is
+  unavailable and that favorites and your own stations still work
+
 ## [1.23.2] — 2026-10-11
 
 ### Changed
