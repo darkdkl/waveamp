@@ -71,6 +71,7 @@ function setSettingsView(view: "interface" | "system" | "hotkeys") {
   settingsInterfaceView.hidden = view !== "interface";
   settingsSystemView.hidden = view !== "system";
   settingsHotkeysView.hidden = view !== "hotkeys";
+  if (view === "system" && !radioMirrorStatus) loadRadioMirror();
 }
 settingsTabInterface.addEventListener("click", () => setSettingsView("interface"));
 settingsTabSystem.addEventListener("click", () => setSettingsView("system"));
@@ -162,6 +163,38 @@ function setLoggingEnabled(enabled: boolean) {
 }
 loggingEnabledBtn.addEventListener("click", () => setLoggingEnabled(!loggingEnabled));
 openLogFolderBtn.addEventListener("click", () => window.electronAPI?.openLogFolder?.());
+
+const radioMirrorText = byId("radioMirrorText");
+const showRadioSourcesBtn = byId<HTMLButtonElement>("showRadioSourcesBtn");
+const refreshRadioMirrorsBtn = byId<HTMLButtonElement>("refreshRadioMirrorsBtn");
+let radioMirror: string | null = null;
+let radioMirrorStatus: "radioMirrorsSearching" | "radioMirrorsNotFound" | null = null;
+
+function renderRadioMirror() {
+  if (radioMirrorStatus) radioMirrorText.textContent = i18n.t(radioMirrorStatus);
+  else radioMirrorText.textContent = radioMirror ? new URL(radioMirror).host : "—";
+}
+
+function loadRadioMirror() {
+  window.electronAPI?.getRadioMirror?.().then((mirror) => {
+    if (radioMirrorStatus === "radioMirrorsSearching") return;
+    radioMirror = mirror;
+    renderRadioMirror();
+  });
+}
+
+showRadioSourcesBtn.addEventListener("click", () => window.electronAPI?.showRadioSources?.());
+refreshRadioMirrorsBtn.addEventListener("click", async () => {
+  if (!window.electronAPI?.refreshRadioMirrors) return;
+  refreshRadioMirrorsBtn.disabled = true;
+  radioMirrorStatus = "radioMirrorsSearching";
+  renderRadioMirror();
+  radioMirror = await window.electronAPI.refreshRadioMirrors();
+  radioMirrorStatus = radioMirror ? null : "radioMirrorsNotFound";
+  renderRadioMirror();
+  refreshRadioMirrorsBtn.disabled = false;
+});
+loadRadioMirror();
 
 const appVersionText = byId("appVersionText");
 const appLicenseBtn = byId<HTMLButtonElement>("appLicenseBtn");
@@ -506,6 +539,7 @@ function refreshTextForLanguage() {
     presetButtons[i].setAttribute("aria-label", i18n.t(preset.nameKey));
   });
   renderPresetSettings();
+  renderRadioMirror();
   if (updateStatusKey) updateStatusText.textContent = updateStatusMessage();
 }
 
