@@ -170,7 +170,12 @@ function setup(options: {
       if (!(options.up ?? []).includes(base)) throw new Error("connect ECONNREFUSED");
       return `${base}${path}`;
     });
-  return { get, saved, logs, discovered, requested };
+  const refresh = () => client.refresh("/json/stats", async (base) => {
+    requested.push(base);
+    if (!(options.up ?? []).includes(base)) throw new Error("connect ECONNREFUSED");
+    return base;
+  });
+  return { get, refresh, client, saved, logs, discovered, requested };
 }
 
 const freshCache = (mirrors: string[], lastGood: string | null = null): MirrorCache => ({
@@ -209,6 +214,30 @@ describe("createMirrorClient", () => {
     const viaFallback = setup({ up: ["https://fallback.user.example.org"] });
     expect(await viaFallback.get("/x")).toBe("https://fallback.user.example.org/x");
     expect(viaFallback.discovered).toEqual(["_api._tcp.user.example.org", "https://all.user.example.org/json/servers"]);
+  });
+
+  it("reports the current mirror from the cache", () => {
+    expect(setup({ cache: freshCache(["https://a.example.org"], "https://a.example.org") }).client.currentMirror()).toBe("https://a.example.org");
+    expect(setup({}).client.currentMirror()).toBeNull();
+  });
+
+  it("refresh ignores a fresh cache, rediscovers and remembers the mirror that answers", async () => {
+    const env = setup({
+      cache: freshCache(["https://old.example.org"], "https://old.example.org"),
+      found: { "_api._tcp.user.example.org": ["https://new.example.org"] },
+      up: ["https://old.example.org", "https://new.example.org"],
+    });
+    expect(await env.refresh()).toBe("https://new.example.org");
+    expect(env.discovered).toEqual(["_api._tcp.user.example.org"]);
+    expect(env.client.currentMirror()).toBe("https://new.example.org");
+  });
+
+  it("refresh rejects when nothing answers and keeps the previous cache", async () => {
+    const previous = freshCache(["https://old.example.org"], "https://old.example.org");
+    const env = setup({ cache: previous });
+    await expect(env.refresh()).rejects.toBeInstanceOf(CatalogUnavailableError);
+    expect(env.client.currentMirror()).toBe("https://old.example.org");
+    expect(env.saved.at(-1)).toEqual(previous);
   });
 
   it("skips a discovery source that would bypass the proxy", async () => {

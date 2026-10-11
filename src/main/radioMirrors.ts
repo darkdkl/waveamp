@@ -267,5 +267,19 @@ export function createMirrorClient(deps: MirrorClientDeps) {
     throw new CatalogUnavailableError();
   }
 
-  return { request };
+  function currentMirror(): string | null {
+    return currentCache()?.lastGood ?? null;
+  }
+
+  function refresh<T>(label: string, fn: (base: string) => Promise<T>): Promise<T> {
+    const previous = currentCache();
+    userSources = undefined;
+    cache = null;
+    return request(label, fn).catch((err: unknown) => {
+      if (previous) storeCache(previous);
+      throw err;
+    });
+  }
+
+  return { request, refresh, currentMirror };
 }

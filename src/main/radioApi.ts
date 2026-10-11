@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, shell } from "electron";
 import fs from "node:fs";
 import path from "node:path";
 import { Resolver } from "node:dns/promises";
@@ -118,6 +118,25 @@ const mirrors = createMirrorClient({
   now: Date.now,
   random: Math.random,
 });
+
+export function currentRadioMirror(): string | null {
+  return mirrors.currentMirror();
+}
+
+export async function refreshRadioMirrors(): Promise<string | null> {
+  try {
+    await mirrors.refresh("/json/stats", (base) => netRequestJson(`${base}/json/stats`, { "User-Agent": USER_AGENT }, REQUEST_TIMEOUT_MS));
+    return mirrors.currentMirror();
+  } catch (err) {
+    writeLog("warn", "radio-api", `Mirror refresh failed: ${errorMessage(err)}`);
+    return null;
+  }
+}
+
+export function showRadioSourcesFile(): void {
+  loadUserSources();
+  shell.showItemInFolder(USER_SOURCES_PATH);
+}
 
 function radioApiFetch(pathAndQuery: string): Promise<any> {
   return mirrors.request(pathAndQuery, (base) => netRequestJson(base + pathAndQuery, { "User-Agent": USER_AGENT }, REQUEST_TIMEOUT_MS));

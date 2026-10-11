@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.25.0] — 2026-10-12
+
+### Added
+- Settings → System → Station catalog shows the radio mirror in use, opens
+  the folder with `radio-sources.json`, and can look for mirrors again right
+  away (a failed attempt keeps the last working mirror)
+
 ## [1.24.1] — 2026-10-12
 
 ### Fixed

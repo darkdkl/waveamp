@@ -7,9 +7,12 @@ import {
   fetchStates,
   fetchTags,
   fetchTagsForFilter,
+  currentRadioMirror,
+  refreshRadioMirrors,
   registerStationClick,
   resolveStreamUrl,
   searchStations,
+  showRadioSourcesFile,
 } from "./radioApi";
 import {
   closeSenderWindow,
@@ -163,6 +166,9 @@ export function registerIpcHandlers(): void {
   );
 
   ipcMain.handle("open-log-folder", () => openLogFolder());
+  ipcMain.handle("radio-mirror-current", () => currentRadioMirror());
+  ipcMain.handle("radio-mirrors-refresh", () => refreshRadioMirrors());
+  ipcMain.on("radio-sources-show", () => showRadioSourcesFile());
 
   ipcMain.handle("get-app-version", () => app.getVersion());
 
