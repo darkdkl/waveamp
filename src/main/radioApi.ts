@@ -1,5 +1,20 @@
+import { app } from "electron";
+import fs from "node:fs";
+import path from "node:path";
+import { Resolver } from "node:dns/promises";
 import { writeLog } from "./logging";
-import { REQUEST_TIMEOUT_MS, USER_AGENT, netRequestJson, netRequestText } from "./network";
+import { HttpStatusError, REQUEST_TIMEOUT_MS, USER_AGENT, netRequestJson, netRequestText } from "./network";
+import {
+  CatalogUnavailableError,
+  createMirrorClient,
+  mirrorsFromServerList,
+  mirrorsFromSrv,
+  parseCache,
+  parseSources,
+  type DiscoverySource,
+  type MirrorCache,
+  type RadioSources,
+} from "./radioMirrors";
 import { isHttpUrl, parsePlaylistStreamUrl, playlistKind } from "./streamUrl";
 import {
   countTags,
@@ -9,15 +24,20 @@ import {
   toStateOptions,
   toTagOptions,
 } from "./radioStations";
-import type { CountedOption, CountryOption, ResolveStreamResult, Station, StationSearchParams } from "../shared/types";
+import type {
+  CountedOption,
+  CountryOption,
+  ResolveStreamResult,
+  Station,
+  StationSearchParams,
+  StationSearchResult,
+} from "../shared/types";
 import { errorMessage } from "../shared/errors";
 
-const RADIO_API_MIRRORS = [
-  "https://de1.api.radio-browser.info",
-  "https://de2.api.radio-browser.info",
-  "https://nl1.api.radio-browser.info",
-  "https://at1.api.radio-browser.info",
-];
+const BUNDLED_SOURCES_PATH = path.join(app.getAppPath(), "assets", "radio-sources.json");
+const USER_SOURCES_PATH = path.join(app.getPath("userData"), "radio-sources.json");
+const MIRROR_CACHE_PATH = path.join(app.getPath("userData"), "radio-mirrors-cache.json");
+const DNS_TIMEOUT_MS = 3000;
 
 const PLAYLIST_MAX_BYTES = 256 * 1024;
 
@@ -28,18 +48,78 @@ const TAG_MATCH_SAMPLE_SIZE = 250;
 const TAG_LIMIT = 30;
 const TAG_SAMPLE_SIZE = 500;
 
-async function radioApiFetch(pathAndQuery: string): Promise<any> {
-  let lastErr: unknown;
-  for (const base of RADIO_API_MIRRORS) {
+function readJson(file: string): unknown {
+  return JSON.parse(fs.readFileSync(file, "utf-8"));
+}
+
+function loadBundledSources(): RadioSources {
+  const sources = parseSources(readJson(BUNDLED_SOURCES_PATH));
+  if (!sources) throw new Error("The built-in radio-sources.json has no usable sources");
+  return sources;
+}
+
+function loadUserSources(): RadioSources {
+  if (!fs.existsSync(USER_SOURCES_PATH)) {
     try {
-      return await netRequestJson(base + pathAndQuery, { "User-Agent": USER_AGENT }, REQUEST_TIMEOUT_MS);
+      fs.writeFileSync(USER_SOURCES_PATH, fs.readFileSync(BUNDLED_SOURCES_PATH));
+      writeLog("info", "radio-api", `Created ${USER_SOURCES_PATH} from the built-in list`);
     } catch (err) {
-      lastErr = err;
-      writeLog("warn", "radio-api", `Mirror ${base} failed for ${pathAndQuery}: ${errorMessage(err)}`);
+      writeLog("warn", "radio-api", `Could not create ${USER_SOURCES_PATH}: ${errorMessage(err)}`);
     }
+    return loadBundledSources();
   }
-  writeLog("error", "radio-api", `All mirrors failed for ${pathAndQuery}: ${errorMessage(lastErr)}`);
-  throw lastErr;
+  try {
+    const sources = parseSources(readJson(USER_SOURCES_PATH));
+    if (sources) return sources;
+    writeLog("warn", "radio-api", `${USER_SOURCES_PATH} has no usable sources, using the built-in list`);
+  } catch (err) {
+    writeLog("warn", "radio-api", `Could not read ${USER_SOURCES_PATH}, using the built-in list: ${errorMessage(err)}`);
+  }
+  return loadBundledSources();
+}
+
+function loadMirrorCache(): MirrorCache | null {
+  try {
+    return parseCache(readJson(MIRROR_CACHE_PATH));
+  } catch {
+    return null;
+  }
+}
+
+function saveMirrorCache(cache: MirrorCache): void {
+  try {
+    fs.writeFileSync(MIRROR_CACHE_PATH, JSON.stringify(cache, null, 2));
+  } catch (err) {
+    writeLog("warn", "radio-api", `Could not save the mirror cache: ${errorMessage(err)}`);
+  }
+}
+
+async function discoverMirrors(source: DiscoverySource): Promise<string[]> {
+  if (source.type === "dns-srv") {
+    const resolver = new Resolver({ timeout: DNS_TIMEOUT_MS, tries: 2 });
+    return mirrorsFromSrv(await resolver.resolveSrv(source.name));
+  }
+  return mirrorsFromServerList(await netRequestJson(source.url, { "User-Agent": USER_AGENT }, REQUEST_TIMEOUT_MS));
+}
+
+function isMirrorFailure(err: unknown): boolean {
+  return !(err instanceof HttpStatusError && err.status >= 400 && err.status < 500 && err.status !== 429);
+}
+
+const mirrors = createMirrorClient({
+  loadUserSources,
+  loadBundledSources,
+  loadCache: loadMirrorCache,
+  saveCache: saveMirrorCache,
+  discover: discoverMirrors,
+  isMirrorFailure,
+  log: (level, message) => writeLog(level, "radio-api", message),
+  now: Date.now,
+  random: Math.random,
+});
+
+function radioApiFetch(pathAndQuery: string): Promise<any> {
+  return mirrors.request(pathAndQuery, (base) => netRequestJson(base + pathAndQuery, { "User-Agent": USER_AGENT }, REQUEST_TIMEOUT_MS));
 }
 
 export async function resolveStreamUrl(url: string): Promise<ResolveStreamResult> {
@@ -57,7 +137,17 @@ export async function resolveStreamUrl(url: string): Promise<ResolveStreamResult
   }
 }
 
-export async function searchStations(params: StationSearchParams = {}): Promise<Station[]> {
+export async function searchStations(params: StationSearchParams = {}): Promise<StationSearchResult> {
+  try {
+    return { ok: true, stations: await findStations(params) };
+  } catch (err) {
+    if (err instanceof CatalogUnavailableError) return { ok: false, error: "unavailable" };
+    writeLog("error", "radio", `Search failed: ${errorMessage(err)}`);
+    return { ok: false, error: "failed" };
+  }
+}
+
+async function findStations(params: StationSearchParams): Promise<Station[]> {
   const limit = params.limit || 40;
   const q = new URLSearchParams();
   if (params.name) q.set("name", params.name);

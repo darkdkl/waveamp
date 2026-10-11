@@ -5,6 +5,13 @@ import type { ProxyConfig } from "../shared/types";
 export const USER_AGENT = `WaveAMP/${app.getVersion()}`;
 export const REQUEST_TIMEOUT_MS = 8000;
 
+export class HttpStatusError extends Error {
+  constructor(readonly status: number) {
+    super(`HTTP ${status}`);
+    this.name = "HttpStatusError";
+  }
+}
+
 let currentProxyAuth: { username: string; password: string } | null = null;
 
 export async function applyProxyConfig(proxyConfig: Partial<ProxyConfig> | null): Promise<void> {
@@ -67,7 +74,7 @@ export function netRequestText(
     request.on("response", (response) => {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         (response as unknown as NodeJS.ReadableStream).resume();
-        finish(reject, new Error(`HTTP ${response.statusCode}`));
+        finish(reject, new HttpStatusError(response.statusCode));
         return;
       }
       const chunks: Buffer[] = [];

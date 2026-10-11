@@ -28,7 +28,7 @@ import { persistConfig } from "../config";
 import { syncElectronWindowSize } from "../layout";
 import { openStationForm } from "./stationForm";
 import { tuneStation } from "./stream";
-import type { CountedOption, Station } from "../../../shared/types";
+import type { CountedOption, Station, StationSearchResult } from "../../../shared/types";
 import { errorMessage } from "../../../shared/errors";
 
 let radioCountry = "";
@@ -241,7 +241,16 @@ async function loadRadioStates(countryName: string): Promise<void> {
 
 function setRadioEmptyText(key: string): void {
   radioEmptyKey = key;
-  radioEmpty.textContent = i18n.t(key);
+  if (key !== "catalogUnavailable") {
+    radioEmpty.textContent = i18n.t(key);
+    return;
+  }
+  const title = document.createElement("span");
+  title.className = "radio__empty-title";
+  title.textContent = i18n.t("catalogUnavailable");
+  const hint = document.createElement("span");
+  hint.textContent = i18n.t("catalogUnavailableHint");
+  radioEmpty.replaceChildren(title, hint);
 }
 
 export function refreshRadioEmptyText(): void {
@@ -253,27 +262,24 @@ async function runRadioSearch(): Promise<void> {
   const token = ++radioSearchToken;
   radioEmpty.hidden = false;
   setRadioEmptyText("searching");
-  try {
-    const results = await window.electronAPI.searchStations({
+  const result = await window.electronAPI
+    .searchStations({
       name: radioSearchInput.value.trim(),
       country: radioCountry,
       state: radioState,
       tag: radioTag,
       limit: 40,
+    })
+    .catch((err: unknown): StationSearchResult => {
+      logEvent("error", "radio", `Search failed: ${errorMessage(err)}`);
+      return { ok: false, error: "failed" };
     });
-    if (token !== radioSearchToken) return;
-    state.radioResults = results;
-    renderRadioResults();
-    radioEmpty.hidden = state.radioResults.length > 0;
-    setRadioEmptyText("nothingFound");
-  } catch (err) {
-    if (token !== radioSearchToken) return;
-    state.radioResults = [];
-    renderRadioResults();
-    radioEmpty.hidden = false;
-    setRadioEmptyText("loadFailed");
-    logEvent("error", "radio", `Search failed: ${errorMessage(err)}`);
-  }
+  if (token !== radioSearchToken) return;
+  state.radioResults = result.ok ? result.stations : [];
+  renderRadioResults();
+  radioEmpty.hidden = state.radioResults.length > 0;
+  if (result.ok) setRadioEmptyText("nothingFound");
+  else setRadioEmptyText(result.error === "unavailable" ? "catalogUnavailable" : "loadFailed");
 }
 
 export function initRadioTabs(): void {
