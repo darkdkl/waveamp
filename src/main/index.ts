@@ -1,7 +1,7 @@
 import { app, BrowserWindow, globalShortcut } from "electron";
 import { loadConfig } from "./config";
 import { pruneOldLogs, setLoggingEnabled, writeLog } from "./logging";
-import { applyProxyConfig, registerProxyLogin } from "./network";
+import { applyProxyConfig, registerProxyLogin, USER_AGENT } from "./network";
 import { createWindow, getMainWindow } from "./windows";
 import { initMenuPreferences, setAppMenu, setDockIcon, syncDockMenu, syncTray } from "./menus";
 import { registerMediaKeys } from "./shortcuts";
@@ -9,6 +9,7 @@ import { checkForUpdatesOnLaunch, setAutoUpdateEnabled } from "./updates";
 import { registerIpcHandlers } from "./ipc";
 import { handleAlacProtocol, registerAlacScheme } from "./alac/protocol";
 
+app.userAgentFallback = USER_AGENT;
 registerAlacScheme();
 registerProxyLogin();
 registerIpcHandlers();

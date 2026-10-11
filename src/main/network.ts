@@ -2,7 +2,7 @@ import { app, net, session } from "electron";
 import { writeLog } from "./logging";
 import type { ProxyConfig } from "../shared/types";
 
-export const USER_AGENT = `WaveAMP/${app.getVersion()} (https://github.com/darkdkl/waveamp)`;
+export const USER_AGENT = `WaveAMP/${app.getVersion()}`;
 export const REQUEST_TIMEOUT_MS = 8000;
 
 let currentProxyAuth: { username: string; password: string } | null = null;
