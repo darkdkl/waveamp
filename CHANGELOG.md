@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.23.2] — 2026-10-11
+
+### Changed
+- Radio streams identify the player as WaveAMP with its version instead of
+  the browser engine, and requests no longer carry a link to the repository
+
 ## [1.23.1] — 2026-10-10
 
 ### Fixed
