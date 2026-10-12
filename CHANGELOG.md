@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.25.1] — 2026-10-12
+
+### Changed
+- A cleaner app icon: the bars lose their knobs, get wider gaps and a
+  crisper glow, and sit on a plate that matches the player's body
+
 ## [1.25.0] — 2026-10-12
 
 ### Added
