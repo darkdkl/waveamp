@@ -168,15 +168,15 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 Winamp is a trademark of its respective owner. WaveAMP is an independent
 project, not affiliated with or endorsed by the owner of Winamp; Winamp is
 mentioned here only to describe the player's style and the origin of the
-equalizer presets. MilkDrop is mentioned only to name the visualizer preset
-format (`.milk`) that projectM supports.
+equalizer presets. MilkDrop is mentioned to name the visualizer preset format
+(`.milk`) that projectM supports and to credit its author.
 
 ## Acknowledgements
 
 Internet radio in WaveAMP is powered by [Radio Browser](https://www.radio-browser.info/) —
-a free, non-commercial station database kept running by volunteers who host
-its API mirrors at their own expense. Thank you for making it exist and keeping
-it open.
+a free station database that its community fills in, like Wikipedia; the data
+is in the public domain, and its author keeps the servers running with the help
+of sponsors. Thank you for making it exist and keeping it open.
 
 The visualizer presets run on [projectM](https://github.com/projectM-visualizer/projectm) —
 the open-source reimplementation of MilkDrop that its team has been developing
