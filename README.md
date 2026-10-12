@@ -6,6 +6,9 @@ A retro-style desktop audio player with internet radio, in the spirit of
 classic Winamp: dark chrome, a glowing LCD and a real 10-band equalizer.
 Runs on macOS, Windows and Linux.
 
+**Also for VS Code:** WaveAMP in the editor sidebar —
+[waveamp-vscode](https://github.com/darkdkl/waveamp-vscode).
+
 <p align="center">
   <img src="docs/header.png" alt="WaveAMP in four of its color schemes" width="100%" />
 </p>
@@ -62,6 +65,18 @@ Runs on macOS, Windows and Linux.
   download page
 - **English and Russian interface**, adjustable UI scale; your playlist,
   equalizer, favorites and layout are restored on the next launch
+
+## WaveAMP for VS Code
+
+The same player — the look, the playlist, the equalizer and internet radio —
+also lives in the VS Code sidebar. Get the `.vsix` from the
+[waveamp-vscode releases](https://github.com/darkdkl/waveamp-vscode/releases/latest)
+and install it with **Extensions: Install from VSIX…**; everything else is in
+the [waveamp-vscode](https://github.com/darkdkl/waveamp-vscode) repository.
+
+<p align="center">
+  <img src="docs/vscode.png" alt="WaveAMP in the VS Code sidebar" width="260" />
+</p>
 
 ## Download
 
