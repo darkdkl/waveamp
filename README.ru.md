@@ -6,6 +6,9 @@
 корпус, светящийся LCD-дисплей и настоящий 10-полосный эквалайзер. Работает
 на macOS, Windows и Linux.
 
+**Есть и для VS Code:** WaveAMP в боковой панели редактора —
+[waveamp-vscode](https://github.com/darkdkl/waveamp-vscode).
+
 <p align="center">
   <img src="docs/header.png" alt="WaveAMP в четырёх цветовых схемах" width="100%" />
 </p>
@@ -62,6 +65,18 @@
   загрузки
 - **Русский и английский интерфейс**, масштаб интерфейса; плейлист,
   эквалайзер, избранное и расположение панелей восстанавливаются при запуске
+
+## WaveAMP для VS Code
+
+Тот же плеер — внешний вид, плейлист, эквалайзер и интернет-радио — есть и в
+боковой панели VS Code. Скачайте `.vsix` со страницы
+[релизов waveamp-vscode](https://github.com/darkdkl/waveamp-vscode/releases/latest)
+и установите командой **Extensions: Install from VSIX…**; всё остальное — в
+репозитории [waveamp-vscode](https://github.com/darkdkl/waveamp-vscode).
+
+<p align="center">
+  <img src="docs/vscode.png" alt="WaveAMP в боковой панели VS Code" width="260" />
+</p>
 
 ## Скачать
 
