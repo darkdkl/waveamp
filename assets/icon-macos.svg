@@ -1,46 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#474b52"/>
-      <stop offset="0.5" stop-color="#25282d"/>
-      <stop offset="1" stop-color="#15171a"/>
+    <linearGradient id="plateFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#30353c"/>
+      <stop offset="0.55" stop-color="#1d2025"/>
+      <stop offset="1" stop-color="#131518"/>
     </linearGradient>
-    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#a5fdbf"/>
-      <stop offset="1" stop-color="#56d980"/>
+    <linearGradient id="plateEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.03"/>
     </linearGradient>
-    <linearGradient id="knob" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f1f2f4"/>
-      <stop offset="1" stop-color="#d2d4da"/>
+    <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b4ffc6"/>
+      <stop offset="1" stop-color="#5fe884"/>
     </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="9" result="near"/>
-      <feGaussianBlur in="SourceGraphic" stdDeviation="26" result="far"/>
-      <feMerge><feMergeNode in="far"/><feMergeNode in="near"/></feMerge>
-    </filter>
-    <filter id="knobShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="5"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="near"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="22" result="far"/>
+      <feComponentTransfer in="far" result="farDim"><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+      <feMerge><feMergeNode in="farDim"/><feMergeNode in="near"/></feMerge>
     </filter>
     <filter id="drop" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000" flood-opacity="0.3"/>
     </filter>
-    <rect id="plate" x="31" y="31" width="962" height="962" rx="208"/>
-    <path id="bars" d="M272 174.67Q272 168.67 277.24 171.58L386.76 232.42Q392 235.33 392 241.33L392 782.67Q392 788.67 386.76 791.58L277.24 852.42Q272 855.33 272 849.33ZM452 274.67Q452 268.67 457.24 271.58L566.76 332.42Q572 335.33 572 341.33L572 682.67Q572 688.67 566.76 691.58L457.24 752.42Q452 755.33 452 749.33ZM632 374.67Q632 368.67 637.24 371.58L746.76 432.42Q752 435.33 752 441.33L752 582.67Q752 588.67 746.76 591.58L637.24 652.42Q632 655.33 632 649.33Z"/>
-    <clipPath id="barsClip"><use href="#bars"/></clipPath>
-    <g id="knobs">
-      <circle cx="332" cy="480" r="46"/>
-      <circle cx="512" cy="553" r="46"/>
-      <circle cx="692" cy="525" r="46"/>
-    </g>
+    <path id="bars" d="M262 202Q262 192 271.39 195.44L376.61 234.01Q386 237.45 386 247.45L386 776.55Q386 786.55 376.61 789.99L271.39 828.56Q262 832 262 822ZM466 276.77Q466 266.77 475.39 270.22L580.61 308.78Q590 312.23 590 322.23L590 701.77Q590 711.77 580.61 715.22L475.39 753.78Q466 757.23 466 747.23ZM670 351.55Q670 341.55 679.39 344.99L784.61 383.56Q794 387 794 397L794 627Q794 637 784.61 640.44L679.39 679.01Q670 682.45 670 672.45Z"/>
   </defs>
   <g transform="translate(512 512) scale(0.8566) translate(-512 -512)">
-    <use href="#plate" fill="url(#background)" filter="url(#drop)"/>
-    <rect x="32.5" y="32.5" width="959" height="959" rx="206.5" fill="none" stroke="#9aa3b5" stroke-opacity="0.35" stroke-width="3"/>
-    <use href="#bars" fill="#8af5ad" opacity="0.95" filter="url(#glow)"/>
-    <use href="#bars" fill="url(#bar)"/>
-    <g clip-path="url(#barsClip)">
-      <use href="#knobs" fill="#1f6b3a" opacity="0.45" filter="url(#knobShadow)" transform="translate(0 9)"/>
-    </g>
-    <use href="#knobs" fill="url(#knob)" stroke="#000" stroke-width="6"/>
+    <rect x="31" y="31" width="962" height="962" rx="208" fill="url(#plateFill)" filter="url(#drop)"/>
+    <rect x="33" y="33" width="958" height="958" rx="206" fill="none" stroke="url(#plateEdge)" stroke-width="4"/>
+    <use href="#bars" fill="#7dfc9b" filter="url(#glow)"/>
+    <use href="#bars" fill="url(#lit)"/>
   </g>
 </svg>
