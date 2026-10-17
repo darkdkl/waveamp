@@ -26,6 +26,7 @@ import { applyWindowControlsSide, initSettingsBridge, initSettingsButton, initSk
 import { initPlayerHotkeys } from "./playerHotkeys";
 import { restoreConfig } from "./restore";
 import { initStereo } from "./stereo";
+import { initDisplayInfo } from "./displayInfo";
 
 initVisualizerControls();
 initEqualizerControls();
@@ -48,6 +49,7 @@ initSavedTracks();
 initClock();
 initPlayState();
 initStereo();
+initDisplayInfo();
 initMediaSession();
 initAudioErrorHandling();
 initSeekAndVolume();

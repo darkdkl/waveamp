@@ -5,11 +5,14 @@ import { isHttpUrl } from "./streamUrl";
 import { writeLog } from "./logging";
 import { getMainWindow, sendToMainWindow } from "./windows";
 import { errorMessage } from "../shared/errors";
+import { codecFromContentType, parseIcyBitrate, type StreamInfo } from "../shared/audioFormat";
 import type { NowPlayingUpdate } from "../shared/types";
 
 const ICY_MAX_METADATA_BLOCKS = 3;
 
 class NoIcyMetadataError extends Error {}
+
+const streamInfoByUrl = new Map<string, StreamInfo>();
 
 class HttpStatusError extends Error {
   constructor(readonly status: number) {
@@ -44,6 +47,8 @@ function fetchIcyTitle(url: string): Promise<string | null> {
         finish(() => reject(new HttpStatusError(response.statusCode)));
         return;
       }
+      const stream = { codec: codecFromContentType(response.headers["content-type"]), bitrate: parseIcyBitrate(response.headers["icy-br"]) };
+      if (stream.codec || stream.bitrate) streamInfoByUrl.set(url, stream);
       const metaint = parseMetaInt(response.headers["icy-metaint"]);
       if (!metaint) {
         finish(() => reject(new NoIcyMetadataError()));
@@ -67,7 +72,7 @@ function fetchIcyTitle(url: string): Promise<string | null> {
 }
 
 function sendUpdate(update: NowPlayingUpdate): void {
-  sendToMainWindow("now-playing", update);
+  sendToMainWindow("now-playing", { ...update, stream: streamInfoByUrl.get(update.url) ?? null });
 }
 
 function stopPollingStation(url: string, reason: string): void {

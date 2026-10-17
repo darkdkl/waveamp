@@ -1,4 +1,5 @@
 import type { TitleScrollMode } from "./titleScroll";
+import type { StreamInfo } from "./audioFormat";
 
 export type Lang = "ru" | "en";
 export type VizMode = "spectrum" | "meters" | "scope" | "presets";
@@ -28,6 +29,7 @@ export interface Station {
 export interface NowPlayingUpdate {
   url: string;
   title: string | null;
+  stream?: StreamInfo | null;
 }
 
 export interface PresetInfo {

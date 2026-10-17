@@ -36,7 +36,7 @@ import {
   showAppMenu,
 } from "./menus";
 import { applyGlobalHotkeys } from "./shortcuts";
-import { readTrackTags } from "./tags";
+import { readAudioFormat, readTrackTags } from "./tags";
 import { expandPlaylistPaths } from "./cue";
 import { readCoverArt } from "./coverArt";
 import { checkForUpdates, openReleasePage, setAutoUpdateEnabled } from "./updates";
@@ -110,6 +110,13 @@ export function registerIpcHandlers(): void {
   ipcMain.handle("read-track-tags", (_event, filePath: string) =>
     readTrackTags(filePath).catch((err) => {
       writeLog("warn", "tags", `Could not read tags for "${filePath}": ${err.message}`);
+      return null;
+    })
+  );
+
+  ipcMain.handle("read-audio-format", (_event, filePath: string) =>
+    readAudioFormat(filePath).catch((err) => {
+      writeLog("warn", "tags", `Could not read the audio format of "${filePath}": ${err.message}`);
       return null;
     })
   );
