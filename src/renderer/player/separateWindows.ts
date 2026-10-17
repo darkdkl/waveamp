@@ -20,9 +20,12 @@ let mirror: MutationObserver | null = null;
 let queue: Promise<void> = Promise.resolve();
 
 function mirrorInto(doc: Document): void {
-  const style = document.documentElement.getAttribute("style");
-  if (style === null) doc.documentElement.removeAttribute("style");
-  else doc.documentElement.setAttribute("style", style);
+  const source = document.documentElement.style;
+  const target = doc.documentElement.style;
+  Array.from(target).forEach((name) => {
+    if (!source.getPropertyValue(name)) target.removeProperty(name);
+  });
+  Array.from(source).forEach((name) => target.setProperty(name, source.getPropertyValue(name), source.getPropertyPriority(name)));
   doc.documentElement.lang = document.documentElement.lang;
   doc.body.className = document.body.className;
   doc.body.classList.remove("is-separated");
