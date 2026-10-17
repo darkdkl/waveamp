@@ -4,6 +4,19 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.26.0] — 2026-10-17
+
+### Added
+- The display shows the format next to the time: the codec with the bitrate
+  (MP3 320, AAC 128) or, for lossless files, with the bit depth (FLAC 16). It
+  takes turns with STEREO/MONO every few seconds. Constant bitrates come from
+  the file or the station's stream; variable ones are measured while playing
+
+### Changed
+- The right block of the display has a fixed width in every mode, with equal
+  gaps around the spectrum and a smaller font; the time, LIVE, STEREO and the
+  bookmark share one center line, and the play mark is centered on the text
+
 ## [1.25.1] — 2026-10-12
 
 ### Changed

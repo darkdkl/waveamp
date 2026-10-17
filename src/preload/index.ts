@@ -20,6 +20,7 @@ import type {
   TrackTags,
   UpdateCheckResult,
 } from "../shared/types";
+import type { AudioFormat } from "../shared/audioFormat";
 
 // Sandboxed preload has no node:url; the drive-letter colon must stay unencoded.
 function pathToFileUrl(filePath: string): string {
@@ -45,6 +46,7 @@ const api = {
   loadConfig: (): Promise<StoredConfig | null> => ipcRenderer.invoke("config-load"),
   saveConfig: (config: AppConfig): void => ipcRenderer.send("config-save", config),
   readTrackTags: (filePath: string): Promise<TrackTags> => ipcRenderer.invoke("read-track-tags", filePath),
+  readAudioFormat: (filePath: string): Promise<AudioFormat | null> => ipcRenderer.invoke("read-audio-format", filePath),
   expandPlaylistPaths: (paths: string[]): Promise<PlaylistEntry[]> => ipcRenderer.invoke("expand-playlist-paths", paths),
   readTrackCover: (filePath: string): Promise<string | null> => ipcRenderer.invoke("read-track-cover", filePath),
   getFilePath: (file: File): string | null => {

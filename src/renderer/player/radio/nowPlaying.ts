@@ -5,6 +5,7 @@ import { persistConfig } from "../config";
 import { updateMediaSessionMetadata } from "../mediaSession";
 import { renderSaveTrackButton, toggleCurrentTrackSaved } from "./savedTracks";
 import { setTrackTitleText, titleScrollCycleMs } from "../titleScroll";
+import { setStreamInfo } from "../displayInfo";
 
 const TRACK_PHASE_MS = 8000;
 const STATION_PHASE_MS = 4000;
@@ -107,6 +108,8 @@ export function initNowPlaying(): void {
   });
   saveTrackBtn.addEventListener("click", toggleCurrentTrackSaved);
   window.electronAPI?.onNowPlaying?.((update) => {
-    if (update.url === pollingUrl) setNowPlayingTitle(update.title);
+    if (update.url !== pollingUrl) return;
+    setStreamInfo(update.stream);
+    setNowPlayingTitle(update.title);
   });
 }

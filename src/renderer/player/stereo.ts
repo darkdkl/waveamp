@@ -1,4 +1,5 @@
-import { audio, channelsTag } from "./dom";
+import { audio } from "./dom";
+import { setChannelLayout } from "./displayInfo";
 import { state } from "./state";
 import { meterAnalysers, setStereoWidening } from "./audioGraph";
 import { persistConfig } from "./config";
@@ -31,9 +32,7 @@ function applyStereo(): void {
 }
 
 function renderChannels(): void {
-  channelsTag.hidden = !layout;
-  channelsTag.textContent = layout === "mono" ? "MONO" : "STEREO";
-  channelsTag.classList.toggle("is-idle", layout === "mono");
+  setChannelLayout(layout);
 }
 
 function resetChannels(): void {

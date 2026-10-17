@@ -37,6 +37,15 @@ function savedTracksChanged(): void {
   renderSaveTrackButton();
 }
 
+function alignSaveTrackButton(): void {
+  const range = document.createRange();
+  range.selectNodeContents(liveTag);
+  const text = range.getBoundingClientRect();
+  const row = saveTrackBtn.parentElement?.getBoundingClientRect();
+  saveTrackBtn.style.width = text.width + "px";
+  saveTrackBtn.style.marginRight = row ? row.right - text.right + "px" : "";
+}
+
 export function renderSaveTrackButton(): void {
   const title = state.playbackMode === "radio" ? state.nowPlayingTitle : null;
   saveTrackBtn.hidden = !title;
@@ -46,7 +55,7 @@ export function renderSaveTrackButton(): void {
   saveTrackBtn.title = i18n.t(saved ? "unsaveTrack" : "saveTrack");
   saveTrackBtn.setAttribute("aria-label", saveTrackBtn.title);
   saveTrackBtn.setAttribute("aria-pressed", String(saved));
-  if (liveTag.offsetWidth) saveTrackBtn.style.width = liveTag.offsetWidth + "px";
+  if (liveTag.offsetWidth) alignSaveTrackButton();
 }
 
 export function toggleCurrentTrackSaved(): void {
