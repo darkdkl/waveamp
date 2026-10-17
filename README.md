@@ -34,7 +34,8 @@ Runs on macOS, Windows and Linux.
 - **Cover art** — the album cover (embedded in the file or `cover.jpg` /
   `folder.jpg` next to it) or the radio station's logo shows dimmed behind the
   display and in the system "Now Playing"; can be turned off in Settings
-- **Equalizer** — 10 bands (60 Hz–16 kHz) plus preamp, real audio processing
+- **Equalizer** — 10 bands (60 Hz–16 kHz), or 19 finer bands (31 Hz–16 kHz)
+  that follow the sliders exactly, plus preamp, real audio processing
   through the Web Audio API. 18 presets based on the classic Winamp presets,
   with automatic preamp headroom, and a Custom preset that remembers your own
   settings

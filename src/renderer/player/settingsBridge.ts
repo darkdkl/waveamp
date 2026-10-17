@@ -6,7 +6,8 @@ import { persistConfig } from "./config";
 import { BASE_ZOOM, setScale, syncElectronWindowSize } from "./layout";
 import { applySeparateWindows } from "./separateWindows";
 import { setVizResponse } from "./visualizer";
-import { renderEqToggle } from "./equalizer";
+import { applyEqBandCount, renderEqToggle } from "./equalizer";
+import { normalizeBandCount } from "../../shared/eqCurve";
 import { setCoverArtEnabled } from "./coverArt";
 import { setTitleScroll, setTitleScrollSpeed } from "./titleScroll";
 import { setRadioTrackTitleEnabled } from "./radio/nowPlaying";
@@ -20,7 +21,7 @@ import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from 
 import { updateStationFormText } from "./radio/stationForm";
 import { tuneStation } from "./radio/stream";
 import { setHotkeys } from "./playerHotkeys";
-import type { AccentColor, ProxyConfig, WindowControlsSide } from "../../shared/types";
+import type { AccentColor, EqBandCount, ProxyConfig, WindowControlsSide } from "../../shared/types";
 
 export function getProxyConfig(): ProxyConfig {
   return { ...state.proxy };
@@ -103,6 +104,12 @@ export function setSeparateWindows(enabled: boolean): void {
   });
 }
 
+export function setEqBands(count: EqBandCount): void {
+  applyEqBandCount(count);
+  syncElectronWindowSize();
+  persistConfig();
+}
+
 export function setAccentColor(color: Partial<AccentColor>): void {
   state.accentColor = accentColorTheme.normalize(color);
   accentColorTheme.apply(state.accentColor);
@@ -128,6 +135,7 @@ export function pushSettingsState(): void {
     windowControlsSide: state.windowControlsSide,
     separateWindows: state.separateWindows,
     separateWindowsPending: state.separateWindows && !state.separateActive,
+    eqBands: state.eqBandCount,
     presetAutoSwitch: state.presetAutoSwitch,
     presetHardCuts: state.presetHardCuts,
     presetFolder: state.presetFolder,
@@ -201,6 +209,9 @@ export function initSettingsBridge(): void {
       case "setSeparateWindows":
         setSeparateWindows(!!action.value);
         return;
+      case "setEqBands":
+        setEqBands(normalizeBandCount(action.value));
+        break;
       case "setPresetAutoSwitch":
         setPresetAutoSwitch(!!action.value);
         break;

@@ -30,6 +30,7 @@ export function persistConfig(): void {
         enabled: state.eqEnabled,
         preset: state.eqPreset,
         custom: state.customEq,
+        fineCustom: state.fineCustomEq,
       },
       radio: {
         favorites: state.favoriteStations,
@@ -50,6 +51,7 @@ export function persistConfig(): void {
         stereoPseudo: state.stereoPseudo,
         windowControlsSide: state.windowControlsSide,
         separateWindows: state.separateWindows,
+        eqBands: state.eqBandCount,
         presetAutoSwitch: state.presetAutoSwitch,
         presetHardCuts: state.presetHardCuts,
         presetFolder: state.presetFolder,

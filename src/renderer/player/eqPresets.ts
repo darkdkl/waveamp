@@ -1,4 +1,4 @@
-export const EQ_BANDS = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000];
+import { convertGains, type EqBandCount } from "../../shared/eqCurve";
 
 export interface EqPreset {
   id: string;
@@ -27,10 +27,14 @@ export const EQ_PRESETS: EqPreset[] = [
   { id: "techno", nameKey: "eqPresetTechno", bands: [5, 3, 0, -4, -3, 0, 5, 6, 6, 5] },
 ];
 
-export const EQ_PRESET_MAX_HEADROOM_DB = 3;
+export const EQ_PRESET_MAX_HEADROOM_DB = 1;
 
 export function presetPreampDb(bands: number[]): number {
   return -Math.min(EQ_PRESET_MAX_HEADROOM_DB, Math.max(0, ...bands)) || 0;
+}
+
+export function presetGains(preset: EqPreset, count: EqBandCount): number[] {
+  return convertGains(preset.bands, 10, count);
 }
 
 export function findEqPreset(id: string): EqPreset | undefined {

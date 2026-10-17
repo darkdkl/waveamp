@@ -1,10 +1,10 @@
 import { hotkeys } from "../hotkeys";
 import { accentColor as accentColorTheme } from "../theme";
-import { EQ_BANDS } from "./eqPresets";
 import { TITLE_SCROLL_DEFAULT, TITLE_SCROLL_SPEED_DEFAULT, type TitleScrollMode } from "../../shared/titleScroll";
 import type {
   AccentColor,
   DockLayout,
+  EqBandCount,
   EqCustomPreset,
   HotkeyConfig,
   ProxyConfig,
@@ -66,10 +66,12 @@ export const state = {
   uiScale: 1,
 
   eqEnabled: true,
-  bandGains: new Array(EQ_BANDS.length).fill(0) as number[],
+  eqBandCount: 10 as EqBandCount,
+  bandGains: new Array(10).fill(0) as number[],
   preampDb: 0,
   eqPreset: "flat",
-  customEq: { bandGains: new Array(EQ_BANDS.length).fill(0), preampDb: 0 } as EqCustomPreset,
+  customEq: { bandGains: new Array(10).fill(0), preampDb: 0 } as EqCustomPreset,
+  fineCustomEq: null as EqCustomPreset | null,
 
   vizMode: "spectrum" as VizMode,
   vizResponse: "smooth" as VizResponse,

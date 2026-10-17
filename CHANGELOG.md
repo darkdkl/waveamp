@@ -4,6 +4,18 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.28.0] — 2026-10-18
+
+### Added
+- Settings → Interface → Equalizer: 10 or 19 bands. The 19 bands sit half an
+  octave apart from 31 Hz to 16 kHz in the same window, and the sound follows
+  the sliders: the player works out the real filter gains so that
+  neighbouring bands don't add up. Presets read their curve at the new bands;
+  each mode keeps its own custom settings
+
+### Changed
+- Choosing a preset lowers the preamp by at most 1 dB instead of 3
+
 ## [1.27.0] — 2026-10-18
 
 ### Added

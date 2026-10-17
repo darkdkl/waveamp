@@ -117,6 +117,8 @@ export interface EqCustomPreset {
   preampDb: number;
 }
 
+export type EqBandCount = 10 | 19;
+
 export interface AppConfig {
   version: number;
   playlist: {
@@ -129,6 +131,7 @@ export interface AppConfig {
     enabled: boolean;
     preset: string;
     custom: EqCustomPreset;
+    fineCustom: EqCustomPreset | null;
   };
   radio: {
     favorites: Station[];
@@ -149,6 +152,7 @@ export interface AppConfig {
     stereoPseudo: boolean;
     windowControlsSide: WindowControlsSide;
     separateWindows: boolean;
+    eqBands: EqBandCount;
     presetAutoSwitch: boolean;
     presetHardCuts: boolean;
     presetFolder: string;
@@ -190,6 +194,7 @@ export interface SettingsState {
   windowControlsSide: WindowControlsSide;
   separateWindows: boolean;
   separateWindowsPending: boolean;
+  eqBands: EqBandCount;
   presetAutoSwitch: boolean;
   presetHardCuts: boolean;
   presetFolder: string;
@@ -218,6 +223,7 @@ export type SettingsAction =
   | { type: "setStereoPseudo"; value: boolean }
   | { type: "setWindowControlsSide"; value: WindowControlsSide }
   | { type: "setSeparateWindows"; value: boolean }
+  | { type: "setEqBands"; value: EqBandCount }
   | { type: "setPresetAutoSwitch"; value: boolean }
   | { type: "setPresetHardCuts"; value: boolean }
   | { type: "setPresetFolder"; value: string }

@@ -1,19 +1,18 @@
 import { audio } from "./dom";
 import { state } from "./state";
-import { EQ_BANDS } from "./eqPresets";
+import { EQ_LAYOUTS, filterGainsFor } from "../../shared/eqCurve";
 import { dbToGain } from "./format";
 import { logEvent } from "./log";
 
 export const audioCtx = new AudioContext();
 const sourceNode = audioCtx.createMediaElementSource(audio);
-const filterNodes = EQ_BANDS.map((freq) => {
+const filterNodes = EQ_LAYOUTS[19].frequencies.map(() => {
   const filter = audioCtx.createBiquadFilter();
   filter.type = "peaking";
-  filter.frequency.value = freq;
-  filter.Q.value = 1;
   filter.gain.value = 0;
   return filter;
 });
+configureEqFilters();
 const preampNode = audioCtx.createGain();
 export const analyserNode = audioCtx.createAnalyser();
 analyserNode.fftSize = 256;
@@ -121,9 +120,20 @@ export function setVolume(percent: number): void {
   volumeNode.gain.setTargetAtTime(percent / 100, audioCtx.currentTime, 0.015);
 }
 
-export function applyEqState(): void {
+export function configureEqFilters(): void {
+  const layout = EQ_LAYOUTS[state.eqBandCount];
   filterNodes.forEach((filter, i) => {
-    filter.gain.value = state.eqEnabled ? state.bandGains[i] : 0;
+    filter.frequency.value = layout.frequencies[i] ?? layout.frequencies[0];
+    filter.Q.value = layout.q;
+    filter.gain.value = 0;
+  });
+}
+
+export function applyEqState(): void {
+  const layout = EQ_LAYOUTS[state.eqBandCount];
+  const gains = state.eqBandCount === 19 ? filterGainsFor(layout, state.bandGains, audioCtx.sampleRate) : state.bandGains;
+  filterNodes.forEach((filter, i) => {
+    filter.gain.value = state.eqEnabled && i < gains.length ? gains[i] : 0;
   });
   preampNode.gain.value = state.eqEnabled ? dbToGain(state.preampDb) : 1;
 }
