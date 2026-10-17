@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.28.1] — 2026-10-18
+
+### Changed
+- The display no longer switches between STEREO/MONO and the format: the
+  format stays in place, with a small S (stereo) or a dimmed M (mono) above
+  the play mark
+
 ## [1.28.0] — 2026-10-18
 
 ### Added

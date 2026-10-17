@@ -1,16 +1,13 @@
-import { audio, channelsTag } from "./dom";
+import { audio, channelLetter, formatTag, formatText } from "./dom";
 import { codecLabel, infoLabel, type AudioFormat, type StreamInfo } from "../../shared/audioFormat";
 import type { ChannelLayout } from "../../shared/stereo";
 import type { Station } from "../../shared/types";
 import type { Track } from "./state";
 
-const ROTATE_MS = 4000;
-const FADE_MS = 100;
 const SAMPLE_MS = 1000;
 const WINDOW_S = 3;
 const MIN_WINDOW_S = 2.5;
 
-type ItemKind = "channels" | "format";
 type Source = { kind: "none" } | { kind: "file"; path: string | null } | { kind: "station"; station: Station };
 interface Sample {
   bytes: number;
@@ -24,9 +21,6 @@ let stream: StreamInfo | null = null;
 let layout: ChannelLayout | null = null;
 let samples: Sample[] = [];
 let measured: number | null = null;
-let shownKind: ItemKind | null = null;
-let rotateTimer: ReturnType<typeof setTimeout> | undefined;
-let fadeTimer: ReturnType<typeof setTimeout> | undefined;
 
 function decodedBytes(): number | null {
   const count = (audio as HTMLMediaElement & { webkitAudioDecodedByteCount?: number }).webkitAudioDecodedByteCount;
@@ -69,52 +63,14 @@ function formatItem(): string | null {
   return null;
 }
 
-function items(): { kind: ItemKind; text: string }[] {
-  const list: { kind: ItemKind; text: string }[] = [];
-  if (layout) list.push({ kind: "channels", text: layout === "mono" ? "MONO" : "STEREO" });
-  const format = formatItem();
-  if (format) list.push({ kind: "format", text: format });
-  return list;
-}
-
-function paint(item: { kind: ItemKind; text: string } | undefined): void {
-  channelsTag.hidden = !item;
-  if (!item) return;
-  shownKind = item.kind;
-  channelsTag.textContent = item.text;
-  channelsTag.classList.toggle("is-idle", audio.paused || (item.kind === "channels" && layout === "mono"));
-}
-
 function render(): void {
-  const list = items();
-  paint(list.find((item) => item.kind === shownKind) ?? list[0]);
-  scheduleRotation(list.length > 1);
-}
-
-function scheduleRotation(active: boolean): void {
-  if (!active) {
-    clearTimeout(rotateTimer);
-    rotateTimer = undefined;
-    return;
-  }
-  if (rotateTimer !== undefined) return;
-  rotateTimer = setTimeout(rotate, ROTATE_MS);
-}
-
-function rotate(): void {
-  rotateTimer = undefined;
-  const list = items();
-  if (list.length < 2) return render();
-  const index = list.findIndex((item) => item.kind === shownKind);
-  const next = list[(index + 1) % list.length];
-  channelsTag.classList.add("is-fading");
-  clearTimeout(fadeTimer);
-  fadeTimer = setTimeout(() => {
-    shownKind = next.kind;
-    render();
-    channelsTag.classList.remove("is-fading");
-  }, FADE_MS);
-  scheduleRotation(true);
+  const format = formatItem();
+  const letter = layout ? (layout === "mono" ? "M" : "S") : "";
+  formatTag.hidden = !format && !letter;
+  formatText.textContent = format ?? "";
+  channelLetter.textContent = letter;
+  channelLetter.classList.toggle("is-mono", layout === "mono");
+  formatTag.classList.toggle("is-idle", audio.paused);
 }
 
 export function setChannelLayout(next: ChannelLayout | null): void {

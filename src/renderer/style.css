@@ -239,6 +239,8 @@ body.is-detached :is(.eq, .playlist, .radio) {
   --display-info-size: 9px;
   --display-info-width: calc(7ch + 0.35em);
   --display-info-gap: 8px;
+  --display-state-pull: 4px;
+  --display-channel-size: 8px;
   --display-viz-height: 26px;
   position: relative;
   isolation: isolate;
@@ -419,7 +421,7 @@ body.is-detached :is(.eq, .playlist, .radio) {
 .display__state {
   display: flex;
   align-self: flex-end;
-  margin: 0 -4px 0.083em 0;
+  margin: 0 calc(-1 * var(--display-state-pull)) 0.083em 0;
   color: var(--lcd-fg);
   filter: drop-shadow(0 0 2px hsl(var(--accent-h) var(--accent-s) 74% / 0.5));
 }
@@ -612,33 +614,45 @@ body.is-presets-fullscreen .player > :not(.player__display) {
   text-shadow: none;
 }
 
-.display__channels {
+.display__format {
   position: absolute;
-  right: calc(var(--display-info-width) / 2);
+  right: 0;
   bottom: calc(var(--display-info-size) * 1.5);
-  transform: translateX(50%);
-  transition: opacity 100ms ease;
+  width: var(--display-info-width);
+  display: grid;
+  grid-template-columns: 0 1fr;
+  align-items: baseline;
+  text-align: center;
   font-family: var(--display-font);
   font-size: var(--display-info-size);
 }
 
-.display__channels[hidden] {
+.display__format[hidden] {
   display: none;
 }
 
-.display__channels.is-fading {
-  opacity: 0;
+.display__channel {
+  position: relative;
+  top: calc((var(--display-channel-size) - var(--display-info-size)) * 0.44);
+  left: calc(var(--display-state-pull) - var(--display-info-gap) - var(--display-info-size) * 0.45);
+  display: flex;
+  justify-content: center;
+  font-size: var(--display-channel-size);
 }
 
-.player__display.is-presets .display__channels {
-  position: static;
+.display__channel.is-mono {
+  color: var(--lcd-fg-dim);
+  text-shadow: none;
+}
+
+.player__display.is-presets .display__format {
+  position: relative;
   align-self: flex-end;
   margin: -3px 0;
-  transform: none;
 }
 
-.player__display.is-presets .display__channels[hidden] {
-  display: inline;
+.player__display.is-presets .display__format[hidden] {
+  display: grid;
   visibility: hidden;
 }
 
