@@ -11,6 +11,7 @@ import { openStationForm } from "./radio/stationForm";
 import { toggleCurrentTrackSaved } from "./radio/savedTracks";
 import { nextPreset, previousPreset, togglePresetLock, togglePresetsFullscreen } from "./presets/mode";
 import { pushSettingsState } from "./settingsBridge";
+import { onEveryDocument } from "./documents";
 import type { HotkeyConfig } from "../../shared/types";
 
 const SEEK_STEP_SECONDS = 5;
@@ -127,22 +128,16 @@ export function setHotkeys(config: Partial<HotkeyConfig> | null | undefined): vo
 }
 
 export function initPlayerHotkeys(): void {
-  document.addEventListener("keydown", (e) => {
+  onEveryDocument("keydown", (e) => {
     const target = e.target as HTMLElement;
-    const isRange = target instanceof HTMLInputElement && target.type === "range";
+    const tag = target.tagName;
+    const isRange = tag === "INPUT" && (target as HTMLInputElement).type === "range";
     if (isRange && RANGE_KEYS.has(e.code)) return;
-    if (
-      (target instanceof HTMLInputElement && !isRange) ||
-      target instanceof HTMLTextAreaElement ||
-      target instanceof HTMLSelectElement ||
-      target.isContentEditable
-    ) {
-      return;
-    }
+    if ((tag === "INPUT" && !isRange) || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) return;
     const combo = hotkeys.comboFromEvent(e);
     if (!combo) return;
     // Focused buttons handle Space/Enter natively.
-    if (target instanceof HTMLButtonElement && (combo === "Space" || combo === "Enter")) return;
+    if (tag === "BUTTON" && (combo === "Space" || combo === "Enter")) return;
     const local = state.hotkeyConfig.local;
     const action = Object.keys(local).find((id) => local[id] === combo);
     if (!action) return;

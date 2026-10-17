@@ -55,6 +55,12 @@
       </div>
 
       <div class="settings-panel__row">
+        <span class="settings-panel__row-label" id="separateWindowsLabel" data-i18n="separateWindows">Разделять окна</span>
+        <button type="button" class="switch" id="separateWindowsBtn" role="switch" aria-checked="false" aria-labelledby="separateWindowsLabel"></button>
+      </div>
+      <p class="settings-panel__hint" id="separateWindowsHint" data-i18n="separateWindowsRestart" hidden>Окна разделятся после перезапуска плеера.</p>
+
+      <div class="settings-panel__row">
         <span class="settings-panel__row-label" data-i18n="vizResponse" data-i18n-title="vizResponseHint">Визуализатор</span>
         <select class="settings-panel__select" id="vizResponseSelect">
           <option value="slow" data-i18n="vizResponseSlow">Медленный</option>

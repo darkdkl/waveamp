@@ -3,7 +3,8 @@ import { accentColor as accentColorTheme } from "../theme";
 import { settingsBtn } from "./dom";
 import { state } from "./state";
 import { persistConfig } from "./config";
-import { BASE_ZOOM, setScale } from "./layout";
+import { BASE_ZOOM, setScale, syncElectronWindowSize } from "./layout";
+import { applySeparateWindows } from "./separateWindows";
 import { setVizResponse } from "./visualizer";
 import { renderEqToggle } from "./equalizer";
 import { setCoverArtEnabled } from "./coverArt";
@@ -93,6 +94,15 @@ export function setWindowControlsSide(side: WindowControlsSide): void {
   persistConfig();
 }
 
+export function setSeparateWindows(enabled: boolean): void {
+  state.separateWindows = enabled;
+  persistConfig();
+  void applySeparateWindows().then(() => {
+    syncElectronWindowSize(true);
+    pushSettingsState();
+  });
+}
+
 export function setAccentColor(color: Partial<AccentColor>): void {
   state.accentColor = accentColorTheme.normalize(color);
   accentColorTheme.apply(state.accentColor);
@@ -116,6 +126,8 @@ export function pushSettingsState(): void {
     stereoStrength: state.stereoStrength,
     stereoPseudo: state.stereoPseudo,
     windowControlsSide: state.windowControlsSide,
+    separateWindows: state.separateWindows,
+    separateWindowsPending: state.separateWindows && !state.separateActive,
     presetAutoSwitch: state.presetAutoSwitch,
     presetHardCuts: state.presetHardCuts,
     presetFolder: state.presetFolder,
@@ -186,6 +198,9 @@ export function initSettingsBridge(): void {
       case "setWindowControlsSide":
         setWindowControlsSide(action.value);
         break;
+      case "setSeparateWindows":
+        setSeparateWindows(!!action.value);
+        return;
       case "setPresetAutoSwitch":
         setPresetAutoSwitch(!!action.value);
         break;

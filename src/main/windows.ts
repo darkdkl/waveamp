@@ -2,6 +2,7 @@ import { app, BrowserWindow, screen, type Rectangle, type WebContents } from "el
 import path from "node:path";
 import { loadConfig } from "./config";
 import { normalizeScalePercent, rescaledSize, scaledSize, type Size } from "./windowSizing";
+import { dockSettingsWindow, trackMainWindow } from "./dock";
 
 const WINDOW_WIDTH = 480;
 const RESIZE_DURATION_MS = 180;
@@ -172,12 +173,15 @@ export function createWindow(): Promise<void> {
     },
   });
 
-  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event, url) => {
     if (url !== win.webContents.getURL()) event.preventDefault();
   });
 
   mainWindow = win;
+  trackMainWindow(win, {
+    layout: (layout) => sendToMainWindow("dock-layout", layout),
+    close: (name) => sendToMainWindow("dock-close", name),
+  });
   win.on("enter-full-screen", () => sendToMainWindow("full-screen-changed", true));
   win.on("leave-full-screen", () => {
     win.setResizable(false);
@@ -235,6 +239,7 @@ function createSettingsWindow(): void {
     },
   });
   settingsWindow = win;
+  dockSettingsWindow(win);
   sendToMainWindow("settings-window-state", true);
 
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));

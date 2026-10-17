@@ -4,6 +4,7 @@ import { EQ_BANDS } from "./eqPresets";
 import { TITLE_SCROLL_DEFAULT, TITLE_SCROLL_SPEED_DEFAULT, type TitleScrollMode } from "../../shared/titleScroll";
 import type {
   AccentColor,
+  DockLayout,
   EqCustomPreset,
   HotkeyConfig,
   ProxyConfig,
@@ -50,6 +51,9 @@ export const state = {
   stereoStrength: 50,
   stereoPseudo: true,
   windowControlsSide: (hotkeys.isMac ? "left" : "right") as WindowControlsSide,
+  separateWindows: false,
+  separateActive: false,
+  dockLayout: {} as DockLayout,
   presetAutoSwitch: true,
   presetHardCuts: false,
   presetFolder: "",

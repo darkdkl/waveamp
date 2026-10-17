@@ -7,6 +7,7 @@ import { applyEqState, setVolume } from "./audioGraph";
 import { syncEqControlsFromState } from "./equalizer";
 import { setVizMode, setVizResponse } from "./visualizer";
 import { SCALE_MAX, SCALE_MIN, SCALE_STEP, setEqOpen, setPlaylistOpen, setRadioOpen, setScale } from "./layout";
+import { applySeparateWindows } from "./separateWindows";
 import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
@@ -83,6 +84,8 @@ export async function restoreConfig(): Promise<void> {
   if (settings?.windowControlsSide === "left" || settings?.windowControlsSide === "right") {
     setWindowControlsSide(settings.windowControlsSide);
   }
+  if (typeof settings?.separateWindows === "boolean") state.separateWindows = settings.separateWindows;
+  if (config.ui?.dock && typeof config.ui.dock === "object") state.dockLayout = config.ui.dock;
 
   if (typeof settings?.presetAutoSwitch === "boolean") setPresetAutoSwitch(settings.presetAutoSwitch);
   if (typeof settings?.presetHardCuts === "boolean") setPresetHardCuts(settings.presetHardCuts);
@@ -180,6 +183,7 @@ export async function restoreConfig(): Promise<void> {
   }
 
   if (config.ui?.vizMode) setVizMode(config.ui.vizMode);
+  if (state.separateWindows) await applySeparateWindows();
   if (config.ui?.eqOpen) setEqOpen(true);
   if (config.ui?.playlistOpen) setPlaylistOpen(true);
   if (config.ui?.radioOpen) setRadioOpen(true);

@@ -49,6 +49,7 @@ export function persistConfig(): void {
         stereoStrength: state.stereoStrength,
         stereoPseudo: state.stereoPseudo,
         windowControlsSide: state.windowControlsSide,
+        separateWindows: state.separateWindows,
         presetAutoSwitch: state.presetAutoSwitch,
         presetHardCuts: state.presetHardCuts,
         presetFolder: state.presetFolder,
@@ -66,6 +67,7 @@ export function persistConfig(): void {
         eqOpen: state.eqOpen,
         radioOpen: state.radioOpen,
         vizMode: state.vizMode,
+        dock: state.dockLayout,
       },
     });
   }, 300);

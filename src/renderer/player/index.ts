@@ -27,6 +27,7 @@ import { initPlayerHotkeys } from "./playerHotkeys";
 import { restoreConfig } from "./restore";
 import { initStereo } from "./stereo";
 import { initDisplayInfo } from "./displayInfo";
+import { initSeparateWindows } from "./separateWindows";
 
 initVisualizerControls();
 initEqualizerControls();
@@ -54,6 +55,7 @@ initMediaSession();
 initAudioErrorHandling();
 initSeekAndVolume();
 initDragAndDrop();
+initSeparateWindows();
 
 const electronAPI = window.electronAPI;
 if (electronAPI) {

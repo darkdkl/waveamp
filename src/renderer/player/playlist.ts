@@ -233,25 +233,29 @@ export function initFileInputs(): void {
   });
 }
 
-export function initDragAndDrop(): void {
+export function attachDropTarget(root: HTMLElement): void {
   ["dragenter", "dragover"].forEach((evt) => {
-    player.addEventListener(evt, (e) => {
+    root.addEventListener(evt, (e) => {
       e.preventDefault();
-      player.classList.add("is-dragover");
+      root.classList.add("is-dragover");
     });
   });
 
   ["dragleave", "drop"].forEach((evt) => {
-    player.addEventListener(evt, (e) => {
+    root.addEventListener(evt, (e) => {
       e.preventDefault();
-      if (evt === "dragleave" && e.target !== player) return;
-      player.classList.remove("is-dragover");
+      if (evt === "dragleave" && e.target !== root) return;
+      root.classList.remove("is-dragover");
     });
   });
 
-  player.addEventListener("drop", (e) => {
+  root.addEventListener("drop", (e) => {
     if (e.dataTransfer?.files?.length) {
       void addFiles(e.dataTransfer.files);
     }
   });
+}
+
+export function initDragAndDrop(): void {
+  attachDropTarget(player);
 }

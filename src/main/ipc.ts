@@ -37,6 +37,15 @@ import {
 } from "./menus";
 import { applyGlobalHotkeys } from "./shortcuts";
 import { readAudioFormat, readTrackTags } from "./tags";
+import {
+  dockNameOf,
+  isManagedName,
+  setDockZoom,
+  setSeparateWindows,
+  startDockDrag,
+  stopDockDrag,
+  updateDock,
+} from "./dock";
 import { expandPlaylistPaths } from "./cue";
 import { readCoverArt } from "./coverArt";
 import { checkForUpdates, openReleasePage, setAutoUpdateEnabled } from "./updates";
@@ -46,6 +55,8 @@ import { loadSavedTracks, writeSavedTracks } from "./savedTracks";
 import { choosePresetFolder, listPresets, readPreset } from "./presets";
 import type {
   AppConfig,
+  DockLayout,
+  DockUpdate,
   GlobalHotkeyRequest,
   LogLevel,
   ProxyConfig,
@@ -85,6 +96,20 @@ export function registerIpcHandlers(): void {
   ipcMain.on("window-ready", (event) => revealSenderWindow(event.sender));
 
   ipcMain.on("set-full-screen", (_event, enabled: boolean) => setMainWindowFullScreen(!!enabled));
+
+  ipcMain.handle("dock-set-separate", (_event, enabled: boolean, layout: DockLayout) => setSeparateWindows(!!enabled, layout));
+
+  ipcMain.on("dock-update", (_event, update: DockUpdate) => updateDock(update));
+
+  ipcMain.on("dock-zoom", (_event, factor: number) => setDockZoom(Number(factor)));
+
+  ipcMain.on("dock-drag-start", (event, name: unknown) => {
+    const sender = dockNameOf(event.sender);
+    const target = sender === "main" && isManagedName(name) ? name : sender;
+    if (target) startDockDrag(target);
+  });
+
+  ipcMain.on("dock-drag-end", () => stopDockDrag());
 
   ipcMain.on("window-minimize", (event) => minimizeSenderWindow(event.sender));
 

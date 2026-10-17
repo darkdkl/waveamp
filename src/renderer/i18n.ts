@@ -24,6 +24,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     windowControls: "Кнопки окна",
     windowControlsLeft: "Слева",
     windowControlsRight: "Справа",
+    separateWindows: "Разделять окна",
+    separateWindowsRestart: "Окна разделятся после перезапуска плеера.",
     vizResponse: "Визуализатор",
     vizResponseHint: "Как визуализатор реагирует на звук — во всех режимах: медленно и плавно, со средней скоростью или с быстрым подъёмом и медленным спадом",
     vizResponseSlow: "Медленный",
@@ -248,6 +250,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     windowControls: "Window buttons",
     windowControlsLeft: "Left",
     windowControlsRight: "Right",
+    separateWindows: "Separate windows",
+    separateWindowsRestart: "The windows will separate after the player restarts.",
     vizResponse: "Visualizer",
     vizResponseHint: "How the visualizer follows the sound in every mode: slowly and smoothly, at medium speed, or with a fast rise and slow fall",
     vizResponseSlow: "Slow",
@@ -458,21 +462,37 @@ function t(key: string): string {
   return translations[currentLang]?.[key] ?? translations[DEFAULT_LANG][key] ?? key;
 }
 
-function applyTranslations(): void {
-  document.documentElement.lang = currentLang;
+const extraDocuments = new Set<Document>();
 
-  document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((el) => {
+function translateDocument(doc: Document): void {
+  doc.documentElement.lang = currentLang;
+
+  doc.querySelectorAll<HTMLElement>("[data-i18n]").forEach((el) => {
     el.textContent = t(el.dataset.i18n ?? "");
   });
-  document.querySelectorAll<HTMLElement>("[data-i18n-title]").forEach((el) => {
+  doc.querySelectorAll<HTMLElement>("[data-i18n-title]").forEach((el) => {
     el.title = t(el.dataset.i18nTitle ?? "");
   });
-  document.querySelectorAll<HTMLElement>("[data-i18n-aria]").forEach((el) => {
+  doc.querySelectorAll<HTMLElement>("[data-i18n-aria]").forEach((el) => {
     el.setAttribute("aria-label", t(el.dataset.i18nAria ?? ""));
   });
-  document.querySelectorAll<HTMLInputElement>("[data-i18n-placeholder]").forEach((el) => {
+  doc.querySelectorAll<HTMLInputElement>("[data-i18n-placeholder]").forEach((el) => {
     el.placeholder = t(el.dataset.i18nPlaceholder ?? "");
   });
+}
+
+function applyTranslations(): void {
+  translateDocument(document);
+  extraDocuments.forEach(translateDocument);
+}
+
+function addDocument(doc: Document): void {
+  extraDocuments.add(doc);
+  translateDocument(doc);
+}
+
+function removeDocument(doc: Document): void {
+  extraDocuments.delete(doc);
 }
 
 function setLanguage(lang: string): void {
@@ -484,4 +504,4 @@ function getLanguage(): Lang {
   return currentLang;
 }
 
-export const i18n = { t, setLanguage, getLanguage, applyTranslations };
+export const i18n = { t, setLanguage, getLanguage, applyTranslations, addDocument, removeDocument };

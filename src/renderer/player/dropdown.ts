@@ -1,3 +1,5 @@
+import { onEveryDocument } from "./documents";
+
 export function createDropdown(btn: HTMLButtonElement, menu: HTMLElement, wrap: HTMLElement) {
   function setOpen(open: boolean) {
     menu.hidden = !open;
@@ -8,10 +10,10 @@ export function createDropdown(btn: HTMLButtonElement, menu: HTMLElement, wrap: 
     e.stopPropagation();
     setOpen(Boolean(menu.hidden));
   });
-  document.addEventListener("click", (e) => {
+  onEveryDocument("click", (e) => {
     if (!menu.hidden && !wrap.contains(e.target as Node)) setOpen(false);
   });
-  document.addEventListener("keydown", (e) => {
+  onEveryDocument("keydown", (e) => {
     if (e.key === "Escape" && !menu.hidden) setOpen(false);
   });
   return setOpen;

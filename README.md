@@ -60,6 +60,10 @@ Runs on macOS, Windows and Linux.
 - **Media keys and system Now Playing** (macOS Control Center, Windows media
   overlay)
 - **Tray icon** with an optional close-to-tray mode
+- **Separate windows** — the equalizer and the playlist/radio can live in
+  their own windows that snap to each other and to the screen edges, move with
+  the player and remember where they were (on a Linux Wayland desktop the
+  player then runs through XWayland)
 - **HTTP / SOCKS5 proxy** for the radio
 - **Update check** — tells you when a new version is out, with a link to its
   download page

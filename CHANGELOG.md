@@ -4,6 +4,26 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.27.0] — 2026-10-18
+
+### Added
+- Settings → Interface → Separate windows: the equalizer and the
+  playlist/radio move into their own windows, in the same order under the
+  player. The windows snap to each other and to the screen edges, the ones
+  docked to the player move with it, minimize with it and come back where they
+  were on the next launch; the settings window docks too. Each window closes
+  with ✕ in its header, on the side set in "Window buttons". On a Linux
+  Wayland desktop the player runs through XWayland while the option is on,
+  so the change applies after a restart there
+
+### Changed
+- One rule for the section headers: the equalizer, playlist and radio
+  headers share the same height and spacing
+- The section buttons share one size and style (34×21, like the old Reset):
+  the playlist, radio tabs, search, station form and saved titles buttons,
+  the preset list, the radio filters and the input fields; Reset became a ↺
+  icon
+
 ## [1.26.0] — 2026-10-17
 
 ### Added

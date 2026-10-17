@@ -102,3 +102,4 @@ export const radioFavEmpty = byId("radioFavEmpty");
 export const radioResizeHandle = byId("radioResizeHandle");
 export const windowEdgeResize = byId("windowEdgeResize");
 export const windowGripResize = byId("windowGripResize");
+export const dropzone = byId("dropzone");
