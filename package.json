@@ -1,6 +1,6 @@
 {
   "name": "waveamp",
-  "version": "1.28.1",
+  "version": "1.28.2",
   "private": true,
   "description": "Retro-style desktop audio player with internet radio, built on Electron",
   "author": "Dark.Dmake",

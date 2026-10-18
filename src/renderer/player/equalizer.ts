@@ -3,11 +3,13 @@ import { eq, eqBandGroup, eqPreamp, eqPresetSelect, eqResetBtn, eqToggleBtn } fr
 import { state } from "./state";
 import { EQ_PRESETS, findEqPreset, presetGains, presetPreampDb } from "./eqPresets";
 import { formatDb } from "./format";
-import { applyEqState, configureEqFilters } from "./audioGraph";
+import { applyEqState, switchEqLayout } from "./audioGraph";
 import { convertGains, EQ_LAYOUTS } from "../../shared/eqCurve";
 import type { EqBandCount, EqCustomPreset } from "../../shared/types";
 import { renderSwitch } from "../switchControl";
 import { persistConfig } from "./config";
+
+const WHEEL_NOTCH = 40;
 
 function createEqBandControl(label: string, onChange: (db: number) => void): HTMLElement {
   const wrap = document.createElement("div");
@@ -33,6 +35,24 @@ function createEqBandControl(label: string, onChange: (db: number) => void): HTM
     valueEl.textContent = formatDb(db);
     onChange(db);
   });
+  let wheelDelta = 0;
+  wrap.addEventListener(
+    "wheel",
+    (e) => {
+      if (slider.disabled) return;
+      e.preventDefault();
+      wheelDelta = Math.abs(e.deltaY) >= WHEEL_NOTCH ? Math.sign(e.deltaY) * WHEEL_NOTCH : wheelDelta + e.deltaY;
+      if (Math.abs(wheelDelta) < WHEEL_NOTCH) return;
+      const step = wheelDelta < 0 ? 1 : -1;
+      wheelDelta = 0;
+      const db = Math.max(Number(slider.min), Math.min(Number(slider.max), Number(slider.value) + step));
+      if (db === Number(slider.value)) return;
+      slider.value = String(db);
+      valueEl.textContent = formatDb(db);
+      onChange(db);
+    },
+    { passive: false }
+  );
   sliderWrap.appendChild(slider);
 
   const labelEl = document.createElement("span");
@@ -77,6 +97,8 @@ function customFor(count: EqBandCount): EqCustomPreset {
 function setCustom(custom: EqCustomPreset): void {
   if (state.eqBandCount === 19) state.fineCustomEq = custom;
   else state.customEq = custom;
+  state.customEq = { ...state.customEq, preampDb: custom.preampDb };
+  if (state.fineCustomEq) state.fineCustomEq = { ...state.fineCustomEq, preampDb: custom.preampDb };
 }
 
 export function loadEqGains(): void {
@@ -93,10 +115,15 @@ export function loadEqGains(): void {
 
 export function applyEqBandCount(count: EqBandCount): void {
   if (count === state.eqBandCount) return;
+  const preampDb = state.preampDb;
   state.eqBandCount = count;
-  configureEqFilters();
+  switchEqLayout();
   buildEqBands();
   loadEqGains();
+  if (state.eqPreset === "custom") {
+    state.preampDb = preampDb;
+    setCustom({ bandGains: [...state.bandGains], preampDb });
+  }
   syncEqControlsFromState();
   applyEqState();
 }

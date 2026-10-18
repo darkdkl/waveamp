@@ -646,7 +646,7 @@ body.is-presets-fullscreen .player > :not(.player__display) {
 }
 
 .player__display.is-presets .display__format {
-  position: relative;
+  position: static;
   align-self: flex-end;
   margin: -3px 0;
 }

@@ -4,6 +4,19 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.28.2] — 2026-10-18
+
+### Added
+- The mouse wheel over an equalizer band or the preamp moves it by 1 dB
+
+### Fixed
+- No more clicks when switching between 10 and 19 equalizer bands or moving
+  the sliders: the filters change smoothly
+- With the visualizer shown on the display, the format no longer overlaps
+  the track title
+- The custom equalizer keeps one preamp for 10 and 19 bands, so switching
+  the band count no longer changes it
+
 ## [1.28.1] — 2026-10-18
 
 ### Changed
