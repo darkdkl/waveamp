@@ -34,7 +34,8 @@ Runs on macOS, Windows and Linux.
 - **Cover art** — the album cover (embedded in the file or `cover.jpg` /
   `folder.jpg` next to it) or the radio station's logo shows dimmed behind the
   display and in the system "Now Playing"; can be turned off in Settings
-- **Equalizer** — 10 bands (60 Hz–16 kHz) plus preamp, real audio processing
+- **Equalizer** — 10 bands (60 Hz–16 kHz), or 19 finer bands (31 Hz–16 kHz)
+  that follow the sliders exactly, plus preamp, real audio processing
   through the Web Audio API. 18 presets based on the classic Winamp presets,
   with automatic preamp headroom, and a Custom preset that remembers your own
   settings
@@ -60,6 +61,10 @@ Runs on macOS, Windows and Linux.
 - **Media keys and system Now Playing** (macOS Control Center, Windows media
   overlay)
 - **Tray icon** with an optional close-to-tray mode
+- **Separate windows** — the equalizer and the playlist/radio can live in
+  their own windows that snap to each other and to the screen edges, move with
+  the player and remember where they were (on a Linux Wayland desktop the
+  player then runs through XWayland)
 - **HTTP / SOCKS5 proxy** for the radio
 - **Update check** — tells you when a new version is out, with a link to its
   download page

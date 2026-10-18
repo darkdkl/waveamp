@@ -7,6 +7,18 @@ export type VizResponse = "slow" | "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
 export type WindowControlsSide = "left" | "right";
 
+export type DockName = "eq" | "panel";
+
+export type DockLayout = Partial<Record<DockName | "settings", { x: number; y: number }>>;
+
+export interface DockWindowState {
+  visible: boolean;
+  width: number;
+  height: number;
+}
+
+export type DockUpdate = Record<DockName, DockWindowState>;
+
 export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends (infer U)[] ? DeepPartial<U>[] : T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
@@ -105,6 +117,10 @@ export interface EqCustomPreset {
   preampDb: number;
 }
 
+export type EqBandCount = 10 | 19;
+
+export type WheelDirection = "standard" | "natural";
+
 export interface AppConfig {
   version: number;
   playlist: {
@@ -117,6 +133,7 @@ export interface AppConfig {
     enabled: boolean;
     preset: string;
     custom: EqCustomPreset;
+    fineCustom: EqCustomPreset | null;
   };
   radio: {
     favorites: Station[];
@@ -136,6 +153,9 @@ export interface AppConfig {
     stereoStrength: number;
     stereoPseudo: boolean;
     windowControlsSide: WindowControlsSide;
+    separateWindows: boolean;
+    eqBands: EqBandCount;
+    eqWheel: WheelDirection;
     presetAutoSwitch: boolean;
     presetHardCuts: boolean;
     presetFolder: string;
@@ -153,6 +173,7 @@ export interface AppConfig {
     eqOpen: boolean;
     radioOpen: boolean;
     vizMode: VizMode;
+    dock: DockLayout;
   };
 }
 
@@ -174,6 +195,10 @@ export interface SettingsState {
   stereoStrength: number;
   stereoPseudo: boolean;
   windowControlsSide: WindowControlsSide;
+  separateWindows: boolean;
+  separateWindowsPending: boolean;
+  eqBands: EqBandCount;
+  eqWheel: WheelDirection;
   presetAutoSwitch: boolean;
   presetHardCuts: boolean;
   presetFolder: string;
@@ -201,6 +226,9 @@ export type SettingsAction =
   | { type: "setStereoStrength"; value: number }
   | { type: "setStereoPseudo"; value: boolean }
   | { type: "setWindowControlsSide"; value: WindowControlsSide }
+  | { type: "setSeparateWindows"; value: boolean }
+  | { type: "setEqBands"; value: EqBandCount }
+  | { type: "setEqWheel"; value: WheelDirection }
   | { type: "setPresetAutoSwitch"; value: boolean }
   | { type: "setPresetHardCuts"; value: boolean }
   | { type: "setPresetFolder"; value: string }

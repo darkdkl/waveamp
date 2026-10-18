@@ -30,6 +30,7 @@ export function persistConfig(): void {
         enabled: state.eqEnabled,
         preset: state.eqPreset,
         custom: state.customEq,
+        fineCustom: state.fineCustomEq,
       },
       radio: {
         favorites: state.favoriteStations,
@@ -49,6 +50,9 @@ export function persistConfig(): void {
         stereoStrength: state.stereoStrength,
         stereoPseudo: state.stereoPseudo,
         windowControlsSide: state.windowControlsSide,
+        separateWindows: state.separateWindows,
+        eqBands: state.eqBandCount,
+        eqWheel: state.eqWheel ?? "standard",
         presetAutoSwitch: state.presetAutoSwitch,
         presetHardCuts: state.presetHardCuts,
         presetFolder: state.presetFolder,
@@ -66,6 +70,7 @@ export function persistConfig(): void {
         eqOpen: state.eqOpen,
         radioOpen: state.radioOpen,
         vizMode: state.vizMode,
+        dock: state.dockLayout,
       },
     });
   }, 300);

@@ -1,10 +1,12 @@
 import { hotkeys } from "../hotkeys";
 import { accentColor as accentColorTheme } from "../theme";
-import { EQ_BANDS } from "./eqPresets";
 import { TITLE_SCROLL_DEFAULT, TITLE_SCROLL_SPEED_DEFAULT, type TitleScrollMode } from "../../shared/titleScroll";
 import type {
   AccentColor,
+  DockLayout,
+  EqBandCount,
   EqCustomPreset,
+  WheelDirection,
   HotkeyConfig,
   ProxyConfig,
   SavedTrack,
@@ -50,6 +52,9 @@ export const state = {
   stereoStrength: 50,
   stereoPseudo: true,
   windowControlsSide: (hotkeys.isMac ? "left" : "right") as WindowControlsSide,
+  separateWindows: false,
+  separateActive: false,
+  dockLayout: {} as DockLayout,
   presetAutoSwitch: true,
   presetHardCuts: false,
   presetFolder: "",
@@ -62,10 +67,13 @@ export const state = {
   uiScale: 1,
 
   eqEnabled: true,
-  bandGains: new Array(EQ_BANDS.length).fill(0) as number[],
+  eqBandCount: 10 as EqBandCount,
+  eqWheel: null as WheelDirection | null,
+  bandGains: new Array(10).fill(0) as number[],
   preampDb: 0,
   eqPreset: "flat",
-  customEq: { bandGains: new Array(EQ_BANDS.length).fill(0), preampDb: 0 } as EqCustomPreset,
+  customEq: { bandGains: new Array(10).fill(0), preampDb: 0 } as EqCustomPreset,
+  fineCustomEq: null as EqCustomPreset | null,
 
   vizMode: "spectrum" as VizMode,
   vizResponse: "smooth" as VizResponse,

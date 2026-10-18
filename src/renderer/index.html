@@ -26,7 +26,7 @@
             <svg viewBox="0 0 24 24"><path d="M6 2.5h12v19l-6-4.8-6 4.8z"/></svg>
           </button>
         </div>
-        <span id="channelsTag" class="display__live display__channels" hidden>STEREO</span>
+        <span id="formatTag" class="display__live display__format" hidden><span class="display__channel" id="channelLetter"></span><span id="formatText"></span></span>
         <div class="display__scale">
           <canvas class="display__viz-canvas" id="vizCanvas" data-i18n-title="vizModeHint"></canvas>
           <span class="display__state" id="playState" hidden><svg viewBox="0 0 24 24"><path d=""/></svg></span>
@@ -103,11 +103,14 @@
     <section class="eq" id="eq">
       <div class="eq__inner">
         <div class="eq__header">
-          <span id="eqTitle" data-i18n="eq">Эквалайзер</span>
+          <button class="window-controls__btn window-controls__btn--close section-close" type="button" data-dock-close="eq" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
+          <span class="section-title" id="eqTitle" data-i18n="eq">Эквалайзер</span>
           <div class="eq__header-actions">
             <select class="eq__preset-select" id="eqPresetSelect" data-i18n-title="eqPreset"></select>
             <button class="switch is-active" id="eqToggleBtn" type="button" role="switch" aria-checked="true" aria-labelledby="eqTitle"></button>
-            <button class="eq__reset" id="eqResetBtn" type="button" data-i18n="reset">Сброс</button>
+            <button class="btn btn--icon" id="eqResetBtn" type="button" data-i18n-title="reset" data-i18n-aria="reset" title="Сброс" aria-label="Сброс">
+              <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            </button>
           </div>
         </div>
         <div class="eq__bands">
@@ -121,7 +124,8 @@
     <section class="playlist" id="playlist">
       <div class="playlist__inner">
         <div class="playlist__header">
-          <span data-i18n="playlist">Плейлист</span>
+          <button class="window-controls__btn window-controls__btn--close section-close" type="button" data-dock-close="panel" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
+          <span class="section-title" data-i18n="playlist">Плейлист</span>
           <div class="playlist__add" id="playlistAddWrap">
             <button class="btn btn--icon" id="playlistAddBtn" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
               <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
@@ -155,7 +159,8 @@
     <section class="radio" id="radio">
       <div class="radio__inner">
         <div class="radio__header">
-          <span data-i18n="radio">Радио</span>
+          <button class="window-controls__btn window-controls__btn--close section-close" type="button" data-dock-close="panel" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
+          <span class="section-title" data-i18n="radio">Радио</span>
           <div class="radio__view-toggle">
             <button class="btn btn--icon is-active" id="radioTabSearch" type="button" data-i18n-title="search" data-i18n-aria="search" title="Поиск" aria-label="Поиск" aria-pressed="true">
               <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>

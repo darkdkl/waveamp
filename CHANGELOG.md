@@ -4,6 +4,73 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.29.1] — 2026-10-18
+
+### Added
+- Settings → Interface → Mouse wheel on the equalizer: standard or natural.
+  On the first launch it follows the system (macOS natural scrolling, the
+  GNOME mouse setting on Linux) and can be changed by hand
+
+## [1.29.0] — 2026-10-18
+
+### Changed
+- In the 19-band equalizer the outer bands are shelves: 31 Hz lifts or cuts
+  everything below it and 16 kHz everything above it, so the lowest bass and
+  the "air" respond on any record. The curve no longer dips between 11 and
+  16 kHz and no longer falls off past the outer bands
+
+## [1.28.2] — 2026-10-18
+
+### Added
+- The mouse wheel over an equalizer band or the preamp moves it by 1 dB
+
+### Fixed
+- No more clicks when switching between 10 and 19 equalizer bands or moving
+  the sliders: the filters change smoothly
+- With the visualizer shown on the display, the format no longer overlaps
+  the track title
+- The custom equalizer keeps one preamp for 10 and 19 bands, so switching
+  the band count no longer changes it
+
+## [1.28.1] — 2026-10-18
+
+### Changed
+- The display no longer switches between STEREO/MONO and the format: the
+  format stays in place, with a small S (stereo) or a dimmed M (mono) above
+  the play mark
+
+## [1.28.0] — 2026-10-18
+
+### Added
+- Settings → Interface → Equalizer: 10 or 19 bands. The 19 bands sit half an
+  octave apart from 31 Hz to 16 kHz in the same window, and the sound follows
+  the sliders: the player works out the real filter gains so that
+  neighbouring bands don't add up. Presets read their curve at the new bands;
+  each mode keeps its own custom settings
+
+### Changed
+- Choosing a preset lowers the preamp by at most 1 dB instead of 3
+
+## [1.27.0] — 2026-10-18
+
+### Added
+- Settings → Interface → Separate windows: the equalizer and the
+  playlist/radio move into their own windows, in the same order under the
+  player. The windows snap to each other and to the screen edges, the ones
+  docked to the player move with it, minimize with it and come back where they
+  were on the next launch; the settings window docks too. Each window closes
+  with ✕ in its header, on the side set in "Window buttons". On a Linux
+  Wayland desktop the player runs through XWayland while the option is on,
+  so the change applies after a restart there
+
+### Changed
+- One rule for the section headers: the equalizer, playlist and radio
+  headers share the same height and spacing
+- The section buttons share one size and style (34×21, like the old Reset):
+  the playlist, radio tabs, search, station form and saved titles buttons,
+  the preset list, the radio filters and the input fields; Reset became a ↺
+  icon
+
 ## [1.26.0] — 2026-10-17
 
 ### Added

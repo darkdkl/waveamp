@@ -1,19 +1,24 @@
 import { audio } from "./dom";
 import { state } from "./state";
-import { EQ_BANDS } from "./eqPresets";
+import { bandFilter, EQ_LAYOUTS, filterGainsFor } from "../../shared/eqCurve";
 import { dbToGain } from "./format";
 import { logEvent } from "./log";
 
 export const audioCtx = new AudioContext();
 const sourceNode = audioCtx.createMediaElementSource(audio);
-const filterNodes = EQ_BANDS.map((freq) => {
+const createFilter = (type: BiquadFilterType, frequency = 1000): BiquadFilterNode => {
   const filter = audioCtx.createBiquadFilter();
-  filter.type = "peaking";
-  filter.frequency.value = freq;
-  filter.Q.value = 1;
+  filter.type = type;
+  filter.frequency.value = frequency;
   filter.gain.value = 0;
   return filter;
-});
+};
+const fineLayout = EQ_LAYOUTS[19];
+const lowShelf = createFilter("lowshelf", bandFilter(fineLayout, 0).frequency);
+const highShelf = createFilter("highshelf", bandFilter(fineLayout, fineLayout.frequencies.length - 1).frequency);
+const peakNodes = fineLayout.frequencies.map(() => createFilter("peaking"));
+const filterNodes = [lowShelf, ...peakNodes, highShelf];
+configureEqFilters();
 const preampNode = audioCtx.createGain();
 export const analyserNode = audioCtx.createAnalyser();
 analyserNode.fftSize = 256;
@@ -121,11 +126,56 @@ export function setVolume(percent: number): void {
   volumeNode.gain.setTargetAtTime(percent / 100, audioCtx.currentTime, 0.015);
 }
 
-export function applyEqState(): void {
-  filterNodes.forEach((filter, i) => {
-    filter.gain.value = state.eqEnabled ? state.bandGains[i] : 0;
+const EQ_RAMP_S = 0.015;
+const EQ_SWITCH_FADE_S = 0.04;
+const EQ_SWITCH_GAP_S = 0.001;
+let eqSwitchEndsAt = 0;
+
+function bandNode(index: number): BiquadFilterNode {
+  const type = bandFilter(EQ_LAYOUTS[state.eqBandCount], index).type;
+  if (type === "lowshelf") return lowShelf;
+  if (type === "highshelf") return highShelf;
+  return peakNodes[index];
+}
+
+export function configureEqFilters(): void {
+  const layout = EQ_LAYOUTS[state.eqBandCount];
+  peakNodes.forEach((filter, i) => {
+    filter.frequency.value = layout.frequencies[i] ?? layout.frequencies[0];
+    filter.Q.value = layout.q;
   });
-  preampNode.gain.value = state.eqEnabled ? dbToGain(state.preampDb) : 1;
+  filterNodes.forEach((filter) => {
+    filter.gain.value = 0;
+  });
+}
+
+export function switchEqLayout(): void {
+  const layout = EQ_LAYOUTS[state.eqBandCount];
+  const now = audioCtx.currentTime;
+  eqSwitchEndsAt = now + EQ_SWITCH_FADE_S;
+  filterNodes.forEach((filter) => {
+    filter.gain.cancelScheduledValues(now);
+    filter.gain.setValueAtTime(filter.gain.value, now);
+    filter.gain.linearRampToValueAtTime(0, eqSwitchEndsAt);
+  });
+  peakNodes.forEach((filter, i) => {
+    filter.frequency.setValueAtTime(layout.frequencies[i] ?? layout.frequencies[0], eqSwitchEndsAt);
+    filter.Q.setValueAtTime(layout.q, eqSwitchEndsAt);
+  });
+}
+
+export function applyEqState(): void {
+  const layout = EQ_LAYOUTS[state.eqBandCount];
+  const gains = state.eqBandCount === 19 ? filterGainsFor(layout, state.bandGains, audioCtx.sampleRate) : state.bandGains;
+  const start = Math.max(audioCtx.currentTime, eqSwitchEndsAt + EQ_SWITCH_GAP_S);
+  const targets = new Map<BiquadFilterNode, number>(filterNodes.map((filter) => [filter, 0]));
+  if (state.eqEnabled) gains.forEach((gain, i) => targets.set(bandNode(i), gain));
+  targets.forEach((gain, filter) => {
+    filter.gain.cancelScheduledValues(start);
+    filter.gain.setTargetAtTime(gain, start, EQ_RAMP_S);
+  });
+  preampNode.gain.cancelScheduledValues(audioCtx.currentTime);
+  preampNode.gain.setTargetAtTime(state.eqEnabled ? dbToGain(state.preampDb) : 1, audioCtx.currentTime, EQ_RAMP_S);
 }
 
 export function resumeAudioContext(): void {

@@ -1,11 +1,15 @@
 import { i18n } from "../i18n";
 import { eq, eqBandGroup, eqPreamp, eqPresetSelect, eqResetBtn, eqToggleBtn } from "./dom";
 import { state } from "./state";
-import { EQ_BANDS, EQ_PRESETS, findEqPreset, presetPreampDb } from "./eqPresets";
-import { formatBandLabel, formatDb } from "./format";
-import { applyEqState } from "./audioGraph";
+import { EQ_PRESETS, findEqPreset, presetGains, presetPreampDb } from "./eqPresets";
+import { formatDb } from "./format";
+import { applyEqState, switchEqLayout } from "./audioGraph";
+import { convertGains, EQ_LAYOUTS } from "../../shared/eqCurve";
+import type { EqBandCount, EqCustomPreset } from "../../shared/types";
 import { renderSwitch } from "../switchControl";
 import { persistConfig } from "./config";
+
+const WHEEL_NOTCH = 40;
 
 function createEqBandControl(label: string, onChange: (db: number) => void): HTMLElement {
   const wrap = document.createElement("div");
@@ -31,6 +35,24 @@ function createEqBandControl(label: string, onChange: (db: number) => void): HTM
     valueEl.textContent = formatDb(db);
     onChange(db);
   });
+  let wheelDelta = 0;
+  wrap.addEventListener(
+    "wheel",
+    (e) => {
+      if (slider.disabled) return;
+      e.preventDefault();
+      wheelDelta = Math.abs(e.deltaY) >= WHEEL_NOTCH ? Math.sign(e.deltaY) * WHEEL_NOTCH : wheelDelta + e.deltaY;
+      if (Math.abs(wheelDelta) < WHEEL_NOTCH) return;
+      const step = (wheelDelta < 0) === (state.eqWheel !== "natural") ? 1 : -1;
+      wheelDelta = 0;
+      const db = Math.max(Number(slider.min), Math.min(Number(slider.max), Number(slider.value) + step));
+      if (db === Number(slider.value)) return;
+      slider.value = String(db);
+      valueEl.textContent = formatDb(db);
+      onChange(db);
+    },
+    { passive: false }
+  );
   sliderWrap.appendChild(slider);
 
   const labelEl = document.createElement("span");
@@ -50,17 +72,60 @@ function buildEqPanel(): void {
       persistConfig();
     })
   );
+  buildEqBands();
+}
 
-  EQ_BANDS.forEach((freq, i) => {
-    eqBandGroup.appendChild(
-      createEqBandControl(formatBandLabel(freq), (db) => {
+function buildEqBands(): void {
+  eqBandGroup.replaceChildren(
+    ...EQ_LAYOUTS[state.eqBandCount].labels.map((label, i) =>
+      createEqBandControl(label, (db) => {
         state.bandGains[i] = db;
         markEqCustom();
         applyEqState();
         persistConfig();
       })
-    );
-  });
+    )
+  );
+}
+
+function customFor(count: EqBandCount): EqCustomPreset {
+  if (count === 10) return state.customEq;
+  if (state.fineCustomEq) return state.fineCustomEq;
+  return { bandGains: convertGains(state.customEq.bandGains, 10, 19), preampDb: state.customEq.preampDb };
+}
+
+function setCustom(custom: EqCustomPreset): void {
+  if (state.eqBandCount === 19) state.fineCustomEq = custom;
+  else state.customEq = custom;
+  state.customEq = { ...state.customEq, preampDb: custom.preampDb };
+  if (state.fineCustomEq) state.fineCustomEq = { ...state.fineCustomEq, preampDb: custom.preampDb };
+}
+
+export function loadEqGains(): void {
+  const preset = findEqPreset(state.eqPreset);
+  if (preset) {
+    state.bandGains = presetGains(preset, state.eqBandCount);
+    state.preampDb = presetPreampDb(state.bandGains);
+  } else {
+    const custom = customFor(state.eqBandCount);
+    state.bandGains = [...custom.bandGains];
+    state.preampDb = custom.preampDb;
+  }
+}
+
+export function applyEqBandCount(count: EqBandCount): void {
+  if (count === state.eqBandCount) return;
+  const preampDb = state.preampDb;
+  state.eqBandCount = count;
+  switchEqLayout();
+  buildEqBands();
+  loadEqGains();
+  if (state.eqPreset === "custom") {
+    state.preampDb = preampDb;
+    setCustom({ bandGains: [...state.bandGains], preampDb });
+  }
+  syncEqControlsFromState();
+  applyEqState();
 }
 
 export function syncEqControlsFromState(): void {
@@ -92,13 +157,8 @@ function resetEq(): void {
 }
 
 function selectEqPreset(id: string): void {
-  const preset = findEqPreset(id);
-  const gains = preset ? preset.bands : state.customEq.bandGains;
-  gains.forEach((db, i) => {
-    state.bandGains[i] = db;
-  });
-  state.preampDb = preset ? presetPreampDb(preset.bands) : state.customEq.preampDb;
-  state.eqPreset = preset ? preset.id : "custom";
+  state.eqPreset = findEqPreset(id) ? id : "custom";
+  loadEqGains();
   eqPresetSelect.value = state.eqPreset;
   syncEqControlsFromState();
   applyEqState();
@@ -107,7 +167,7 @@ function selectEqPreset(id: string): void {
 
 function markEqCustom(): void {
   state.eqPreset = "custom";
-  state.customEq = { bandGains: [...state.bandGains], preampDb: state.preampDb };
+  setCustom({ bandGains: [...state.bandGains], preampDb: state.preampDb });
   eqPresetSelect.value = "custom";
 }
 

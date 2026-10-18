@@ -7,8 +7,10 @@ import { initMenuPreferences, setAppMenu, setDockIcon, syncDockMenu, syncTray } 
 import { registerMediaKeys } from "./shortcuts";
 import { checkForUpdatesOnLaunch, setAutoUpdateEnabled } from "./updates";
 import { registerIpcHandlers } from "./ipc";
+import { preferX11ForDocking } from "./dock";
 import { handleAlacProtocol, registerAlacScheme } from "./alac/protocol";
 
+preferX11ForDocking(loadConfig()?.settings?.separateWindows === true);
 app.userAgentFallback = USER_AGENT;
 registerAlacScheme();
 registerProxyLogin();

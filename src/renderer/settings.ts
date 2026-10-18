@@ -40,6 +40,10 @@ const checkUpdatesBtn = byId<HTMLButtonElement>("checkUpdatesBtn");
 const updateStatusText = byId("updateStatusText");
 const trayEnabledBtn = byId<HTMLButtonElement>("trayEnabledBtn");
 const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
+const separateWindowsBtn = byId<HTMLButtonElement>("separateWindowsBtn");
+const separateWindowsHint = byId("separateWindowsHint");
+const eqBandsSelect = byId<HTMLSelectElement>("eqBandsSelect");
+const eqWheelSelect = byId<HTMLSelectElement>("eqWheelSelect");
 const titleScrollSelect = byId<HTMLSelectElement>("titleScrollSelect");
 const titleScrollSpeedRow = byId("titleScrollSpeedRow");
 const titleScrollSpeedInput = byId<HTMLInputElement>("titleScrollSpeedInput");
@@ -227,6 +231,28 @@ function setTrayIconEnabled(enabled: boolean) {
   sendAction("setTrayIconEnabled", enabled);
 }
 trayEnabledBtn.addEventListener("click", () => setTrayIconEnabled(!trayIconEnabled));
+
+let separateWindows = false;
+
+function setSeparateWindows(enabled: boolean) {
+  separateWindows = enabled;
+  renderSwitch(separateWindowsBtn, enabled);
+  sendAction("setSeparateWindows", enabled);
+}
+separateWindowsBtn.addEventListener("click", () => setSeparateWindows(!separateWindows));
+
+const settingsHeader = document.querySelector(".settings-window__header") as HTMLElement;
+settingsHeader.addEventListener("pointerdown", (e) => {
+  if (!document.body.classList.contains("is-separated") || e.button !== 0) return;
+  if ((e.target as Element).closest("button")) return;
+  settingsHeader.setPointerCapture(e.pointerId);
+  window.electronAPI?.dockDragStart?.();
+});
+for (const type of ["pointerup", "lostpointercapture"]) {
+  settingsHeader.addEventListener(type, () => {
+    if (document.body.classList.contains("is-separated")) window.electronAPI?.dockDragEnd?.();
+  });
+}
 
 function setCoverArtEnabled(enabled: boolean) {
   coverArtEnabled = enabled;
@@ -558,6 +584,14 @@ windowControlsSelect.addEventListener("change", () => {
   sendAction("setWindowControlsSide", windowControlsSelect.value as WindowControlsSide);
 });
 
+eqWheelSelect.addEventListener("change", () => {
+  sendAction("setEqWheel", eqWheelSelect.value === "natural" ? "natural" : "standard");
+});
+
+eqBandsSelect.addEventListener("change", () => {
+  sendAction("setEqBands", eqBandsSelect.value === "19" ? 19 : 10);
+});
+
 vizResponseSelect.addEventListener("change", () => {
   sendAction("setVizResponse", vizResponseSelect.value as VizResponse);
 });
@@ -586,6 +620,12 @@ window.electronAPI?.onSettingsState?.((state) => {
     windowControlsSelect.value = state.windowControlsSide;
     document.body.classList.toggle("window-controls-right", state.windowControlsSide === "right");
   }
+  separateWindows = !!state.separateWindows;
+  renderSwitch(separateWindowsBtn, separateWindows);
+  separateWindowsHint.hidden = !state.separateWindowsPending;
+  eqBandsSelect.value = String(state.eqBands === 19 ? 19 : 10);
+  eqWheelSelect.value = state.eqWheel === "natural" ? "natural" : "standard";
+  document.body.classList.toggle("is-separated", separateWindows && !state.separateWindowsPending);
   if (state.hotkeys) {
     hotkeyConfig = hotkeys.normalize(state.hotkeys);
     hotkeyFailures = state.globalHotkeyFailures || [];

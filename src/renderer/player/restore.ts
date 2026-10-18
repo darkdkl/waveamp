@@ -1,12 +1,14 @@
 import { hotkeys } from "../hotkeys";
 import { eqPresetSelect, volume } from "./dom";
 import { state } from "./state";
-import { EQ_BANDS, findEqPreset } from "./eqPresets";
+import { findEqPreset } from "./eqPresets";
+import { EQ_LAYOUTS, normalizeBandCount } from "../../shared/eqCurve";
 import { safeStreamUrl, trackFromEntry } from "./format";
 import { applyEqState, setVolume } from "./audioGraph";
-import { syncEqControlsFromState } from "./equalizer";
+import { applyEqBandCount, loadEqGains, syncEqControlsFromState } from "./equalizer";
 import { setVizMode, setVizResponse } from "./visualizer";
 import { SCALE_MAX, SCALE_MIN, SCALE_STEP, setEqOpen, setPlaylistOpen, setRadioOpen, setScale } from "./layout";
+import { applySeparateWindows } from "./separateWindows";
 import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
@@ -28,7 +30,7 @@ import {
   setTrayIconEnabled,
   setWindowControlsSide,
 } from "./settingsBridge";
-import type { PlaylistEntry, Station, TrackTags } from "../../shared/types";
+import type { EqBandCount, EqCustomPreset, PlaylistEntry, Station, TrackTags } from "../../shared/types";
 
 function restoredTags(tags: Partial<TrackTags> | undefined): TrackTags | undefined {
   if (!tags || typeof tags !== "object") return undefined;
@@ -46,6 +48,17 @@ function restoredEntry(t: PlaylistEntry & { name?: string }): PlaylistEntry & { 
   if (start === undefined) return { name: t.name, path: t.path };
   const end = typeof t.end === "number" && t.end > start ? t.end : null;
   return { name: t.name, path: t.path, start, end, tags: restoredTags(t.tags) };
+}
+
+function restoredGains(raw: unknown, count: EqBandCount): number[] | null {
+  if (!Array.isArray(raw) || raw.length !== EQ_LAYOUTS[count].frequencies.length) return null;
+  return raw.map((db) => (typeof db === "number" ? db : 0));
+}
+
+function restoredCustom(raw: Partial<EqCustomPreset> | null | undefined, count: EqBandCount): EqCustomPreset | null {
+  if (!raw || typeof raw.preampDb !== "number" || !Array.isArray(raw.bandGains)) return null;
+  const gains = raw.bandGains;
+  return { bandGains: EQ_LAYOUTS[count].frequencies.map((_, i) => (typeof gains[i] === "number" ? gains[i] : 0)), preampDb: raw.preampDb };
 }
 
 export async function restoreConfig(): Promise<void> {
@@ -83,6 +96,9 @@ export async function restoreConfig(): Promise<void> {
   if (settings?.windowControlsSide === "left" || settings?.windowControlsSide === "right") {
     setWindowControlsSide(settings.windowControlsSide);
   }
+  if (typeof settings?.separateWindows === "boolean") state.separateWindows = settings.separateWindows;
+  if (settings?.eqWheel === "standard" || settings?.eqWheel === "natural") state.eqWheel = settings.eqWheel;
+  if (config.ui?.dock && typeof config.ui.dock === "object") state.dockLayout = config.ui.dock;
 
   if (typeof settings?.presetAutoSwitch === "boolean") setPresetAutoSwitch(settings.presetAutoSwitch);
   if (typeof settings?.presetHardCuts === "boolean") setPresetHardCuts(settings.presetHardCuts);
@@ -134,26 +150,22 @@ export async function restoreConfig(): Promise<void> {
     setCloseMinimizesToTrayEnabled(settings.closeMinimizesToTray);
   }
 
+  applyEqBandCount(normalizeBandCount(settings?.eqBands));
   if (config.eq) {
-    if (Array.isArray(config.eq.bandGains)) {
-      config.eq.bandGains.forEach((db, i) => {
-        if (i < state.bandGains.length && typeof db === "number") state.bandGains[i] = db;
-      });
-    }
-    if (typeof config.eq.preampDb === "number") state.preampDb = config.eq.preampDb;
+    const count = state.eqBandCount;
+    const saved = restoredGains(config.eq.bandGains, count);
+    const preampDb = typeof config.eq.preampDb === "number" ? config.eq.preampDb : 0;
     if (typeof config.eq.enabled === "boolean") state.eqEnabled = config.eq.enabled;
-    const custom = config.eq.custom;
-    const customGains = custom?.bandGains;
-    if (Array.isArray(customGains) && typeof custom?.preampDb === "number") {
-      state.customEq = {
-        bandGains: EQ_BANDS.map((_, i) => (typeof customGains[i] === "number" ? customGains[i] : 0)),
-        preampDb: custom.preampDb,
-      };
-    } else {
-      state.customEq = { bandGains: [...state.bandGains], preampDb: state.preampDb };
-    }
+    state.customEq = restoredCustom(config.eq.custom, 10) ?? { bandGains: restoredGains(config.eq.bandGains, 10) ?? new Array(10).fill(0), preampDb };
+    state.fineCustomEq = restoredCustom(config.eq.fineCustom, 19);
     const preset = config.eq.preset;
     state.eqPreset = preset && findEqPreset(preset) ? preset : "custom";
+    if (state.eqPreset === "custom" && saved) {
+      state.bandGains = saved;
+      state.preampDb = preampDb;
+    } else {
+      loadEqGains();
+    }
     eqPresetSelect.value = state.eqPreset;
     syncEqControlsFromState();
     applyEqState();
@@ -180,6 +192,7 @@ export async function restoreConfig(): Promise<void> {
   }
 
   if (config.ui?.vizMode) setVizMode(config.ui.vizMode);
+  if (state.separateWindows) await applySeparateWindows();
   if (config.ui?.eqOpen) setEqOpen(true);
   if (config.ui?.playlistOpen) setPlaylistOpen(true);
   if (config.ui?.radioOpen) setRadioOpen(true);

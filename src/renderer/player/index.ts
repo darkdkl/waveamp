@@ -22,11 +22,12 @@ import { initTitleScroll } from "./titleScroll";
 import { initSavedTracks } from "./radio/savedTracks";
 import { initClock } from "./clock";
 import { initPlayState } from "./playState";
-import { applyWindowControlsSide, initSettingsBridge, initSettingsButton, initSkipUpdateVersion } from "./settingsBridge";
+import { applyWindowControlsSide, detectEqWheel, initSettingsBridge, initSettingsButton, initSkipUpdateVersion } from "./settingsBridge";
 import { initPlayerHotkeys } from "./playerHotkeys";
 import { restoreConfig } from "./restore";
 import { initStereo } from "./stereo";
 import { initDisplayInfo } from "./displayInfo";
+import { initSeparateWindows } from "./separateWindows";
 
 initVisualizerControls();
 initEqualizerControls();
@@ -54,6 +55,7 @@ initMediaSession();
 initAudioErrorHandling();
 initSeekAndVolume();
 initDragAndDrop();
+initSeparateWindows();
 
 const electronAPI = window.electronAPI;
 if (electronAPI) {
@@ -82,6 +84,7 @@ restoreConfig().finally(() => {
   state.restoring = false;
   document.body.classList.remove("is-restoring");
   window.electronAPI?.notifyWindowReady?.();
+  void detectEqWheel();
 });
 
 initPlayerHotkeys();

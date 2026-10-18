@@ -17,8 +17,11 @@ import {
   windowGripResize,
 } from "./dom";
 import { state } from "./state";
+import type { DockName } from "../../shared/types";
 import { persistConfig } from "./config";
 import { ensureRadioFilters } from "./radio/panel";
+import { onEveryDocument } from "./documents";
+import { syncDockWindows } from "./separateWindows";
 
 export const BASE_ZOOM = 0.855;
 export const SCALE_MIN = 70;
@@ -38,10 +41,13 @@ let radioSavedOffset = 38;
 
 export function syncElectronWindowSize(instant = false): void {
   if (!window.electronAPI || windowSizeFrozen) return;
-  let target = basePlayerHeight + displayExtraHeight;
-  if (state.playlistOpen) target += playlist.scrollHeight;
-  if (state.eqOpen) target += eq.scrollHeight;
-  if (state.radioOpen) target += radio.scrollHeight;
+  const mainHeight = basePlayerHeight + displayExtraHeight;
+  let target = mainHeight;
+  if (!state.separateActive) {
+    if (state.playlistOpen) target += playlist.scrollHeight;
+    if (state.eqOpen) target += eq.scrollHeight;
+    if (state.radioOpen) target += radio.scrollHeight;
+  }
   target *= state.uiScale;
   const targetWidth = WINDOW_WIDTH_BASE * state.uiScale;
   if ((instant || state.restoring) && window.electronAPI.resizeWindowInstant) {
@@ -49,13 +55,19 @@ export function syncElectronWindowSize(instant = false): void {
   } else {
     window.electronAPI.resizeWindow(target, targetWidth);
   }
+  if (state.separateActive) syncDockWindows(mainHeight, targetWidth, state.uiScale);
+}
+
+function sectionMaxHeight(section: HTMLElement, open: boolean): string {
+  if (!open) return "0px";
+  return state.separateActive ? "none" : section.scrollHeight + "px";
 }
 
 export function setPlaylistOpen(open: boolean): void {
   state.playlistOpen = open;
   playlist.classList.toggle("is-open", open);
   playlistBtn.classList.toggle("is-active", open);
-  playlist.style.maxHeight = open ? playlist.scrollHeight + "px" : "0px";
+  playlist.style.maxHeight = sectionMaxHeight(playlist, open);
   if (open && state.radioOpen) setRadioOpen(false);
   syncElectronWindowSize();
   persistConfig();
@@ -65,7 +77,7 @@ export function setEqOpen(open: boolean): void {
   state.eqOpen = open;
   eq.classList.toggle("is-open", open);
   eqBtn.classList.toggle("is-active", open);
-  eq.style.maxHeight = open ? eq.scrollHeight + "px" : "0px";
+  eq.style.maxHeight = sectionMaxHeight(eq, open);
   syncElectronWindowSize();
   persistConfig();
 }
@@ -74,7 +86,7 @@ export function setRadioOpen(open: boolean): void {
   state.radioOpen = open;
   radio.classList.toggle("is-open", open);
   radioBtn.classList.toggle("is-active", open);
-  radio.style.maxHeight = open ? radio.scrollHeight + "px" : "0px";
+  radio.style.maxHeight = sectionMaxHeight(radio, open);
   if (open && state.playlistOpen) setPlaylistOpen(false);
   syncElectronWindowSize();
   if (open) ensureRadioFilters();
@@ -84,6 +96,7 @@ export function setScale(percent: number): void {
   state.uiScale = (percent / 100) * BASE_ZOOM;
   if (window.electronAPI?.setZoomFactor) {
     window.electronAPI.setZoomFactor(state.uiScale);
+    window.electronAPI.dockZoom?.(state.uiScale);
   } else {
     player.style.zoom = String(state.uiScale);
   }
@@ -109,8 +122,8 @@ function applyListHeight(px: number): void {
   radioFavoritesFrame.style.height = px + "px";
   radioAddFrame.style.height = px + "px";
   radioSavedFrame.style.height = Math.max(FRAME_MIN_HEIGHT, px - radioSavedOffset) + "px";
-  if (state.playlistOpen) playlist.style.maxHeight = playlist.scrollHeight + "px";
-  if (state.radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
+  if (state.playlistOpen) playlist.style.maxHeight = sectionMaxHeight(playlist, true);
+  if (state.radioOpen) radio.style.maxHeight = sectionMaxHeight(radio, true);
 }
 
 let resizingList = false;
@@ -125,7 +138,7 @@ function startListResize(e: MouseEvent, handle: HTMLElement, section: HTMLElemen
   activeResizeHandle = handle;
   handle.classList.add("is-active");
   section.classList.add("is-resizing");
-  document.body.style.cursor = cursor;
+  handle.ownerDocument.body.style.cursor = cursor;
   e.preventDefault();
 }
 
@@ -144,6 +157,16 @@ export function initPanelToggles(): void {
   radioBtn.addEventListener("click", () => {
     setRadioOpen(!state.radioOpen);
   });
+  document.querySelectorAll<HTMLButtonElement>("[data-dock-close]").forEach((button) => {
+    button.addEventListener("click", () => closeDockWindow(button.dataset.dockClose === "eq" ? "eq" : "panel"));
+  });
+  window.electronAPI?.onDockClose?.(closeDockWindow);
+}
+
+function closeDockWindow(name: DockName): void {
+  if (name === "eq") setEqOpen(false);
+  else if (state.radioOpen) setRadioOpen(false);
+  else setPlaylistOpen(false);
 }
 
 export function initListResize(): void {
@@ -169,7 +192,7 @@ export function initListResize(): void {
   windowEdgeResize.addEventListener("mousedown", (e) => startOpenListResize(e, windowEdgeResize, "ns-resize"));
   windowGripResize.addEventListener("mousedown", (e) => startOpenListResize(e, windowGripResize, "nwse-resize"));
 
-  window.addEventListener("mousemove", (e) => {
+  onEveryDocument("mousemove", (e) => {
     if (!resizingList) return;
     const delta = (e.clientY - resizeStartY) / cssZoomFactor();
     const newHeight = Math.min(LIST_MAX_HEIGHT, Math.max(LIST_MIN_HEIGHT, resizeStartHeight + delta));
@@ -177,14 +200,16 @@ export function initListResize(): void {
     syncElectronWindowSize(true);
   });
 
-  window.addEventListener("mouseup", () => {
+  onEveryDocument("mouseup", () => {
     if (!resizingList) return;
     resizingList = false;
-    activeResizeHandle?.classList.remove("is-active");
+    if (activeResizeHandle) {
+      activeResizeHandle.classList.remove("is-active");
+      activeResizeHandle.ownerDocument.body.style.cursor = "";
+    }
     activeResizeHandle = null;
     playlist.classList.remove("is-resizing");
     radio.classList.remove("is-resizing");
-    document.body.style.cursor = "";
   });
 }
 
