@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bandFilter,
   cascadeResponseDb,
   convertGains,
   curveAt,
@@ -7,6 +8,7 @@ import {
   filterGainsFor,
   normalizeBandCount,
   peakingResponseDb,
+  shelfResponseDb,
 } from "../../src/shared/eqCurve";
 import { EQ_PRESETS } from "../../src/renderer/player/eqPresets";
 
@@ -70,6 +72,31 @@ describe("peakingResponseDb", () => {
   });
 });
 
+describe("shelfResponseDb", () => {
+  it("lifts everything below or above the corner", () => {
+    expect(shelfResponseDb("lowshelf", 45, 6, 10, RATE)).toBeCloseTo(6, 1);
+    expect(shelfResponseDb("lowshelf", 45, 6, 5000, RATE)).toBeCloseTo(0, 1);
+    expect(shelfResponseDb("highshelf", 11000, 6, 20000, RATE)).toBeGreaterThan(5);
+    expect(shelfResponseDb("highshelf", 11000, 6, 100, RATE)).toBeCloseTo(0, 1);
+  });
+
+  it("gives half the gain at the corner", () => {
+    expect(shelfResponseDb("lowshelf", 45, 6, 45, RATE)).toBeCloseTo(3, 1);
+  });
+});
+
+describe("bandFilter", () => {
+  it("turns the outer 19-band filters into shelves half a band inward", () => {
+    expect(bandFilter(fine, 0)).toEqual({ type: "lowshelf", frequency: fine.frequencies[0] * Math.SQRT2 });
+    expect(bandFilter(fine, 18)).toEqual({ type: "highshelf", frequency: fine.frequencies[18] / Math.SQRT2 });
+    expect(bandFilter(fine, 9).type).toBe("peaking");
+  });
+
+  it("keeps every classic band a peak", () => {
+    for (let i = 0; i < 10; i++) expect(bandFilter(EQ_LAYOUTS[10], i)).toEqual({ type: "peaking", frequency: EQ_LAYOUTS[10].frequencies[i] });
+  });
+});
+
 describe("filterGainsFor", () => {
   const centersMatch = (sliders: number[], tolerance: number) => {
     const gains = filterGainsFor(fine, sliders, RATE);
@@ -85,6 +112,14 @@ describe("filterGainsFor", () => {
     const naive = cascadeResponseDb(fine, sliders, 1000, RATE);
     expect(naive).toBeGreaterThan(9);
     centersMatch(sliders, 0.3);
+  });
+
+  it("carries the outer sliders to the ends of the range without a dip at the top", () => {
+    const sliders = new Array(19).fill(6);
+    const gains = filterGainsFor(fine, sliders, RATE);
+    expect(cascadeResponseDb(fine, gains, 20, RATE)).toBeCloseTo(6, 0);
+    expect(cascadeResponseDb(fine, gains, 20000, RATE)).toBeCloseTo(6, 0);
+    for (let f = 9000; f <= 18000; f += 250) expect(cascadeResponseDb(fine, gains, f, RATE)).toBeGreaterThan(5.4);
   });
 
   it("follows every built-in preset", () => {

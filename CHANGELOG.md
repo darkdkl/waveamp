@@ -4,6 +4,14 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.29.0] — 2026-10-18
+
+### Changed
+- In the 19-band equalizer the outer bands are shelves: 31 Hz lifts or cuts
+  everything below it and 16 kHz everything above it, so the lowest bass and
+  the "air" respond on any record. The curve no longer dips between 11 and
+  16 kHz and no longer falls off past the outer bands
+
 ## [1.28.2] — 2026-10-18
 
 ### Added
