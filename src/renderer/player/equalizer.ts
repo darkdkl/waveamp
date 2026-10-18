@@ -43,7 +43,7 @@ function createEqBandControl(label: string, onChange: (db: number) => void): HTM
       e.preventDefault();
       wheelDelta = Math.abs(e.deltaY) >= WHEEL_NOTCH ? Math.sign(e.deltaY) * WHEEL_NOTCH : wheelDelta + e.deltaY;
       if (Math.abs(wheelDelta) < WHEEL_NOTCH) return;
-      const step = wheelDelta < 0 ? 1 : -1;
+      const step = (wheelDelta < 0) === (state.eqWheel !== "natural") ? 1 : -1;
       wheelDelta = 0;
       const db = Math.max(Number(slider.min), Math.min(Number(slider.max), Number(slider.value) + step));
       if (db === Number(slider.value)) return;

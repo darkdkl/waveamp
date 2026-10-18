@@ -97,6 +97,7 @@ export async function restoreConfig(): Promise<void> {
     setWindowControlsSide(settings.windowControlsSide);
   }
   if (typeof settings?.separateWindows === "boolean") state.separateWindows = settings.separateWindows;
+  if (settings?.eqWheel === "standard" || settings?.eqWheel === "natural") state.eqWheel = settings.eqWheel;
   if (config.ui?.dock && typeof config.ui.dock === "object") state.dockLayout = config.ui.dock;
 
   if (typeof settings?.presetAutoSwitch === "boolean") setPresetAutoSwitch(settings.presetAutoSwitch);

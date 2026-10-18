@@ -4,6 +4,13 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.29.1] — 2026-10-18
+
+### Added
+- Settings → Interface → Mouse wheel on the equalizer: standard or natural.
+  On the first launch it follows the system (macOS natural scrolling, the
+  GNOME mouse setting on Linux) and can be changed by hand
+
 ## [1.29.0] — 2026-10-18
 
 ### Changed

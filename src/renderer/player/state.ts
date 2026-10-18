@@ -6,6 +6,7 @@ import type {
   DockLayout,
   EqBandCount,
   EqCustomPreset,
+  WheelDirection,
   HotkeyConfig,
   ProxyConfig,
   SavedTrack,
@@ -67,6 +68,7 @@ export const state = {
 
   eqEnabled: true,
   eqBandCount: 10 as EqBandCount,
+  eqWheel: null as WheelDirection | null,
   bandGains: new Array(10).fill(0) as number[],
   preampDb: 0,
   eqPreset: "flat",

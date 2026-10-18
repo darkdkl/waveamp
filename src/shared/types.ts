@@ -119,6 +119,8 @@ export interface EqCustomPreset {
 
 export type EqBandCount = 10 | 19;
 
+export type WheelDirection = "standard" | "natural";
+
 export interface AppConfig {
   version: number;
   playlist: {
@@ -153,6 +155,7 @@ export interface AppConfig {
     windowControlsSide: WindowControlsSide;
     separateWindows: boolean;
     eqBands: EqBandCount;
+    eqWheel: WheelDirection;
     presetAutoSwitch: boolean;
     presetHardCuts: boolean;
     presetFolder: string;
@@ -195,6 +198,7 @@ export interface SettingsState {
   separateWindows: boolean;
   separateWindowsPending: boolean;
   eqBands: EqBandCount;
+  eqWheel: WheelDirection;
   presetAutoSwitch: boolean;
   presetHardCuts: boolean;
   presetFolder: string;
@@ -224,6 +228,7 @@ export type SettingsAction =
   | { type: "setWindowControlsSide"; value: WindowControlsSide }
   | { type: "setSeparateWindows"; value: boolean }
   | { type: "setEqBands"; value: EqBandCount }
+  | { type: "setEqWheel"; value: WheelDirection }
   | { type: "setPresetAutoSwitch"; value: boolean }
   | { type: "setPresetHardCuts"; value: boolean }
   | { type: "setPresetFolder"; value: string }

@@ -43,6 +43,7 @@ const coverArtBtn = byId<HTMLButtonElement>("coverArtBtn");
 const separateWindowsBtn = byId<HTMLButtonElement>("separateWindowsBtn");
 const separateWindowsHint = byId("separateWindowsHint");
 const eqBandsSelect = byId<HTMLSelectElement>("eqBandsSelect");
+const eqWheelSelect = byId<HTMLSelectElement>("eqWheelSelect");
 const titleScrollSelect = byId<HTMLSelectElement>("titleScrollSelect");
 const titleScrollSpeedRow = byId("titleScrollSpeedRow");
 const titleScrollSpeedInput = byId<HTMLInputElement>("titleScrollSpeedInput");
@@ -583,6 +584,10 @@ windowControlsSelect.addEventListener("change", () => {
   sendAction("setWindowControlsSide", windowControlsSelect.value as WindowControlsSide);
 });
 
+eqWheelSelect.addEventListener("change", () => {
+  sendAction("setEqWheel", eqWheelSelect.value === "natural" ? "natural" : "standard");
+});
+
 eqBandsSelect.addEventListener("change", () => {
   sendAction("setEqBands", eqBandsSelect.value === "19" ? 19 : 10);
 });
@@ -619,6 +624,7 @@ window.electronAPI?.onSettingsState?.((state) => {
   renderSwitch(separateWindowsBtn, separateWindows);
   separateWindowsHint.hidden = !state.separateWindowsPending;
   eqBandsSelect.value = String(state.eqBands === 19 ? 19 : 10);
+  eqWheelSelect.value = state.eqWheel === "natural" ? "natural" : "standard";
   document.body.classList.toggle("is-separated", separateWindows && !state.separateWindowsPending);
   if (state.hotkeys) {
     hotkeyConfig = hotkeys.normalize(state.hotkeys);

@@ -52,6 +52,7 @@ export function persistConfig(): void {
         windowControlsSide: state.windowControlsSide,
         separateWindows: state.separateWindows,
         eqBands: state.eqBandCount,
+        eqWheel: state.eqWheel ?? "standard",
         presetAutoSwitch: state.presetAutoSwitch,
         presetHardCuts: state.presetHardCuts,
         presetFolder: state.presetFolder,

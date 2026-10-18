@@ -21,7 +21,7 @@ import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from 
 import { updateStationFormText } from "./radio/stationForm";
 import { tuneStation } from "./radio/stream";
 import { setHotkeys } from "./playerHotkeys";
-import type { AccentColor, EqBandCount, ProxyConfig, WindowControlsSide } from "../../shared/types";
+import type { AccentColor, EqBandCount, ProxyConfig, WheelDirection, WindowControlsSide } from "../../shared/types";
 
 export function getProxyConfig(): ProxyConfig {
   return { ...state.proxy };
@@ -104,6 +104,19 @@ export function setSeparateWindows(enabled: boolean): void {
   });
 }
 
+export function setEqWheel(direction: WheelDirection): void {
+  state.eqWheel = direction === "natural" ? "natural" : "standard";
+  persistConfig();
+}
+
+export async function detectEqWheel(): Promise<void> {
+  if (state.eqWheel || !window.electronAPI?.systemNaturalScroll) return;
+  const natural = await window.electronAPI.systemNaturalScroll().catch(() => false);
+  if (state.eqWheel) return;
+  setEqWheel(natural ? "natural" : "standard");
+  pushSettingsState();
+}
+
 export function setEqBands(count: EqBandCount): void {
   applyEqBandCount(count);
   syncElectronWindowSize();
@@ -136,6 +149,7 @@ export function pushSettingsState(): void {
     separateWindows: state.separateWindows,
     separateWindowsPending: state.separateWindows && !state.separateActive,
     eqBands: state.eqBandCount,
+    eqWheel: state.eqWheel ?? "standard",
     presetAutoSwitch: state.presetAutoSwitch,
     presetHardCuts: state.presetHardCuts,
     presetFolder: state.presetFolder,
@@ -211,6 +225,9 @@ export function initSettingsBridge(): void {
         return;
       case "setEqBands":
         setEqBands(normalizeBandCount(action.value));
+        break;
+      case "setEqWheel":
+        setEqWheel(action.value);
         break;
       case "setPresetAutoSwitch":
         setPresetAutoSwitch(!!action.value);

@@ -43,6 +43,7 @@ const api = {
   setFullScreen: (enabled: boolean): void => ipcRenderer.send("set-full-screen", enabled),
   onFullScreenChanged: (callback: (enabled: boolean) => void) => ipcRenderer.on("full-screen-changed", (_event, enabled) => callback(!!enabled)),
   closeWindow: (): void => ipcRenderer.send("window-close"),
+  systemNaturalScroll: (): Promise<boolean> => ipcRenderer.invoke("system-natural-scroll"),
   dockSetSeparate: (enabled: boolean, layout: DockLayout): Promise<boolean> => ipcRenderer.invoke("dock-set-separate", enabled, layout),
   dockUpdate: (update: DockUpdate): void => ipcRenderer.send("dock-update", update),
   dockZoom: (factor: number): void => ipcRenderer.send("dock-zoom", factor),

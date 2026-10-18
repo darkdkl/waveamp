@@ -37,6 +37,7 @@ import {
 } from "./menus";
 import { applyGlobalHotkeys } from "./shortcuts";
 import { readAudioFormat, readTrackTags } from "./tags";
+import { systemNaturalScroll } from "./scrollDirection";
 import {
   dockNameOf,
   isManagedName,
@@ -96,6 +97,8 @@ export function registerIpcHandlers(): void {
   ipcMain.on("window-ready", (event) => revealSenderWindow(event.sender));
 
   ipcMain.on("set-full-screen", (_event, enabled: boolean) => setMainWindowFullScreen(!!enabled));
+
+  ipcMain.handle("system-natural-scroll", () => systemNaturalScroll());
 
   ipcMain.handle("dock-set-separate", (_event, enabled: boolean, layout: DockLayout) => setSeparateWindows(!!enabled, layout));
 
