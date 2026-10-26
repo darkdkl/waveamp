@@ -36,6 +36,7 @@ const FALLBACK_HEIGHT = 200;
 
 const startedOnWayland = process.platform === "linux" && !!process.env.WAYLAND_DISPLAY;
 const entries = new Map<Managed, Entry>();
+const limited = new WeakSet<BrowserWindow>();
 let enabled = false;
 let suspended = false;
 let layout: DockLayout = {};
@@ -165,10 +166,13 @@ function track(name: Managed, win: BrowserWindow, wanted: boolean): Entry {
   return entry;
 }
 
+function shownFollowers(): (DockName | "settings")[] {
+  return enabled ? FOLLOWERS : ["chords"];
+}
+
 function suspend(): void {
   suspended = true;
-  if (!enabled) return;
-  for (const name of FOLLOWERS) {
+  for (const name of shownFollowers()) {
     const entry = entries.get(name);
     if (alive(entry) && entry.win.isVisible()) entry.win.hide();
   }
@@ -185,8 +189,7 @@ function resume(afterFullScreen = false): void {
   const main = entries.get("main");
   if (!alive(main) || !main.win.isVisible() || main.win.isMinimized() || (!afterFullScreen && main.win.isFullScreen())) return;
   suspended = false;
-  if (!enabled) return;
-  FOLLOWERS.forEach(showFollower);
+  shownFollowers().forEach(showFollower);
   recordLayout();
 }
 
@@ -213,17 +216,22 @@ export function trackMainWindow(win: BrowserWindow, dockHandlers: DockHandlers):
   win.webContents.on("did-create-window", (child, details) => registerDockWindow(details.frameName, child));
 }
 
+function nativeFrameControls(name: DockName): boolean {
+  return name === "chords" && !enabled && !canPositionWindows();
+}
+
 function dockWindowOptions(frameName: string, parent: BrowserWindow): BrowserWindowConstructorOptions | null {
   const name = dockName(frameName);
   if (!name || (!enabled && name !== "chords")) return null;
   const size = sizes[name];
+  const native = nativeFrameControls(name);
   return {
     parent,
     show: false,
     frame: false,
-    resizable: name === "chords",
+    resizable: native,
     minimizable: false,
-    maximizable: name === "chords",
+    maximizable: native,
     fullscreenable: false,
     skipTaskbar: true,
     useContentSize: true,
@@ -292,6 +300,10 @@ function applyState(name: DockName, state: DockWindowState): void {
     applyBounds(name, back);
   }
   if (!entry.win.isVisible()) {
+    if (nativeFrameControls(name) && !limited.has(entry.win)) {
+      limited.add(entry.win);
+      entry.win.setMinimumSize(width, height);
+    }
     entry.last = { ...entry.last, width, height };
     if (!state.visible || suspended) return;
     showFollower(name);

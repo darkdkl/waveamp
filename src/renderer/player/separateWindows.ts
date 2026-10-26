@@ -21,7 +21,19 @@ panelDropzone.removeAttribute("id");
 let mirror: MutationObserver | null = null;
 let queue: Promise<void> = Promise.resolve();
 let floating: DockWindow | null = null;
+let floatingSize: Size | null = null;
 let canPosition = true;
+
+export const WINDOW_WIDTH_BASE = 480;
+
+export function isChordsFloating(): boolean {
+  return !!floating;
+}
+
+export function sectionMaxHeight(section: HTMLElement, open: boolean): string {
+  if (!open) return "0px";
+  return section.ownerDocument !== document ? "none" : section.scrollHeight + "px";
+}
 
 function mirrorInto(doc: Document): void {
   const source = document.documentElement.style;
@@ -115,8 +127,7 @@ function setSectionHeights(): void {
     [playlist, state.playlistOpen],
     [radio, state.radioOpen],
   ] as const) {
-    if (!open) section.style.maxHeight = "0px";
-    else section.style.maxHeight = section.ownerDocument !== document ? "none" : section.scrollHeight + "px";
+    section.style.maxHeight = sectionMaxHeight(section, open);
   }
 }
 
@@ -175,8 +186,7 @@ function dockFloatingBack(): void {
   if (!floating) return;
   const { win } = floating;
   floating = null;
-  state.chordsFloating = false;
-  state.chordsFloatingSize = null;
+  floatingSize = null;
   player.insertBefore(chordsSection, playlist.parentElement === player ? playlist : dropzone);
   removePlayerDocument(win.document);
   win.close();
@@ -196,8 +206,7 @@ export function popOutChords(): Promise<void> {
       return;
     }
     floating = entry;
-    state.chordsFloating = true;
-    state.chordsFloatingSize = null;
+    floatingSize = null;
     mirrorInto(entry.win.document);
     startMirror();
     setSectionHeights();
@@ -212,12 +221,12 @@ export function returnChords(): Promise<void> {
 
 function chordsNaturalSize(root: HTMLElement): Size {
   const base = parseFloat(getComputedStyle(chordsLcd).getPropertyValue("--chords-lcd-height")) || chordsLcd.offsetHeight;
-  return { width: player.offsetWidth, height: root.offsetHeight - chordsLcd.offsetHeight + base };
+  return { width: WINDOW_WIDTH_BASE, height: root.offsetHeight - chordsLcd.offsetHeight + base };
 }
 
 function chordsWindowState(entry: DockWindow, scale: number): DockWindowState {
   const natural = chordsNaturalSize(entry.root);
-  const size = (state.separateActive ? state.chordsDockedSize : state.chordsFloatingSize) ?? natural;
+  const size = (state.separateActive ? state.chordsDockedSize : floatingSize) ?? natural;
   return {
     visible: state.chordsOpen,
     width: Math.round(Math.max(size.width, natural.width) * scale),
@@ -259,7 +268,7 @@ function startChordsResize(e: PointerEvent, edge: "left" | "right"): void {
 function onChordsSize(size: Size): void {
   const css = { width: size.width / state.uiScale, height: size.height / state.uiScale };
   if (state.separateActive) state.chordsDockedSize = css;
-  else if (floating) state.chordsFloatingSize = css;
+  else if (floating) floatingSize = css;
 }
 
 export function applySeparateWindows(): Promise<void> {

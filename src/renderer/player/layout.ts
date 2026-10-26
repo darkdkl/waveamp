@@ -22,14 +22,13 @@ import type { DockName } from "../../shared/types";
 import { persistConfig } from "./config";
 import { ensureRadioFilters } from "./radio/panel";
 import { onEveryDocument } from "./documents";
-import { syncDockWindows } from "./separateWindows";
+import { isChordsFloating, sectionMaxHeight, syncDockWindows, WINDOW_WIDTH_BASE } from "./separateWindows";
 
 export const BASE_ZOOM = 0.855;
 export const SCALE_MIN = 70;
 export const SCALE_MAX = 150;
 export const SCALE_STEP = 10;
 
-const WINDOW_WIDTH_BASE = 480;
 const LIST_MIN_HEIGHT = 240;
 const FRAME_MIN_HEIGHT = 60;
 const LIST_MAX_HEIGHT = 1920;
@@ -57,12 +56,7 @@ export function syncElectronWindowSize(instant = false): void {
   } else {
     window.electronAPI.resizeWindow(target, targetWidth);
   }
-  if (state.separateActive || state.chordsFloating) syncDockWindows(mainHeight, targetWidth, state.uiScale);
-}
-
-function sectionMaxHeight(section: HTMLElement, open: boolean): string {
-  if (!open) return "0px";
-  return section.ownerDocument !== document ? "none" : section.scrollHeight + "px";
+  if (state.separateActive || isChordsFloating()) syncDockWindows(mainHeight, targetWidth, state.uiScale);
 }
 
 export function setPlaylistOpen(open: boolean): void {
