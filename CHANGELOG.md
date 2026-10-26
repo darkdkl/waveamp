@@ -4,6 +4,19 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.30.1] — 2026-10-26
+
+### Changed
+- The chords screen is taller and shows the previous, current and next chord
+  side by side, each fingering with its name below; on a chord change the row
+  slides left like a tape. The strip of upcoming chords under it is gone
+
+### Fixed
+- The capo list opens inside the window instead of running past its right
+  edge
+- Fmaj7-style shapes up the neck (F#maj7, G#maj7) no longer show a barre
+  across the muted string
+
 ## [1.30.0] — 2026-10-26
 
 ### Added

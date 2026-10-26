@@ -186,5 +186,6 @@ describe("chordShape", () => {
     expect(chordShape(am).barre).toBeNull();
     expect(chordShape(f).barre).toEqual({ fret: 1, from: 0, to: 5 });
     expect(chordShape({ root: 11, quality: "min" }).barre).toEqual({ fret: 2, from: 1, to: 5 });
+    expect(chordShape({ root: 6, quality: "maj7" })).toEqual({ frets: [2, -1, 3, 3, 2, -1], barre: null });
   });
 });

@@ -36,7 +36,9 @@ const A_SHAPE: Record<ChordQuality, number[]> = {
 function barreShape(template: number[], fret: number): ChordShape {
   const frets = template.map((offset) => (offset === X ? X : offset + fret));
   const strings = frets.map((value, i) => (value === fret ? i : -1)).filter((i) => i >= 0);
-  return { frets, barre: { fret, from: strings[0], to: strings[strings.length - 1] } };
+  const from = strings[0], to = strings[strings.length - 1];
+  const covered = frets.slice(from, to + 1).every((value) => value >= fret);
+  return { frets, barre: covered ? { fret, from, to } : null };
 }
 
 export function chordShape(chord: Chord): ChordShape {

@@ -10,9 +10,9 @@ import {
   chordsMessageText,
   chordsNext,
   chordsNow,
+  chordsPrev,
   chordsResult,
   chordsSimplifyBtn,
-  chordsTimeline,
 } from "./dom";
 import { state, type Track } from "./state";
 import { persistConfig } from "./config";
@@ -36,8 +36,8 @@ import {
 } from "../../shared/chords";
 
 const CAPO_MAX = 7;
-const PAST_CELLS = 2;
-const TIMELINE_CELLS = 9;
+const SCROLL_MS = 260;
+const SCROLL_SHIFT = 18;
 
 type Status = "idle" | "analyzing" | "done" | "tooLong" | "tooLarge" | "failed";
 
@@ -67,14 +67,10 @@ function flats(): boolean {
   return analysis ? usesFlats(analysis.key) : false;
 }
 
-function chordLabel(chord: Chord | null): string {
-  return chord ? chordName(displayedChord(chord), flats()) : "—";
-}
-
 function chordMarkup(chord: Chord | null): string {
   if (!chord) return `<span class="chords__name">—</span>`;
   const shown = displayedChord(chord);
-  return `<span class="chords__name">${chordName(shown, flats())}</span>${chordDiagramSvg(chordShape(shown))}`;
+  return `${chordDiagramSvg(chordShape(shown))}<span class="chords__name">${chordName(shown, flats())}</span>`;
 }
 
 function showMessage(text: string, analyzable: boolean): void {
@@ -83,13 +79,18 @@ function showMessage(text: string, analyzable: boolean): void {
   chordsMessageText.textContent = text;
   chordsAnalyzeBtn.hidden = !analyzable;
   chordsAnalyzeBtn.disabled = status === "analyzing";
-  chordsTimeline.replaceChildren();
 }
 
-function nextChordIndex(index: number): number {
+function nearChordIndex(index: number, step: 1 | -1): number {
   const events = analysis?.events ?? [];
-  for (let i = index + 1; i < events.length; i++) if (events[i].chord) return i;
+  for (let i = index + step; i >= 0 && i < events.length; i += step) if (events[i].chord) return i;
   return -1;
+}
+
+function scrollTape(): void {
+  for (const slot of [chordsPrev, chordsNow, chordsNext]) {
+    slot.animate([{ transform: `translateX(${SCROLL_SHIFT}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: SCROLL_MS, easing: "ease-out" });
+  }
 }
 
 function visible(): boolean {
@@ -101,20 +102,14 @@ function updatePosition(force = false): void {
   const events = analysis.events;
   const index = eventAt(events, trackPosition());
   if (index === shownIndex && !force) return;
+  const forward = !force && shownIndex >= 0 && index > shownIndex;
   shownIndex = index;
-  const next = nextChordIndex(index);
+  const prev = nearChordIndex(index, -1);
+  const next = nearChordIndex(index, 1);
+  chordsPrev.innerHTML = prev >= 0 ? chordMarkup(events[prev].chord) : "";
   chordsNow.innerHTML = chordMarkup(events[index]?.chord ?? null);
   chordsNext.innerHTML = next >= 0 ? chordMarkup(events[next].chord) : "";
-  const first = Math.max(0, Math.min(index - PAST_CELLS, events.length - TIMELINE_CELLS));
-  chordsTimeline.replaceChildren(
-    ...events.slice(first, first + TIMELINE_CELLS).map((event, offset) => {
-      const cell = document.createElement("div");
-      const position = first + offset;
-      cell.className = "chords__cell" + (position < index ? " is-past" : position === index ? " is-current" : "");
-      cell.textContent = chordLabel(event.chord);
-      return cell;
-    })
-  );
+  if (forward) scrollTape();
 }
 
 function render(): void {
