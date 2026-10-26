@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, clipboard, dialog, ipcMain, type WebContents } from "electron";
 import { loadConfig, saveConfig } from "./config";
 import { clearLogs, openLogFolder, setLoggingEnabled, isLoggingEnabled, writeLog } from "./logging";
 import { applyProxyConfig } from "./network";
@@ -40,12 +40,17 @@ import { readAudioFormat, readTrackTags } from "./tags";
 import { systemNaturalScroll } from "./scrollDirection";
 import { readAudioData } from "./audioData";
 import {
+  canPositionWindows,
   dockNameOf,
   isManagedName,
+  resizeDock,
   setDockZoom,
   setSeparateWindows,
   startDockDrag,
+  startDockResize,
   stopDockDrag,
+  stopDockResize,
+  toggleDockFull,
   updateDock,
 } from "./dock";
 import { expandPlaylistPaths } from "./cue";
@@ -107,13 +112,35 @@ export function registerIpcHandlers(): void {
 
   ipcMain.on("dock-zoom", (_event, factor: number) => setDockZoom(Number(factor)));
 
+  const dockTarget = (sender: WebContents, name: unknown) => {
+    const own = dockNameOf(sender);
+    return own === "main" && isManagedName(name) ? name : own;
+  };
+
   ipcMain.on("dock-drag-start", (event, name: unknown) => {
-    const sender = dockNameOf(event.sender);
-    const target = sender === "main" && isManagedName(name) ? name : sender;
+    const target = dockTarget(event.sender, name);
     if (target) startDockDrag(target);
   });
 
   ipcMain.on("dock-drag-end", () => stopDockDrag());
+
+  ipcMain.handle("dock-can-position", () => canPositionWindows());
+
+  ipcMain.on("dock-resize-start", (event, name: unknown, edge: unknown, width: unknown, height: unknown) => {
+    const target = dockTarget(event.sender, name);
+    const min = { width: Number(width), height: Number(height) };
+    if (!target || (edge !== "left" && edge !== "right") || !(min.width > 0) || !(min.height > 0)) return;
+    startDockResize(target, edge, min);
+  });
+
+  ipcMain.on("dock-resize", (_event, dx: unknown, dy: unknown) => resizeDock({ x: Number(dx) || 0, y: Number(dy) || 0 }));
+
+  ipcMain.on("dock-resize-end", () => stopDockResize());
+
+  ipcMain.on("dock-toggle-full", (event, name: unknown) => {
+    const target = dockTarget(event.sender, name);
+    if (target) toggleDockFull(target);
+  });
 
   ipcMain.on("window-minimize", (event) => minimizeSenderWindow(event.sender));
 

@@ -229,6 +229,49 @@ body.is-detached .chords-section__inner {
   padding-bottom: calc(var(--player-padding) - 6px);
 }
 
+.player--detached:has(> .chords-section) {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.player--detached > .chords-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.player--detached :is(.chords-section__inner, .chords) {
+  flex: 1;
+  min-height: 0;
+}
+
+.player--detached .chords__lcd {
+  flex: 1;
+  height: auto;
+  min-height: var(--chords-lcd-height);
+}
+
+.chords__popout-in,
+body.is-floating .chords__popout-out,
+body.is-separated .chords__popout,
+body.is-detached:not(.is-floating) .chords__popout {
+  display: none;
+}
+
+body.is-floating .chords__popout-in {
+  display: block;
+}
+
+body.cannot-position.is-floating .chords-section__header {
+  -webkit-app-region: drag;
+}
+
+body.cannot-position.is-floating .chords-section__header :is(button, select, label) {
+  -webkit-app-region: no-drag;
+}
+
 body.is-detached :is(.eq, .chords-section, .playlist, .radio) {
   transition: none;
 }
@@ -834,6 +877,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header .btn--icon,
+.chords-section__header .btn--icon,
 .playlist__header .btn--icon,
 .radio__header .btn--icon,
 .radio__subheader .btn--icon,
@@ -845,6 +889,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header .btn--icon:hover:not(:disabled),
+.chords-section__header .btn--icon:hover,
 .playlist__header .btn--icon:hover,
 .radio__header .btn--icon:hover,
 .radio__subheader .btn--icon:hover,
@@ -853,6 +898,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header .btn--icon svg,
+.chords-section__header .btn--icon svg,
 .playlist__header .btn--icon svg,
 .radio__header .btn--icon svg,
 .radio__subheader .btn--icon svg,
@@ -958,6 +1004,10 @@ input[type="range"]:disabled {
   font-size: 10px;
 }
 
+.chords__popout {
+  margin-left: 6px;
+}
+
 .chords__capo {
   display: flex;
   align-items: center;
@@ -992,6 +1042,8 @@ input[type="range"]:disabled {
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
   font-family: var(--chords-font);
   color: var(--lcd-fg);
+  container-type: size;
+  --px: min(calc(100cqh / 109), calc(100cqw / 426));
 }
 
 .chords__message {
@@ -999,8 +1051,8 @@ input[type="range"]:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
+  gap: calc(8 * var(--px));
+  font-size: calc(11 * var(--px));
   color: var(--lcd-fg-dim);
   text-align: center;
 }
@@ -1033,11 +1085,10 @@ input[type="range"]:disabled {
 
 .chords__result {
   flex: 1;
-  align-self: stretch;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 5px 0;
+  padding: calc(5 * var(--px)) 0;
 }
 
 .chords__chord {
@@ -1045,7 +1096,7 @@ input[type="range"]:disabled {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: calc(2 * var(--px));
 }
 
 .chords__chord--side {
@@ -1054,7 +1105,7 @@ input[type="range"]:disabled {
 }
 
 .chords__name {
-  font-size: 24px;
+  font-size: calc(24 * var(--px));
   line-height: 1;
   font-weight: 700;
   text-align: center;
@@ -1062,7 +1113,7 @@ input[type="range"]:disabled {
 }
 
 .chords__chord--side .chords__name {
-  font-size: 15px;
+  font-size: calc(15 * var(--px));
   color: var(--lcd-fg-dim);
   text-shadow: none;
 }
@@ -1072,14 +1123,14 @@ input[type="range"]:disabled {
 }
 
 .chords__diagram {
-  width: 66px;
-  height: 73px;
+  width: calc(66 * var(--px));
+  height: calc(73 * var(--px));
   flex: none;
 }
 
 .chords__chord--side .chords__diagram {
-  width: 49px;
-  height: 54px;
+  width: calc(49 * var(--px));
+  height: calc(54 * var(--px));
 }
 
 .chords__line {
@@ -1115,9 +1166,9 @@ input[type="range"]:disabled {
 
 .chords__meta {
   position: absolute;
-  top: 6px;
-  right: 10px;
-  font-size: 10px;
+  top: calc(6 * var(--px));
+  right: calc(10 * var(--px));
+  font-size: calc(10 * var(--px));
   color: var(--lcd-fg-dim);
   text-align: right;
 }
@@ -2390,6 +2441,32 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
 .window-grip--player {
   --grip-right: calc(var(--player-padding) / 2 - 1.5px);
   --grip-bottom: 8.5px;
+  display: none;
+}
+
+.window-grip--chords {
+  --grip-right: calc(var(--player-padding) / 2 - 1.5px);
+  --grip-bottom: 3px;
+  display: none;
+}
+
+.window-grip--chords-left {
+  right: auto;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.window-grip--chords-left svg {
+  right: auto;
+  left: calc(var(--grip-right) - 1px);
+  transform: scaleX(-1);
+}
+
+body.is-detached .window-grip--chords {
+  display: block;
+}
+
+body.cannot-position .window-grip--chords-left {
   display: none;
 }
 

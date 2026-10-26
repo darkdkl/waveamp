@@ -179,6 +179,7 @@ export interface AppConfig {
     chordsOpen: boolean;
     chordsCapo: number;
     chordsSimplify: boolean;
+    chordsWindowSize: { width: number; height: number } | null;
   };
 }
 

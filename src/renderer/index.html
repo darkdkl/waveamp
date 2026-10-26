@@ -135,6 +135,10 @@
             <label class="chords__capo"><span data-i18n="chordsCapo">Капо</span>
               <select class="chords__select" id="chordsCapoSelect"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select>
             </label>
+            <button class="btn btn--icon chords__popout" id="chordsPopoutBtn" type="button" data-i18n-title="chordsPopOut" data-i18n-aria="chordsPopOut" title="Отделить окно" aria-label="Отделить окно">
+              <svg class="chords__popout-out" viewBox="0 0 24 24"><path d="M4 5h9v2H6v11h11v-7h2v9H4V5zm11-1h5v5h-2V7.4l-6.3 6.3-1.4-1.4L16.6 6H15V4z"/></svg>
+              <svg class="chords__popout-in" viewBox="0 0 24 24"><path d="M4 5h9v2H6v11h11v-7h2v9H4V5zm15.7-.3l1.4 1.4-5.1 5.1H18v2h-5V8.2h2V9.8l4.7-5.1z"/></svg>
+            </button>
           </div>
         </div>
         <div class="chords" id="chords">
@@ -152,6 +156,8 @@
           </div>
         </div>
       </div>
+      <div class="window-grip window-grip--chords window-grip--chords-left" id="chordsGripLeft" data-i18n-title="chordsResize" title="Потяните, чтобы изменить размер окна"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="2" cy="12" r="1.75"/><circle cx="7" cy="12" r="1.75"/><circle cx="7" cy="7" r="1.75"/><circle cx="12" cy="7" r="1.75"/><circle cx="12" cy="2" r="1.75"/></svg></div>
+      <div class="window-grip window-grip--chords" id="chordsGripRight" data-i18n-title="chordsResize" title="Потяните, чтобы изменить размер окна"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="2" cy="12" r="1.75"/><circle cx="7" cy="12" r="1.75"/><circle cx="7" cy="7" r="1.75"/><circle cx="12" cy="7" r="1.75"/><circle cx="12" cy="2" r="1.75"/></svg></div>
     </section>
 
     <section class="playlist" id="playlist">

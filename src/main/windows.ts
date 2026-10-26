@@ -181,6 +181,7 @@ export function createWindow(): Promise<void> {
   trackMainWindow(win, {
     layout: (layout) => sendToMainWindow("dock-layout", layout),
     close: (name) => sendToMainWindow("dock-close", name),
+    size: (name, size) => sendToMainWindow("dock-size", name, size),
   });
   win.on("enter-full-screen", () => sendToMainWindow("full-screen-changed", true));
   win.on("leave-full-screen", () => {

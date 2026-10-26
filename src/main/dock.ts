@@ -1,5 +1,5 @@
 import { app, screen, type BrowserWindow, type BrowserWindowConstructorOptions, type WebContents } from "electron";
-import { attachedGroup, clampToAreas, offsetFrom, reflowAfterResize, snapDelta, type Point, type Rect } from "../shared/dock";
+import { areaOf, attachedGroup, clampToAreas, offsetFrom, reflowAfterResize, resizedRect, snapDelta, type Point, type Rect, type ResizeEdge, type Size } from "../shared/dock";
 import type { DockLayout, DockName, DockUpdate, DockWindowState } from "../shared/types";
 
 type Managed = "main" | DockName | "settings";
@@ -8,6 +8,15 @@ interface Entry {
   win: BrowserWindow;
   last: Rect;
   wanted: boolean;
+  full: Rect | null;
+}
+
+interface Resize {
+  name: DockName;
+  edge: ResizeEdge;
+  start: Rect;
+  min: Size;
+  area: Rect;
 }
 
 interface Drag {
@@ -33,12 +42,14 @@ let layout: DockLayout = {};
 let sizes: Partial<DockUpdate> = {};
 let zoomFactor = 1;
 let drag: Drag | null = null;
+let resizing: Resize | null = null;
 let closing = false;
-let handlers: DockHandlers = { layout: () => {}, close: () => {} };
+let handlers: DockHandlers = { layout: () => {}, close: () => {}, size: () => {} };
 
 export interface DockHandlers {
   layout: (layout: DockLayout) => void;
   close: (name: DockName) => void;
+  size: (name: DockName, size: Size) => void;
 }
 
 export function preferX11ForDocking(separateWindows: boolean): void {
@@ -48,7 +59,7 @@ export function preferX11ForDocking(separateWindows: boolean): void {
   }
 }
 
-function canPositionWindows(): boolean {
+export function canPositionWindows(): boolean {
   return !startedOnWayland || app.commandLine.getSwitchValue("ozone-platform") === "x11";
 }
 
@@ -77,7 +88,7 @@ function workAreas(): Rect[] {
 function visibleRects(): Partial<Record<Managed, Rect>> {
   const rects: Partial<Record<Managed, Rect>> = {};
   for (const [name, entry] of entries) {
-    if (alive(entry) && (name === "main" || entry.win.isVisible())) rects[name] = entry.last;
+    if (alive(entry) && !entry.full && (name === "main" || entry.win.isVisible())) rects[name] = entry.last;
   }
   return rects;
 }
@@ -99,7 +110,7 @@ function recordLayout(): void {
   if (!enabled || !alive(main)) return;
   for (const name of FOLLOWERS) {
     const entry = entries.get(name);
-    if (alive(entry) && entry.win.isVisible()) layout[name] = offsetFrom(main.last, entry.last);
+    if (alive(entry) && entry.win.isVisible()) layout[name] = offsetFrom(main.last, entry.full ?? entry.last);
   }
   handlers.layout({ ...layout });
 }
@@ -129,7 +140,9 @@ function onBoundsChanged(name: Managed): void {
   const previous = entry.last;
   if (sameRect(current, previous)) return;
   entry.last = current;
-  if (!enabled || drag || suspended || !entry.win.isVisible()) return;
+  const resized = current.width !== previous.width || current.height !== previous.height;
+  if (name === "chords" && resized && !entry.full) handlers.size(name, { width: current.width, height: current.height });
+  if (!enabled || drag || suspended || entry.full || !entry.win.isVisible()) return;
   if (current.width === previous.width && current.height === previous.height) {
     if (name === "main") {
       const group = attachedGroup({ ...visibleRects(), main: previous }, "main");
@@ -142,7 +155,7 @@ function onBoundsChanged(name: Managed): void {
 }
 
 function track(name: Managed, win: BrowserWindow, wanted: boolean): Entry {
-  const entry: Entry = { win, last: boundsOf(win), wanted };
+  const entry: Entry = { win, last: boundsOf(win), wanted, full: null };
   entries.set(name, entry);
   win.on("move", () => onBoundsChanged(name));
   win.on("resize", () => onBoundsChanged(name));
@@ -202,15 +215,15 @@ export function trackMainWindow(win: BrowserWindow, dockHandlers: DockHandlers):
 
 function dockWindowOptions(frameName: string, parent: BrowserWindow): BrowserWindowConstructorOptions | null {
   const name = dockName(frameName);
-  if (!enabled || !name) return null;
+  if (!name || (!enabled && name !== "chords")) return null;
   const size = sizes[name];
   return {
     parent,
     show: false,
     frame: false,
-    resizable: false,
+    resizable: name === "chords",
     minimizable: false,
-    maximizable: false,
+    maximizable: name === "chords",
     fullscreenable: false,
     skipTaskbar: true,
     useContentSize: true,
@@ -232,7 +245,7 @@ function registerDockWindow(frameName: string, win: BrowserWindow): void {
   if (alive(previous) && previous.win !== win) previous.win.destroy();
   track(name, win, false);
   win.on("close", (event) => {
-    if (!enabled || closing) return;
+    if (closing || (!enabled && name !== "chords")) return;
     event.preventDefault();
     handlers.close(name);
   });
@@ -260,6 +273,7 @@ function defaultRect(name: Managed, width: number, height: number): Rect {
 
 function placement(name: Managed, width: number, height: number): Rect {
   const main = entries.get("main") as Entry;
+  if (!enabled) return clampToAreas({ x: main.last.x + main.last.width, y: main.last.y, width, height }, workAreas());
   const saved = name === "main" ? undefined : layout[name];
   const rect = saved ? { x: main.last.x + saved.x, y: main.last.y + saved.y, width, height } : defaultRect(name, width, height);
   return clampToAreas(rect, workAreas());
@@ -271,6 +285,12 @@ function applyState(name: DockName, state: DockWindowState): void {
   entry.wanted = state.visible;
   const width = Math.round(state.width);
   const height = Math.round(state.height);
+  if (entry.full) {
+    if (state.visible) return;
+    const back = entry.full;
+    entry.full = null;
+    applyBounds(name, back);
+  }
   if (!entry.win.isVisible()) {
     entry.last = { ...entry.last, width, height };
     if (!state.visible || suspended) return;
@@ -286,7 +306,7 @@ function applyState(name: DockName, state: DockWindowState): void {
   if (width === entry.last.width && height === entry.last.height) return;
   const previous = entry.last;
   const next = { ...previous, width, height };
-  resizeInGroup(name, previous, next);
+  if (enabled) resizeInGroup(name, previous, next);
   applyBounds(name, next);
   recordLayout();
 }
@@ -326,7 +346,7 @@ export function updateDock(update: Partial<DockUpdate> | null | undefined): void
     const state = update?.[name];
     if (!validState(state)) continue;
     sizes[name] = state;
-    if (enabled) applyState(name, state);
+    if (enabled || name === "chords") applyState(name, state);
   }
 }
 
@@ -363,7 +383,7 @@ function dragTick(): void {
 export function startDockDrag(name: Managed): void {
   stopDockDrag();
   const entry = entries.get(name);
-  if (!enabled || !alive(entry) || !entry.win.isVisible()) return;
+  if (!(enabled || name === "chords") || !alive(entry) || !entry.win.isVisible() || entry.full) return;
   const rects = visibleRects();
   const moving = name === "main" ? attachedGroup(rects, "main") : [name];
   const origin = new Map<Managed, Rect>(moving.map((member) => [member, rects[member] as Rect]));
@@ -377,4 +397,51 @@ export function stopDockDrag(): void {
   clearInterval(drag.timer);
   drag = null;
   recordLayout();
+}
+
+export function startDockResize(name: Managed, edge: ResizeEdge, min: Size): void {
+  stopDockResize();
+  const entry = entries.get(name);
+  if (name !== "chords" || !alive(entry) || !entry.win.isVisible() || entry.full) return;
+  const area = areaOf(entry.last, workAreas()) ?? entry.last;
+  resizing = { name, edge, start: entry.last, min, area };
+}
+
+export function resizeDock(delta: Point): void {
+  if (!resizing) return;
+  const { name } = resizing;
+  const entry = entries.get(name);
+  if (!alive(entry)) {
+    resizing = null;
+    return;
+  }
+  const next = resizedRect(resizing.start, resizing.edge, delta, resizing.min, resizing.area);
+  const previous = entry.last;
+  if (sameRect(previous, next)) return;
+  if (enabled) resizeInGroup(name, previous, next);
+  applyBounds(name, next);
+  handlers.size(name, { width: next.width, height: next.height });
+}
+
+export function stopDockResize(): void {
+  if (!resizing) return;
+  resizing = null;
+  recordLayout();
+}
+
+export function toggleDockFull(name: Managed): void {
+  const entry = entries.get(name);
+  if (name !== "chords" || !alive(entry) || !entry.win.isVisible()) return;
+  stopDockDrag();
+  stopDockResize();
+  if (entry.full) {
+    const back = entry.full;
+    entry.full = null;
+    applyBounds(name, back);
+    return;
+  }
+  const area = areaOf(entry.last, workAreas());
+  if (!area) return;
+  entry.full = entry.last;
+  applyBounds(name, area);
 }

@@ -52,6 +52,14 @@ const api = {
   dockDragEnd: (): void => ipcRenderer.send("dock-drag-end"),
   onDockLayout: (callback: (layout: DockLayout) => void) => ipcRenderer.on("dock-layout", (_event, layout) => callback(layout)),
   onDockClose: (callback: (name: DockName) => void) => ipcRenderer.on("dock-close", (_event, name) => callback(name)),
+  onDockSize: (callback: (name: DockName, size: { width: number; height: number }) => void) =>
+    ipcRenderer.on("dock-size", (_event, name, size) => callback(name, size)),
+  dockCanPosition: (): Promise<boolean> => ipcRenderer.invoke("dock-can-position"),
+  dockResizeStart: (name: DockName, edge: "left" | "right", width: number, height: number): void =>
+    ipcRenderer.send("dock-resize-start", name, edge, width, height),
+  dockResize: (dx: number, dy: number): void => ipcRenderer.send("dock-resize", dx, dy),
+  dockResizeEnd: (): void => ipcRenderer.send("dock-resize-end"),
+  dockToggleFull: (name: DockName): void => ipcRenderer.send("dock-toggle-full", name),
   resizeWindow: (height: number, width: number): void => ipcRenderer.send("window-resize", height, width),
   resizeWindowInstant: (height: number, width: number): void => ipcRenderer.send("window-resize-instant", height, width),
   setZoomFactor: (factor: number): void => webFrame.setZoomFactor(factor),

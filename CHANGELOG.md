@@ -4,6 +4,19 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.32.0] — 2026-10-26
+
+### Added
+- The chords window can be stretched by the grips in its bottom corners, up
+  to the whole screen; the chords and fingerings grow with it so they can be
+  read from across the room. A double click on its header fills the screen
+  and brings it back
+- Without separate windows, the button in the chords header pops them out
+  into a window of their own beside the player and brings them back. The
+  popped-out window is not remembered: after a restart the chords are back
+  under the equalizer. With separate windows the chords window keeps its
+  place and size
+
 ## [1.31.0] — 2026-10-26
 
 ### Changed

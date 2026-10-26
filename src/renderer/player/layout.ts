@@ -47,7 +47,7 @@ export function syncElectronWindowSize(instant = false): void {
   if (!state.separateActive) {
     if (state.playlistOpen) target += playlist.scrollHeight;
     if (state.eqOpen) target += eq.scrollHeight;
-    if (state.chordsOpen) target += chordsSection.scrollHeight;
+    if (state.chordsOpen && chordsSection.ownerDocument === document) target += chordsSection.scrollHeight;
     if (state.radioOpen) target += radio.scrollHeight;
   }
   target *= state.uiScale;
@@ -57,12 +57,12 @@ export function syncElectronWindowSize(instant = false): void {
   } else {
     window.electronAPI.resizeWindow(target, targetWidth);
   }
-  if (state.separateActive) syncDockWindows(mainHeight, targetWidth, state.uiScale);
+  if (state.separateActive || state.chordsFloating) syncDockWindows(mainHeight, targetWidth, state.uiScale);
 }
 
 function sectionMaxHeight(section: HTMLElement, open: boolean): string {
   if (!open) return "0px";
-  return state.separateActive ? "none" : section.scrollHeight + "px";
+  return section.ownerDocument !== document ? "none" : section.scrollHeight + "px";
 }
 
 export function setPlaylistOpen(open: boolean): void {

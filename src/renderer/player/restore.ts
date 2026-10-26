@@ -195,6 +195,8 @@ export async function restoreConfig(): Promise<void> {
   if (config.ui?.vizMode) setVizMode(config.ui.vizMode);
   if (typeof config.ui?.chordsCapo === "number") setChordsCapo(config.ui.chordsCapo);
   if (typeof config.ui?.chordsSimplify === "boolean") setChordsSimplify(config.ui.chordsSimplify);
+  const chordsSize = config.ui?.chordsWindowSize;
+  if (chordsSize && chordsSize.width > 0 && chordsSize.height > 0) state.chordsDockedSize = { width: chordsSize.width, height: chordsSize.height };
   if (config.ui?.chordsOpen) setChordsOpen(true);
   if (state.separateWindows) await applySeparateWindows();
   if (config.ui?.eqOpen) setEqOpen(true);

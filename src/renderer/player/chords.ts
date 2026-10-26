@@ -10,6 +10,7 @@ import {
   chordsMessageText,
   chordsNext,
   chordsNow,
+  chordsPopoutBtn,
   chordsPrev,
   chordsResult,
   chordsSection,
@@ -17,7 +18,8 @@ import {
 } from "./dom";
 import { state, type Track } from "./state";
 import { persistConfig } from "./config";
-import { showSection } from "./layout";
+import { showSection, syncElectronWindowSize } from "./layout";
+import { popOutChords, returnChords } from "./separateWindows";
 import { trackPosition } from "./trackTime";
 import { renderSwitch } from "../switchControl";
 import { chordDiagramSvg } from "./chordDiagram";
@@ -217,12 +219,26 @@ async function analyzeCurrent(): Promise<void> {
   scheduleTick();
 }
 
+function refreshPopoutButton(): void {
+  const key = state.chordsFloating ? "chordsPopIn" : "chordsPopOut";
+  chordsPopoutBtn.dataset.i18nTitle = key;
+  chordsPopoutBtn.dataset.i18nAria = key;
+  chordsPopoutBtn.title = i18n.t(key);
+  chordsPopoutBtn.setAttribute("aria-label", i18n.t(key));
+}
+
+function afterWindowChange(): void {
+  refreshPopoutButton();
+  syncElectronWindowSize();
+}
+
 export function setChordsOpen(open: boolean): void {
   state.chordsOpen = open;
   chordsBtn.classList.toggle("is-active", open);
   chordsBtn.setAttribute("aria-pressed", String(open));
   refreshChords();
   showSection(chordsSection, open);
+  if (!open && state.chordsFloating) void returnChords().then(afterWindowChange);
   persistConfig();
 }
 
@@ -244,8 +260,9 @@ export function initChords(): void {
   chordsBtn.addEventListener("click", () => setChordsOpen(!state.chordsOpen));
   chordsCloseBtn.addEventListener("click", () => setChordsOpen(false));
   window.electronAPI?.onDockClose?.((name) => {
-    if (name === "chords") setChordsOpen(false);
+    if (name === "chords" && (state.chordsFloating || state.separateActive)) setChordsOpen(false);
   });
+  chordsPopoutBtn.addEventListener("click", () => void (state.chordsFloating ? returnChords() : popOutChords()).then(afterWindowChange));
   chordsAnalyzeBtn.addEventListener("click", () => void analyzeCurrent());
   chordsSimplifyBtn.addEventListener("click", () => setChordsSimplify(!state.chordsSimplify));
   chordsCapoSelect.addEventListener("change", () => setChordsCapo(Number(chordsCapoSelect.value)));

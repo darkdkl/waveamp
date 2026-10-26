@@ -74,6 +74,7 @@ export function persistConfig(): void {
         chordsOpen: state.chordsOpen,
         chordsCapo: state.chordsCapo,
         chordsSimplify: state.chordsSimplify,
+        chordsWindowSize: state.chordsDockedSize,
       },
     });
   }, 300);
