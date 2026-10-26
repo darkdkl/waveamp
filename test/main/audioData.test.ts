@@ -20,9 +20,14 @@ interface WavOptions {
   float?: boolean;
   extensible?: boolean;
   formatCode?: number;
+  unknownSize?: boolean;
 }
 
-function wav(name: string, seconds: number, { rate = 1000, signal = () => 0, channels = 1, bits = 8, float = false, extensible = false, formatCode }: WavOptions = {}): string {
+function wav(
+  name: string,
+  seconds: number,
+  { rate = 1000, signal = () => 0, channels = 1, bits = 8, float = false, extensible = false, formatCode, unknownSize = false }: WavOptions = {}
+): string {
   const frames = Math.round(seconds * rate);
   const bytes = bits / 8;
   const length = frames * channels * bytes;
@@ -52,7 +57,7 @@ function wav(name: string, seconds: number, { rate = 1000, signal = () => 0, cha
   const chunk = (id: string, body: Buffer) => {
     const head = Buffer.alloc(8);
     head.write(id, 0);
-    head.writeUInt32LE(body.length, 4);
+    head.writeUInt32LE(unknownSize && id === "data" ? 0 : body.length, 4);
     return Buffer.concat([head, body]);
   };
   const body = Buffer.concat([Buffer.from("WAVE"), chunk("fmt ", fmt), chunk("data", data)]);
@@ -228,6 +233,29 @@ describe("readAudioData", () => {
       expect(samples).toHaveLength(ANALYSIS_RATE);
       expect(rms(samples, 0.1, 0.9)).toBeCloseTo(0.5 / Math.SQRT2, 2);
     }
+  });
+
+  it("reads a WAV whose header never got its data size", async () => {
+    const samples = samplesOf(await readAudioData(wav("unfinished.wav", 3, { rate: 44100, signal: silenceThenTone, bits: 16, unknownSize: true }), false));
+    expect(samples).toHaveLength(3 * ANALYSIS_RATE);
+    expect(rms(samples, 2.1, 2.9)).toBeCloseTo(0.5 / Math.SQRT2, 2);
+    expect(await readAudioData(wav("unfinished-long.wav", 21 * 60, { unknownSize: true }), false)).toEqual({ ok: false, error: "tooLong" });
+  });
+
+  it("fails fast when a CUE track starts past the end of a FLAC of unknown length", async () => {
+    const file = flac("short-unknown.flac", 3, { unknownLength: true });
+    expect(await readAudioData(file, false, { start: 60, end: 70 })).toEqual({ ok: false, error: "failed" });
+  });
+
+  it("only asks the FLAC and WAV reader about FLAC and WAV files", async () => {
+    const asked: string[] = [];
+    const file = path.join(dir, "song.mp3");
+    fs.writeFileSync(file, Buffer.alloc(64));
+    await readAudioData(file, false, { start: 0, end: null }, async (filePath) => {
+      asked.push(filePath);
+      return null;
+    }).catch(() => null);
+    expect(asked).toEqual([]);
   });
 
   it("hands files it cannot read to the built-in decoder", async () => {

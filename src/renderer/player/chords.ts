@@ -52,6 +52,7 @@ let shownIndex = -1;
 let frame = 0;
 let progress: number | null = null;
 let decodedFile: { path: string; samples: Float32Array } | null = null;
+let request = 0;
 
 function localTrack(): Track | null {
   if (state.playbackMode !== "local") return null;
@@ -151,7 +152,10 @@ export function refreshChords(): void {
   const track = localTrack();
   const key = track ? trackKey(track) : null;
   if (key !== currentKey) {
-    if (status === "analyzing") window.electronAPI?.cancelAudioData?.();
+    if (status === "analyzing") {
+      request++;
+      window.electronAPI?.cancelAudioData?.();
+    }
     currentKey = key;
     analysis = key ? (cache.get(key) ?? null) : null;
     status = analysis ? "done" : "idle";
@@ -193,6 +197,8 @@ async function analyzeCurrent(): Promise<void> {
   const track = localTrack();
   const key = track ? trackKey(track) : null;
   if (!track?.path || !key || status === "analyzing" || !window.electronAPI?.readAudioData) return;
+  const id = ++request;
+  const stale = () => id !== request || currentKey !== key;
   status = "analyzing";
   progress = null;
   render();
@@ -204,11 +210,11 @@ async function analyzeCurrent(): Promise<void> {
       const analysed = await analyzeChordsInSteps(
         samples,
         (fraction) => {
-          if (currentKey !== key || status !== "analyzing") return;
+          if (stale()) return;
           progress = fraction;
           render();
         },
-        () => new Promise((resolve) => setTimeout(resolve, 0))
+        () => new Promise((resolve, reject) => setTimeout(() => (stale() ? reject(new Error("cancelled")) : resolve()), 0))
       );
       cache.set(key, analysed);
       result = "done";
@@ -216,7 +222,7 @@ async function analyzeCurrent(): Promise<void> {
   } catch {
     result = "failed";
   }
-  if (currentKey !== key) return;
+  if (stale()) return;
   status = result;
   progress = null;
   analysis = cache.get(key) ?? null;

@@ -3,9 +3,11 @@ import type { FileHandle } from "node:fs/promises";
 import type { CodecFrame } from "codec-parser";
 import { ANALYSIS_SAMPLE_RATE, MAX_ANALYSIS_SECONDS } from "../shared/chords";
 import { Resampler, concatSamples, mixToMono } from "../shared/resample";
-import type { AudioSegment } from "../shared/types";
+import type { AudioDataError, AudioDataResult, AudioSegment } from "../shared/types";
 
-export type AnalysisSamples = { ok: true; samples: Float32Array } | { ok: false; error: "tooLong" | "failed" };
+export type AnalysisSamples = Extract<AudioDataResult, { samples: Float32Array }> | { ok: false; error: Exclude<AudioDataError, "tooLarge"> };
+
+export const ANALYSIS_READABLE_RE = /\.(flac|wav)$/i;
 
 export type SampleReader = (filePath: string, segment: AudioSegment) => Promise<AnalysisSamples | null>;
 
@@ -101,11 +103,14 @@ async function readFlac(handle: FileHandle, segment: AudioSegment): Promise<Anal
     const parser = new CodecParser<CodecFrame>("audio/flac", { enableLogging: false });
     const output = new AnalysisOutput(rate);
     let finished = false;
+    let parsed = 0;
+    let used = 0;
 
     const decode = async (frames: Iterator<CodecFrame>): Promise<void> => {
       const selected: Uint8Array[] = [];
       let first = -1;
       for (const frame of frames as IterableIterator<CodecFrame>) {
+        parsed++;
         const header = frame.header as unknown as Record<string, number | undefined>;
         const at = header[sampleNumber] ?? (header[frameNumber] ?? 0) * blockSize;
         if (at >= to) {
@@ -117,6 +122,7 @@ async function readFlac(handle: FileHandle, segment: AudioSegment): Promise<Anal
         selected.push(frame.data);
       }
       if (!selected.length) return;
+      used += selected.length;
       const decoded = await decoder.decodeFrames(selected);
       const begin = Math.max(0, from - first);
       const end = Math.min(decoded.samplesDecoded, to - first);
@@ -133,7 +139,8 @@ async function readFlac(handle: FileHandle, segment: AudioSegment): Promise<Anal
     if (!finished && !output.tooLong) await decode(parser.flush());
     if (output.tooLong) return TOO_LONG;
     const samples = output.finish();
-    return samples.length ? { ok: true, samples } : null;
+    if (samples.length) return { ok: true, samples };
+    return parsed > 0 && used === 0 ? FAILED : null;
   } finally {
     decoder.free();
   }
@@ -165,7 +172,7 @@ async function wavFormat(handle: FileHandle, size: number): Promise<WavFormat | 
       format = { channels, sampleRate, bytesPerSample: bits / 8, float };
     } else if (id === "data") {
       if (!format) return null;
-      const dataBytes = length === 0xffffffff ? size - body : Math.min(length, size - body);
+      const dataBytes = length === 0 || length === 0xffffffff ? size - body : Math.min(length, size - body);
       return { ...format, dataStart: body, dataBytes };
     }
     offset = body + length + (length & 1);
@@ -207,14 +214,15 @@ async function readWav(handle: FileHandle, format: WavFormat, segment: AudioSegm
       mono[i] = sum / format.channels;
     }
     output.push(mono);
+    if (output.tooLong) return TOO_LONG;
   }
   const samples = output.finish();
   return samples.length ? { ok: true, samples } : FAILED;
 }
 
 export const readAnalysisSamples: SampleReader = async (filePath, segment) => {
+  if (!ANALYSIS_READABLE_RE.test(filePath)) return null;
   const isFlac = /\.flac$/i.test(filePath);
-  if (!isFlac && !/\.wav$/i.test(filePath)) return null;
   const handle = await fs.open(filePath, "r");
   try {
     if (isFlac) return await readFlac(handle, segment);

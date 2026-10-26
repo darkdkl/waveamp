@@ -39,7 +39,8 @@ import { applyGlobalHotkeys } from "./shortcuts";
 import { readAudioFormat, readTrackTags } from "./tags";
 import { systemNaturalScroll } from "./scrollDirection";
 import { audioSegment, readAudioData } from "./audioData";
-import { cancelAnalysisRead, readSamplesInWorker } from "./analysisReader";
+import { createWorkerReader } from "./analysisReader";
+import createAnalysisWorker from "./analysisWorker?nodeWorker";
 import {
   canPositionWindows,
   dockNameOf,
@@ -72,6 +73,11 @@ import type {
   SettingsState,
   StationSearchParams,
 } from "../shared/types";
+
+const analysisReader = createWorkerReader(
+  () => createAnalysisWorker({}),
+  (message) => writeLog("warn", "chords", message)
+);
 
 export function registerIpcHandlers(): void {
   ipcMain.on("settings-window-scale", (_event, percent: number) => setSettingsWindowScale(percent));
@@ -188,13 +194,13 @@ export function registerIpcHandlers(): void {
   ipcMain.handle("read-track-cover", (_event, filePath: string) => readCoverArt(filePath));
 
   ipcMain.handle("read-audio-data", (_event, filePath: string, alac: boolean, start: unknown, end: unknown) =>
-    readAudioData(String(filePath), alac === true, audioSegment(start, end), readSamplesInWorker).catch((err) => {
+    readAudioData(String(filePath), alac === true, audioSegment(start, end), analysisReader.read).catch((err) => {
       writeLog("warn", "chords", `Could not read "${filePath}" for chord analysis: ${err.message}`);
       return { ok: false, error: "failed" } as const;
     })
   );
 
-  ipcMain.on("cancel-audio-data", () => cancelAnalysisRead());
+  ipcMain.on("cancel-audio-data", () => analysisReader.cancel());
 
   ipcMain.handle("radio-search", (_event, params: StationSearchParams) => searchStations(params));
   ipcMain.handle("radio-countries", () => fetchCountries());

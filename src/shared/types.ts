@@ -12,10 +12,9 @@ export interface AudioSegment {
   end: number | null;
 }
 
-export type AudioDataResult =
-  | { ok: true; data: Uint8Array }
-  | { ok: true; samples: Float32Array }
-  | { ok: false; error: "tooLong" | "tooLarge" | "failed" };
+export type AudioDataError = "tooLong" | "tooLarge" | "failed";
+
+export type AudioDataResult = { ok: true; data: Uint8Array } | { ok: true; samples: Float32Array } | { ok: false; error: AudioDataError };
 
 export type DockName = "eq" | "chords" | "panel";
 

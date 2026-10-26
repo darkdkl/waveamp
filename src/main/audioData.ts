@@ -3,7 +3,7 @@ import { openAlacFile, wavLayout, wavStream } from "./alac/wavStream";
 import { loadMusicMetadata } from "./tags";
 import { PLAYABLE_EXT_RE } from "../shared/cue";
 import { MAX_ANALYSIS_SECONDS } from "../shared/chords";
-import { readAnalysisSamples, type SampleReader } from "./analysisAudio";
+import { ANALYSIS_READABLE_RE, readAnalysisSamples, type SampleReader } from "./analysisAudio";
 import type { AudioDataResult, AudioSegment } from "../shared/types";
 
 const MAX_BYTES = 400 * 1024 * 1024;
@@ -64,7 +64,7 @@ export async function readAudioData(
   const stat = await fs.stat(filePath);
   if (!stat.isFile()) return FAILED;
   if (segment.end != null && segment.end - segment.start > MAX_ANALYSIS_SECONDS) return TOO_LONG;
-  if (!alac) {
+  if (!alac && ANALYSIS_READABLE_RE.test(filePath)) {
     const samples = await readSamples(filePath, segment);
     if (samples) return samples;
   }
