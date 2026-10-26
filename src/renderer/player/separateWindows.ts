@@ -109,17 +109,19 @@ async function separate(): Promise<void> {
   if (!api?.dockSetSeparate || !(await api.dockSetSeparate(true, state.dockLayout))) return;
   api.dockZoom?.(state.uiScale);
   const eqWindow = await openWindow("eq", [eq]);
-  const panelWindow = await openWindow("panel", [chordsSection, playlist, radio, panelDropzone]);
-  if (!eqWindow || !panelWindow) {
+  const chordsWindow = await openWindow("chords", [chordsSection]);
+  const panelWindow = await openWindow("panel", [playlist, radio, panelDropzone]);
+  if (!eqWindow || !chordsWindow || !panelWindow) {
     await api.dockSetSeparate(false, state.dockLayout);
     player.insertBefore(eq, dropzone);
     player.insertBefore(chordsSection, dropzone);
     player.insertBefore(playlist, dropzone);
     player.insertBefore(radio, dropzone);
-    [eqWindow, panelWindow].forEach((entry) => entry?.win.close());
+    [eqWindow, chordsWindow, panelWindow].forEach((entry) => entry?.win.close());
     return;
   }
   windows.set("eq", eqWindow);
+  windows.set("chords", chordsWindow);
   windows.set("panel", panelWindow);
   attachDropTarget(panelWindow.root);
   panelWindow.win.document.body.append(windowEdgeResize, windowGripResize);
@@ -157,13 +159,15 @@ export function applySeparateWindows(): Promise<void> {
 
 export function syncDockWindows(mainHeight: number, width: number, scale: number): void {
   const eqWindow = windows.get("eq");
+  const chordsWindow = windows.get("chords");
   const panelWindow = windows.get("panel");
-  if (!state.separateActive || !eqWindow || !panelWindow) return;
+  if (!state.separateActive || !eqWindow || !chordsWindow || !panelWindow) return;
   eqWindow.root.style.minHeight = mainHeight + "px";
   const eqHeight = eqWindow.root.offsetHeight;
   window.electronAPI?.dockUpdate?.({
     eq: { visible: state.eqOpen, width, height: eqHeight > mainHeight ? Math.ceil(eqHeight * scale) : Math.round(mainHeight * scale) },
-    panel: { visible: state.playlistOpen || state.radioOpen || state.chordsOpen, width, height: Math.ceil(panelWindow.root.offsetHeight * scale) },
+    chords: { visible: state.chordsOpen, width, height: Math.ceil(chordsWindow.root.offsetHeight * scale) },
+    panel: { visible: state.playlistOpen || state.radioOpen, width, height: Math.ceil(panelWindow.root.offsetHeight * scale) },
   });
 }
 

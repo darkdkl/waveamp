@@ -18,7 +18,8 @@ interface Drag {
   timer: ReturnType<typeof setInterval>;
 }
 
-const DOCK_NAMES: DockName[] = ["eq", "panel"];
+const DOCK_NAMES: DockName[] = ["eq", "chords", "panel"];
+const STACK_ORDER: Managed[] = ["main", ...DOCK_NAMES];
 const FOLLOWERS: (DockName | "settings")[] = [...DOCK_NAMES, "settings"];
 const FRAME_PREFIX = "waveamp-";
 const DRAG_INTERVAL_MS = 16;
@@ -246,7 +247,8 @@ function defaultRect(name: Managed, width: number, height: number): Rect {
   if (name === "settings") return { x: main.last.x + main.last.width, y: main.last.y, width, height };
   const rects = visibleRects();
   const group = attachedGroup(rects, "main");
-  const anchorName: Managed = name === "panel" && group.includes("eq") ? "eq" : "main";
+  const above = STACK_ORDER.slice(0, STACK_ORDER.indexOf(name)).reverse();
+  const anchorName = above.find((other) => other === "main" || group.includes(other)) ?? "main";
   const anchor = rects[anchorName] ?? main.last;
   const moved = reflowAfterResize(rects, anchorName, { ...anchor, height: anchor.height + height }, group);
   for (const other of group) {

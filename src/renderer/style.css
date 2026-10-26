@@ -225,8 +225,8 @@ body.is-detached .eq__inner {
   padding-bottom: 0;
 }
 
-body.is-detached .chords-section.is-open ~ :is(.playlist, .radio) :is(.playlist__inner, .radio__inner) {
-  padding-top: var(--section-pad-top);
+body.is-detached .chords-section__inner {
+  padding-bottom: calc(var(--player-padding) - 6px);
 }
 
 body.is-detached :is(.eq, .chords-section, .playlist, .radio) {

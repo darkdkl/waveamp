@@ -10,7 +10,8 @@ version, fixes bump the patch version.
 - Chords are a section of their own between the equalizer and the playlist,
   opened by the guitar button next to the playlist button; they show with
   the radio too. «Simpler» and «Capo» sit in the section header. With
-  separate windows the section goes to the playlist window
+  separate windows it gets a window of its own between the equalizer and
+  the playlist
 - The settings button moved to the title bar, on the side opposite the
   window buttons
 
@@ -31,7 +32,7 @@ version, fixes bump the patch version.
 
 ### Added
 - Chords of the playing song: the guitar button in the playlist header opens
-  a block above the list, and «Find the chords» analyses the track in a few
+  a block above the list, and «Detect chords» analyses the track in a few
   seconds. It shows the current chord with its fingering, the next one and
   the chords ahead, and follows playback and seeking. Capo (0–7) moves the
   shapes, «Simpler» turns sevenths into plain chords. Major, minor and

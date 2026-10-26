@@ -173,8 +173,10 @@ export function initPanelToggles(): void {
 
 function closeDockWindow(name: DockName): void {
   if (name === "eq") setEqOpen(false);
-  else if (state.radioOpen) setRadioOpen(false);
-  else setPlaylistOpen(false);
+  else if (name === "panel") {
+    if (state.radioOpen) setRadioOpen(false);
+    else setPlaylistOpen(false);
+  }
 }
 
 export function initListResize(): void {

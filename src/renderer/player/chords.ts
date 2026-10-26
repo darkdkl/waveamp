@@ -244,7 +244,7 @@ export function initChords(): void {
   chordsBtn.addEventListener("click", () => setChordsOpen(!state.chordsOpen));
   chordsCloseBtn.addEventListener("click", () => setChordsOpen(false));
   window.electronAPI?.onDockClose?.((name) => {
-    if (name === "panel") setChordsOpen(false);
+    if (name === "chords") setChordsOpen(false);
   });
   chordsAnalyzeBtn.addEventListener("click", () => void analyzeCurrent());
   chordsSimplifyBtn.addEventListener("click", () => setChordsSimplify(!state.chordsSimplify));

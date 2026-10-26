@@ -9,7 +9,7 @@ export type WindowControlsSide = "left" | "right";
 
 export type AudioDataResult = { ok: true; data: Uint8Array } | { ok: false; error: "tooLong" | "tooLarge" | "failed" };
 
-export type DockName = "eq" | "panel";
+export type DockName = "eq" | "chords" | "panel";
 
 export type DockLayout = Partial<Record<DockName | "settings", { x: number; y: number }>>;
 
