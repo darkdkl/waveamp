@@ -7,6 +7,8 @@ export type VizResponse = "slow" | "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
 export type WindowControlsSide = "left" | "right";
 
+export type AudioDataResult = { ok: true; data: Uint8Array } | { ok: false; error: "tooLong" | "tooLarge" | "failed" };
+
 export type DockName = "eq" | "panel";
 
 export type DockLayout = Partial<Record<DockName | "settings", { x: number; y: number }>>;
@@ -174,6 +176,9 @@ export interface AppConfig {
     radioOpen: boolean;
     vizMode: VizMode;
     dock: DockLayout;
+    chordsOpen: boolean;
+    chordsCapo: number;
+    chordsSimplify: boolean;
   };
 }
 

@@ -897,6 +897,220 @@ input[type="range"]:disabled {
   padding-top: var(--section-pad-top);
 }
 
+.playlist__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chords[hidden] {
+  display: none;
+}
+
+.chords {
+  --chords-font: "DejaVu Sans Mono", "Courier New", monospace;
+  --chords-lcd-height: 84px;
+  --chords-cell-height: 21px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chords__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-height);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chords__spacer {
+  flex: 1;
+}
+
+.chords__capo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+.chords__select {
+  height: var(--control-height);
+  padding: 3px 4px;
+  background: linear-gradient(180deg, var(--btn-bg), var(--btn-bg-active));
+  border: 1px solid #000;
+  border-radius: var(--control-radius);
+  color: var(--text);
+  font-size: var(--control-font-size);
+  cursor: pointer;
+}
+
+.chords__lcd {
+  height: var(--chords-lcd-height);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--lcd-bg);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  font-family: var(--chords-font);
+  color: var(--lcd-fg);
+}
+
+.chords__message {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--lcd-fg-dim);
+  text-align: center;
+}
+
+.chords__message[hidden],
+.chords__result[hidden],
+.chords__analyze[hidden] {
+  display: none;
+}
+
+.chords__analyze {
+  height: var(--control-height);
+  padding: 0 var(--control-pad-x);
+  background: linear-gradient(180deg, var(--btn-bg), var(--btn-bg-active));
+  border: 1px solid #000;
+  border-radius: var(--control-radius);
+  color: var(--text);
+  font-size: var(--control-font-size);
+  cursor: pointer;
+}
+
+.chords__analyze:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--btn-bg-hover), var(--btn-bg));
+}
+
+.chords__analyze:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.chords__result {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.chords__chord {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chords__name {
+  min-width: 44px;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 0 6px hsl(var(--accent-h) var(--accent-s) 74% / 0.55);
+}
+
+.chords__chord--next .chords__name {
+  min-width: 28px;
+  font-size: 15px;
+  color: var(--lcd-fg-dim);
+  text-shadow: none;
+}
+
+.chords__chord--next .chords__diagram {
+  opacity: 0.5;
+}
+
+.chords__diagram {
+  width: 58px;
+  height: 64px;
+  flex: none;
+}
+
+.chords__chord--next .chords__diagram {
+  width: 44px;
+  height: 48px;
+}
+
+.chords__line {
+  stroke: var(--lcd-fg-dim);
+  stroke-width: 0.8;
+}
+
+.chords__nut {
+  stroke: var(--lcd-fg-dim);
+  stroke-width: 2.2;
+}
+
+.chords__dot {
+  fill: var(--lcd-fg);
+}
+
+.chords__open {
+  fill: none;
+  stroke: var(--lcd-fg);
+  stroke-width: 0.9;
+}
+
+.chords__mute,
+.chords__fret {
+  fill: var(--lcd-fg-dim);
+  font-family: var(--chords-font);
+  font-size: 7px;
+}
+
+.chords__mute {
+  text-anchor: middle;
+}
+
+.chords__meta {
+  margin-left: auto;
+  font-size: 9px;
+  color: var(--lcd-fg-dim);
+  text-align: right;
+}
+
+.chords__timeline {
+  display: flex;
+  gap: 4px;
+  height: var(--chords-cell-height);
+  overflow: hidden;
+}
+
+.chords__cell {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--well-2);
+  border: 1px solid #000;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: var(--chords-font);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chords__cell.is-past {
+  opacity: 0.45;
+}
+
+.chords__cell.is-current {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
 .playlist__list-frame {
   height: var(--list-height);
   display: flex;

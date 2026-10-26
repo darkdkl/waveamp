@@ -11,6 +11,7 @@ import { refreshCoverArt } from "../coverArt";
 import { clearNowPlaying } from "./nowPlaying";
 import { syncTimeDisplay } from "../clock";
 import type { Station } from "../../../shared/types";
+import { refreshChords } from "../chords";
 import { setStation } from "../displayInfo";
 
 const RADIO_MAX_RECONNECT = 3;
@@ -42,6 +43,7 @@ export function tuneStation(station: Station): void {
   state.playbackMode = "radio";
   state.currentStation = station;
   setStation(station);
+  refreshChords();
   radioReconnectAttempts = 0;
   radioCrossOriginFallbackTried = false;
   audio.crossOrigin = "anonymous";

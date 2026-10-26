@@ -29,6 +29,7 @@ import { isClockShown, showTrackTimeNow, syncTimeDisplay } from "./clock";
 import { markStopped, renderPlayState } from "./playState";
 import { seekTrack, trackLength, trackPosition, trackStart } from "./trackTime";
 import { clearDisplayInfo, setLocalTrack } from "./displayInfo";
+import { refreshChords } from "./chords";
 
 const SEGMENT_JOIN_TOLERANCE = 0.05;
 const SEGMENT_TIMER_WINDOW = 1;
@@ -76,6 +77,7 @@ export function resetToNoTrackState(): void {
   releaseObjectUrl();
   clearNowPlaying();
   clearDisplayInfo();
+  refreshChords();
   state.playbackMode = "local";
   state.currentStation = null;
   liveTag.hidden = true;
@@ -105,6 +107,7 @@ export function loadTrack(index: number, autoplay = true, direction: 1 | -1 = 1)
   state.localPlayRequested = autoplay;
   const track = state.queue[index];
   setLocalTrack(track);
+  refreshChords();
   const src = safeTrackUrl(getTrackSrc(track));
   if (src && src === loadedSrc && track.start != null && audio.readyState > 0 && !audio.error) {
     pendingStart = null;

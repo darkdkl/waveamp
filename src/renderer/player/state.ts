@@ -68,6 +68,9 @@ export const state = {
 
   eqEnabled: true,
   eqBandCount: 10 as EqBandCount,
+  chordsOpen: false,
+  chordsCapo: 0,
+  chordsSimplify: false,
   eqWheel: null as WheelDirection | null,
   bandGains: new Array(10).fill(0) as number[],
   preampDb: 0,

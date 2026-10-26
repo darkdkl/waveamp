@@ -94,7 +94,7 @@ export function decodeCueText(bytes: Uint8Array): string {
   }
 }
 
-const PLAYABLE_EXT_RE = /\.(mp3|wav|ogg|oga|flac|m4a|aac|opus|weba)$/i;
+export const PLAYABLE_EXT_RE = /\.(mp3|wav|ogg|oga|flac|m4a|aac|opus|weba)$/i;
 
 function stem(name: string): string {
   return name.replace(/\.[^./\\]+$/, "").toLowerCase();

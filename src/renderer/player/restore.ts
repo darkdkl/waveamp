@@ -9,6 +9,7 @@ import { applyEqBandCount, loadEqGains, syncEqControlsFromState } from "./equali
 import { setVizMode, setVizResponse } from "./visualizer";
 import { SCALE_MAX, SCALE_MIN, SCALE_STEP, setEqOpen, setPlaylistOpen, setRadioOpen, setScale } from "./layout";
 import { applySeparateWindows } from "./separateWindows";
+import { setChordsCapo, setChordsOpen, setChordsSimplify } from "./chords";
 import { loadTrack } from "./playback";
 import { loadTrackTags, renderPlaylist } from "./playlist";
 import { renderRadioFavorites } from "./radio/panel";
@@ -192,6 +193,9 @@ export async function restoreConfig(): Promise<void> {
   }
 
   if (config.ui?.vizMode) setVizMode(config.ui.vizMode);
+  if (typeof config.ui?.chordsCapo === "number") setChordsCapo(config.ui.chordsCapo);
+  if (typeof config.ui?.chordsSimplify === "boolean") setChordsSimplify(config.ui.chordsSimplify);
+  if (config.ui?.chordsOpen) setChordsOpen(true);
   if (state.separateWindows) await applySeparateWindows();
   if (config.ui?.eqOpen) setEqOpen(true);
   if (config.ui?.playlistOpen) setPlaylistOpen(true);

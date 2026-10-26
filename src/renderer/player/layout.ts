@@ -73,6 +73,11 @@ export function setPlaylistOpen(open: boolean): void {
   persistConfig();
 }
 
+export function refreshPlaylistHeight(): void {
+  if (state.playlistOpen) playlist.style.maxHeight = sectionMaxHeight(playlist, true);
+  syncElectronWindowSize();
+}
+
 export function setEqOpen(open: boolean): void {
   state.eqOpen = open;
   eq.classList.toggle("is-open", open);

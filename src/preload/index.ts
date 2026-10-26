@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils, webFrame } from "electron";
 import type {
   AppConfig,
+  AudioDataResult,
   CountedOption,
   CountryOption,
   DockLayout,
@@ -60,6 +61,7 @@ const api = {
   readAudioFormat: (filePath: string): Promise<AudioFormat | null> => ipcRenderer.invoke("read-audio-format", filePath),
   expandPlaylistPaths: (paths: string[]): Promise<PlaylistEntry[]> => ipcRenderer.invoke("expand-playlist-paths", paths),
   readTrackCover: (filePath: string): Promise<string | null> => ipcRenderer.invoke("read-track-cover", filePath),
+  readAudioData: (filePath: string, alac: boolean): Promise<AudioDataResult> => ipcRenderer.invoke("read-audio-data", filePath, alac),
   getFilePath: (file: File): string | null => {
     try {
       return webUtils.getPathForFile(file) || null;

@@ -61,6 +61,9 @@ Runs on macOS, Windows and Linux.
 - **Media keys and system Now Playing** (macOS Control Center, Windows media
   overlay)
 - **Tray icon** with an optional close-to-tray mode
+- **Chords of the playing song** — analyses a track on request and shows the
+  current and next chord with guitar fingerings as it plays, with capo and a
+  simpler mode; all on your computer
 - **Separate windows** — the equalizer and the playlist/radio can live in
   their own windows that snap to each other and to the screen edges, move with
   the player and remember where they were (on a Linux Wayland desktop the

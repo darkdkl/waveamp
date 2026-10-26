@@ -126,6 +126,10 @@
         <div class="playlist__header">
           <button class="window-controls__btn window-controls__btn--close section-close" type="button" data-dock-close="panel" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
           <span class="section-title" data-i18n="playlist">Плейлист</span>
+          <div class="playlist__actions">
+          <button class="btn btn--icon" id="chordsBtn" type="button" data-i18n-title="chords" data-i18n-aria="chords" title="Аккорды" aria-label="Аккорды" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><path d="M19.6 2.3l2.1 2.1-1.5 1.5-.7-.1-3.6 3.6a5.6 5.6 0 01-.7 6.7 3 3 0 01-1.9.9 3.4 3.4 0 00-2.1 1 3.8 3.8 0 01-5.4 0l-1.4-1.4a3.8 3.8 0 010-5.4 3.4 3.4 0 001-2.1 3 3 0 01.9-1.9 5.6 5.6 0 016.7-.7l3.6-3.6-.1-.7 1.5-1.5zM9.5 12.6a1.6 1.6 0 102.3 2.3 1.6 1.6 0 00-2.3-2.3z"/></svg>
+          </button>
           <div class="playlist__add" id="playlistAddWrap">
             <button class="btn btn--icon" id="playlistAddBtn" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
               <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
@@ -146,6 +150,31 @@
               </button>
             </div>
           </div>
+          </div>
+        </div>
+
+        <div class="chords" id="chords" hidden>
+          <div class="chords__head">
+            <span data-i18n="chords">Аккорды</span>
+            <span class="chords__spacer"></span>
+            <span id="chordsSimplifyLabel" data-i18n="chordsSimplify">Проще</span>
+            <button class="switch" id="chordsSimplifyBtn" type="button" role="switch" aria-checked="false" aria-labelledby="chordsSimplifyLabel"></button>
+            <label class="chords__capo"><span data-i18n="chordsCapo">Капо</span>
+              <select class="chords__select" id="chordsCapoSelect"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select>
+            </label>
+          </div>
+          <div class="chords__lcd">
+            <div class="chords__message" id="chordsMessage">
+              <span id="chordsMessageText"></span>
+              <button class="chords__analyze" id="chordsAnalyzeBtn" type="button" data-i18n="chordsAnalyze" hidden>Распознать аккорды</button>
+            </div>
+            <div class="chords__result" id="chordsResult" hidden>
+              <div class="chords__chord" id="chordsNow"></div>
+              <div class="chords__chord chords__chord--next" id="chordsNext"></div>
+              <div class="chords__meta" id="chordsKey"></div>
+            </div>
+          </div>
+          <div class="chords__timeline" id="chordsTimeline"></div>
         </div>
         <div class="playlist__list-frame" id="playlistListFrame">
           <ul class="playlist__list" id="playlistList"></ul>

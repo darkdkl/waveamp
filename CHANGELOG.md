@@ -4,6 +4,18 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.30.0] — 2026-10-26
+
+### Added
+- Chords of the playing song: the guitar button in the playlist header opens
+  a block above the list, and «Find the chords» analyses the track in a few
+  seconds. It shows the current chord with its fingering, the next one and
+  the chords ahead, and follows playback and seeking. Capo (0–7) moves the
+  shapes, «Simpler» turns sevenths into plain chords. Major, minor and
+  seventh chords are recognised; the key picks sharps or flats. Local files
+  up to 20 minutes (for a CUE album, the whole album file); everything runs
+  on the computer
+
 ## [1.29.1] — 2026-10-18
 
 ### Added

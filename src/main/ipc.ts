@@ -38,6 +38,7 @@ import {
 import { applyGlobalHotkeys } from "./shortcuts";
 import { readAudioFormat, readTrackTags } from "./tags";
 import { systemNaturalScroll } from "./scrollDirection";
+import { readAudioData } from "./audioData";
 import {
   dockNameOf,
   isManagedName,
@@ -157,6 +158,13 @@ export function registerIpcHandlers(): void {
   );
 
   ipcMain.handle("read-track-cover", (_event, filePath: string) => readCoverArt(filePath));
+
+  ipcMain.handle("read-audio-data", (_event, filePath: string, alac: boolean) =>
+    readAudioData(String(filePath), alac === true).catch((err) => {
+      writeLog("warn", "chords", `Could not read "${filePath}" for chord analysis: ${err.message}`);
+      return { ok: false, error: "failed" } as const;
+    })
+  );
 
   ipcMain.handle("radio-search", (_event, params: StationSearchParams) => searchStations(params));
   ipcMain.handle("radio-countries", () => fetchCountries());

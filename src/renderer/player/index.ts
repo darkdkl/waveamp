@@ -28,6 +28,7 @@ import { restoreConfig } from "./restore";
 import { initStereo } from "./stereo";
 import { initDisplayInfo } from "./displayInfo";
 import { initSeparateWindows } from "./separateWindows";
+import { initChords } from "./chords";
 
 initVisualizerControls();
 initEqualizerControls();
@@ -56,6 +57,7 @@ initAudioErrorHandling();
 initSeekAndVolume();
 initDragAndDrop();
 initSeparateWindows();
+initChords();
 
 const electronAPI = window.electronAPI;
 if (electronAPI) {
