@@ -109,7 +109,10 @@ about an unknown publisher on first launch:
   Alternatively, try to open the app, then go to System Settings → Privacy &
   Security → "Open Anyway".
 - **Windows**: "More info" → "Run anyway" in the SmartScreen dialog
-- **Linux**: `chmod +x WaveAMP-*.AppImage` before running
+- **Linux**: `chmod +x WaveAMP-*.AppImage` before running. AppImages need
+  FUSE 2: if the app doesn't start and complains about FUSE, install it —
+  `sudo apt install libfuse2t64` on Debian 13 and Ubuntu 24.04+ (`libfuse2` on
+  older releases) — or start it with `--appimage-extract-and-run`.
 
 ## Building from source
 
