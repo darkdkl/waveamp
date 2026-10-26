@@ -1,4 +1,4 @@
-import { dropzone, eq, player, playlist, radio, windowEdgeResize, windowGripResize } from "./dom";
+import { chordsSection, dropzone, eq, player, playlist, radio, windowEdgeResize, windowGripResize } from "./dom";
 import { state } from "./state";
 import { persistConfig } from "./config";
 import { addPlayerDocument, removePlayerDocument } from "./documents";
@@ -6,7 +6,7 @@ import { attachDropTarget } from "./playlist";
 import type { DockName } from "../../shared/types";
 
 const INTERACTIVE = "button, select, input, textarea, a, label, [role='switch'], [contenteditable='true'], .playlist__add-menu";
-const SECTION_HEADERS = ".eq__header, .playlist__header, .radio__header";
+const SECTION_HEADERS = ".eq__header, .chords-section__header, .playlist__header, .radio__header";
 
 interface DockWindow {
   win: Window;
@@ -87,6 +87,7 @@ async function openWindow(name: DockName, nodes: HTMLElement[]): Promise<DockWin
 function setSectionHeights(): void {
   for (const [section, open] of [
     [eq, state.eqOpen],
+    [chordsSection, state.chordsOpen],
     [playlist, state.playlistOpen],
     [radio, state.radioOpen],
   ] as const) {
@@ -108,10 +109,11 @@ async function separate(): Promise<void> {
   if (!api?.dockSetSeparate || !(await api.dockSetSeparate(true, state.dockLayout))) return;
   api.dockZoom?.(state.uiScale);
   const eqWindow = await openWindow("eq", [eq]);
-  const panelWindow = await openWindow("panel", [playlist, radio, panelDropzone]);
+  const panelWindow = await openWindow("panel", [chordsSection, playlist, radio, panelDropzone]);
   if (!eqWindow || !panelWindow) {
     await api.dockSetSeparate(false, state.dockLayout);
     player.insertBefore(eq, dropzone);
+    player.insertBefore(chordsSection, dropzone);
     player.insertBefore(playlist, dropzone);
     player.insertBefore(radio, dropzone);
     [eqWindow, panelWindow].forEach((entry) => entry?.win.close());
@@ -135,6 +137,7 @@ async function join(): Promise<void> {
   mirror?.disconnect();
   mirror = null;
   player.insertBefore(eq, dropzone);
+  player.insertBefore(chordsSection, dropzone);
   player.insertBefore(playlist, dropzone);
   player.insertBefore(radio, dropzone);
   document.body.append(windowEdgeResize, windowGripResize);
@@ -160,7 +163,7 @@ export function syncDockWindows(mainHeight: number, width: number, scale: number
   const eqHeight = eqWindow.root.offsetHeight;
   window.electronAPI?.dockUpdate?.({
     eq: { visible: state.eqOpen, width, height: eqHeight > mainHeight ? Math.ceil(eqHeight * scale) : Math.round(mainHeight * scale) },
-    panel: { visible: state.playlistOpen || state.radioOpen, width, height: Math.ceil(panelWindow.root.offsetHeight * scale) },
+    panel: { visible: state.playlistOpen || state.radioOpen || state.chordsOpen, width, height: Math.ceil(panelWindow.root.offsetHeight * scale) },
   });
 }
 

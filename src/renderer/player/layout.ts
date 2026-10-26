@@ -1,4 +1,5 @@
 import {
+  chordsSection,
   eq,
   eqBtn,
   player,
@@ -46,6 +47,7 @@ export function syncElectronWindowSize(instant = false): void {
   if (!state.separateActive) {
     if (state.playlistOpen) target += playlist.scrollHeight;
     if (state.eqOpen) target += eq.scrollHeight;
+    if (state.chordsOpen) target += chordsSection.scrollHeight;
     if (state.radioOpen) target += radio.scrollHeight;
   }
   target *= state.uiScale;
@@ -73,8 +75,9 @@ export function setPlaylistOpen(open: boolean): void {
   persistConfig();
 }
 
-export function refreshPlaylistHeight(): void {
-  if (state.playlistOpen) playlist.style.maxHeight = sectionMaxHeight(playlist, true);
+export function showSection(section: HTMLElement, open: boolean): void {
+  section.classList.toggle("is-open", open);
+  section.style.maxHeight = sectionMaxHeight(section, open);
   syncElectronWindowSize();
 }
 

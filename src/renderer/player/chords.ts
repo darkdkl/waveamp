@@ -2,10 +2,9 @@ import { i18n } from "../i18n";
 import {
   audio,
   chordsAnalyzeBtn,
-  chordsBlock,
   chordsBtn,
   chordsCapoSelect,
-  chordsControls,
+  chordsCloseBtn,
   chordsKey,
   chordsMessage,
   chordsMessageText,
@@ -13,11 +12,12 @@ import {
   chordsNow,
   chordsPrev,
   chordsResult,
+  chordsSection,
   chordsSimplifyBtn,
 } from "./dom";
 import { state, type Track } from "./state";
 import { persistConfig } from "./config";
-import { refreshPlaylistHeight } from "./layout";
+import { showSection } from "./layout";
 import { trackPosition } from "./trackTime";
 import { renderSwitch } from "../switchControl";
 import { chordDiagramSvg } from "./chordDiagram";
@@ -95,7 +95,7 @@ function scrollTape(): void {
 }
 
 function visible(): boolean {
-  return state.chordsOpen && state.playlistOpen;
+  return state.chordsOpen;
 }
 
 function updatePosition(force = false): void {
@@ -219,12 +219,10 @@ async function analyzeCurrent(): Promise<void> {
 
 export function setChordsOpen(open: boolean): void {
   state.chordsOpen = open;
-  chordsBlock.hidden = !open;
-  chordsControls.hidden = !open;
   chordsBtn.classList.toggle("is-active", open);
   chordsBtn.setAttribute("aria-pressed", String(open));
   refreshChords();
-  refreshPlaylistHeight();
+  showSection(chordsSection, open);
   persistConfig();
 }
 
@@ -244,6 +242,10 @@ export function setChordsSimplify(simplify: boolean): void {
 
 export function initChords(): void {
   chordsBtn.addEventListener("click", () => setChordsOpen(!state.chordsOpen));
+  chordsCloseBtn.addEventListener("click", () => setChordsOpen(false));
+  window.electronAPI?.onDockClose?.((name) => {
+    if (name === "panel") setChordsOpen(false);
+  });
   chordsAnalyzeBtn.addEventListener("click", () => void analyzeCurrent());
   chordsSimplifyBtn.addEventListener("click", () => setChordsSimplify(!state.chordsSimplify));
   chordsCapoSelect.addEventListener("change", () => setChordsCapo(Number(chordsCapoSelect.value)));

@@ -4,14 +4,22 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.31.0] — 2026-10-26
+
+### Changed
+- Chords are a section of their own between the equalizer and the playlist,
+  opened by the guitar button next to the playlist button; they show with
+  the radio too. «Simpler» and «Capo» sit in the section header. With
+  separate windows the section goes to the playlist window
+- The settings button moved to the title bar, on the side opposite the
+  window buttons
+
 ## [1.30.1] — 2026-10-26
 
 ### Changed
 - The chords screen is taller and shows the previous, current and next chord
   side by side, each fingering with its name below; on a chord change the row
   slides left like a tape. The strip of upcoming chords under it is gone
-- «Simpler» and «Capo» sit in the playlist header next to the guitar button,
-  and the separate «Chords» row above the screen is gone
 
 ### Fixed
 - The capo list opens inside the window instead of running past its right
