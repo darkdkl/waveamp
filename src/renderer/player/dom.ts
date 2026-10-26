@@ -107,6 +107,7 @@ export const windowGripResize = byId("windowGripResize");
 export const dropzone = byId("dropzone");
 export const chordsBtn = byId<HTMLButtonElement>("chordsBtn");
 export const chordsBlock = byId("chords");
+export const chordsControls = byId("chordsControls");
 export const chordsSimplifyBtn = byId<HTMLButtonElement>("chordsSimplifyBtn");
 export const chordsCapoSelect = byId<HTMLSelectElement>("chordsCapoSelect");
 export const chordsMessage = byId("chordsMessage");

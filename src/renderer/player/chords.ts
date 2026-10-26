@@ -5,6 +5,7 @@ import {
   chordsBlock,
   chordsBtn,
   chordsCapoSelect,
+  chordsControls,
   chordsKey,
   chordsMessage,
   chordsMessageText,
@@ -219,6 +220,7 @@ async function analyzeCurrent(): Promise<void> {
 export function setChordsOpen(open: boolean): void {
   state.chordsOpen = open;
   chordsBlock.hidden = !open;
+  chordsControls.hidden = !open;
   chordsBtn.classList.toggle("is-active", open);
   chordsBtn.setAttribute("aria-pressed", String(open));
   refreshChords();

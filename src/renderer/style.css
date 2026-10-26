@@ -915,19 +915,19 @@ input[type="range"]:disabled {
   gap: 6px;
 }
 
-.chords__head {
+.chords__controls {
   display: flex;
   align-items: center;
   gap: 6px;
-  min-height: var(--control-height);
+  margin-right: 6px;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
-.chords__spacer {
-  flex: 1;
+.chords__controls[hidden] {
+  display: none;
 }
 
 .chords__capo {

@@ -10,6 +10,8 @@ version, fixes bump the patch version.
 - The chords screen is taller and shows the previous, current and next chord
   side by side, each fingering with its name below; on a chord change the row
   slides left like a tape. The strip of upcoming chords under it is gone
+- «Simpler» and «Capo» sit in the playlist header next to the guitar button,
+  and the separate «Chords» row above the screen is gone
 
 ### Fixed
 - The capo list opens inside the window instead of running past its right
