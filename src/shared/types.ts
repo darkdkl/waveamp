@@ -7,7 +7,15 @@ export type VizResponse = "slow" | "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
 export type WindowControlsSide = "left" | "right";
 
-export type AudioDataResult = { ok: true; data: Uint8Array } | { ok: false; error: "tooLong" | "tooLarge" | "failed" };
+export interface AudioSegment {
+  start: number;
+  end: number | null;
+}
+
+export type AudioDataResult =
+  | { ok: true; data: Uint8Array }
+  | { ok: true; samples: Float32Array }
+  | { ok: false; error: "tooLong" | "tooLarge" | "failed" };
 
 export type DockName = "eq" | "chords" | "panel";
 

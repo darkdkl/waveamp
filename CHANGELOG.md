@@ -4,6 +4,14 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.32.1] — 2026-10-27
+
+### Fixed
+- Chords of a track from a CUE album in one FLAC or WAV file are found from
+  that track alone, so the 20-minute limit counts the track, not the whole
+  album. FLAC and WAV files are read in parts for the analysis, which takes
+  far less memory on long and hi-res files; playback is unchanged
+
 ## [1.32.0] — 2026-10-26
 
 ### Added

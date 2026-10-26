@@ -3,9 +3,12 @@ import { openAlacFile, wavLayout, wavStream } from "./alac/wavStream";
 import { loadMusicMetadata } from "./tags";
 import { PLAYABLE_EXT_RE } from "../shared/cue";
 import { MAX_ANALYSIS_SECONDS } from "../shared/chords";
-import type { AudioDataResult } from "../shared/types";
+import { readAnalysisSamples, type SampleReader } from "./analysisAudio";
+import type { AudioDataResult, AudioSegment } from "../shared/types";
 
 const MAX_BYTES = 400 * 1024 * 1024;
+const FAILED = { ok: false, error: "failed" } as const;
+const TOO_LONG = { ok: false, error: "tooLong" } as const;
 
 async function collect(stream: ReadableStream<Uint8Array>, total: number): Promise<Uint8Array> {
   const out = new Uint8Array(total);
@@ -26,14 +29,11 @@ async function tooLong(filePath: string): Promise<boolean> {
   return typeof format.duration === "number" && format.duration > MAX_ANALYSIS_SECONDS;
 }
 
-export async function readAudioData(filePath: string, alac: boolean): Promise<AudioDataResult> {
-  if (!PLAYABLE_EXT_RE.test(filePath)) return { ok: false, error: "failed" };
-  const stat = await fs.stat(filePath);
-  if (!stat.isFile()) return { ok: false, error: "failed" };
-  if (await tooLong(filePath)) return { ok: false, error: "tooLong" };
+async function readEncoded(filePath: string, size: number, alac: boolean): Promise<AudioDataResult> {
+  if (await tooLong(filePath)) return TOO_LONG;
   if (alac) {
     const opened = await openAlacFile(filePath);
-    if (!opened) return { ok: false, error: "failed" };
+    if (!opened) return FAILED;
     const total = wavLayout(opened.track).totalBytes;
     if (total > MAX_BYTES) {
       opened.close();
@@ -41,6 +41,32 @@ export async function readAudioData(filePath: string, alac: boolean): Promise<Au
     }
     return { ok: true, data: await collect(wavStream(opened.track, opened.source, 0, total - 1, opened.close, () => {}), total) };
   }
-  if (stat.size > MAX_BYTES) return { ok: false, error: "tooLarge" };
+  if (size > MAX_BYTES) return { ok: false, error: "tooLarge" };
   return { ok: true, data: await fs.readFile(filePath) };
+}
+
+export function audioSegment(start: unknown, end: unknown): AudioSegment {
+  const from = Number(start);
+  const to = end == null ? null : Number(end);
+  return {
+    start: Number.isFinite(from) && from > 0 ? from : 0,
+    end: to != null && Number.isFinite(to) && to > 0 ? to : null,
+  };
+}
+
+export async function readAudioData(
+  filePath: string,
+  alac: boolean,
+  segment: AudioSegment = { start: 0, end: null },
+  readSamples: SampleReader = readAnalysisSamples
+): Promise<AudioDataResult> {
+  if (!PLAYABLE_EXT_RE.test(filePath)) return FAILED;
+  const stat = await fs.stat(filePath);
+  if (!stat.isFile()) return FAILED;
+  if (segment.end != null && segment.end - segment.start > MAX_ANALYSIS_SECONDS) return TOO_LONG;
+  if (!alac) {
+    const samples = await readSamples(filePath, segment);
+    if (samples) return samples;
+  }
+  return readEncoded(filePath, stat.size, alac);
 }

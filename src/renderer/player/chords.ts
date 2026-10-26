@@ -151,6 +151,7 @@ export function refreshChords(): void {
   const track = localTrack();
   const key = track ? trackKey(track) : null;
   if (key !== currentKey) {
+    if (status === "analyzing") window.electronAPI?.cancelAudioData?.();
     currentKey = key;
     analysis = key ? (cache.get(key) ?? null) : null;
     status = analysis ? "done" : "idle";
@@ -169,16 +170,23 @@ function monoSamples(buffer: AudioBuffer): Float32Array {
   return out;
 }
 
-async function decodeFile(track: Track & { path: string }): Promise<Float32Array | Exclude<Status, "idle" | "analyzing" | "done">> {
-  if (decodedFile?.path === track.path) return decodedFile.samples;
-  const read = await window.electronAPI!.readAudioData(track.path, !!track.alac);
+function trackPart(samples: Float32Array, track: Track): Float32Array {
+  const from = Math.round((track.start ?? 0) * ANALYSIS_SAMPLE_RATE);
+  const to = track.end != null ? Math.round(track.end * ANALYSIS_SAMPLE_RATE) : samples.length;
+  return samples.subarray(from, to);
+}
+
+async function trackSamples(track: Track & { path: string }): Promise<Float32Array | Exclude<Status, "idle" | "analyzing" | "done">> {
+  if (decodedFile?.path === track.path) return trackPart(decodedFile.samples, track);
+  const read = await window.electronAPI!.readAudioData(track.path, !!track.alac, track.start ?? 0, track.end ?? null);
   if (!read.ok) return read.error;
+  if ("samples" in read) return read.samples;
   const { buffer, byteOffset, byteLength } = read.data;
   const bytes = byteOffset === 0 && byteLength === buffer.byteLength ? buffer : buffer.slice(byteOffset, byteOffset + byteLength);
   const decoded = await new OfflineAudioContext(1, 1, ANALYSIS_SAMPLE_RATE).decodeAudioData(bytes as ArrayBuffer);
   if (decoded.duration > MAX_ANALYSIS_SECONDS) return "tooLong";
   decodedFile = { path: track.path, samples: monoSamples(decoded) };
-  return decodedFile.samples;
+  return trackPart(decodedFile.samples, track);
 }
 
 async function analyzeCurrent(): Promise<void> {
@@ -190,13 +198,11 @@ async function analyzeCurrent(): Promise<void> {
   render();
   let result: Status = "failed";
   try {
-    const samples = await decodeFile(track as Track & { path: string });
+    const samples = await trackSamples(track as Track & { path: string });
     if (typeof samples === "string") result = samples;
     else {
-      const from = Math.round((track.start ?? 0) * ANALYSIS_SAMPLE_RATE);
-      const to = track.end != null ? Math.round(track.end * ANALYSIS_SAMPLE_RATE) : samples.length;
       const analysed = await analyzeChordsInSteps(
-        samples.subarray(from, to),
+        samples,
         (fraction) => {
           if (currentKey !== key || status !== "analyzing") return;
           progress = fraction;

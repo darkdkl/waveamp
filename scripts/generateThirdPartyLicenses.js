@@ -116,6 +116,18 @@ sections.push(
   ].join("\n")
 );
 
+sections.push(
+  [
+    "libFLAC",
+    "License: BSD-3-Clause",
+    "Source: https://github.com/xiph/flac",
+    "Built into @wasm-audio-decoders/flac as WebAssembly; it decodes FLAC files",
+    "for chord analysis.",
+    "",
+    fs.readFileSync(path.join(ROOT, "scripts", "notices", "libFLAC-COPYING.Xiph.txt"), "utf8").trim(),
+  ].join("\n")
+);
+
 const header = `WaveAMP — third-party software notices
 ======================================
 
@@ -125,7 +137,7 @@ listed below, each distributed under its own license. Chromium and the
 other components bundled with Electron are listed in
 LICENSES.chromium.html, next to this file in the installed application.
 
-${entries.length} packages, plus projectM and the sources of the ALAC decoder.`;
+${entries.length} packages, plus projectM, libFLAC and the sources of the ALAC decoder.`;
 
 fs.writeFileSync(OUTPUT, [header, ...sections].join(`\n\n${"-".repeat(78)}\n\n`) + "\n");
 console.log(`Wrote ${path.relative(ROOT, OUTPUT)} (${entries.length} packages)`);
