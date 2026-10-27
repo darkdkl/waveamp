@@ -1,6 +1,6 @@
 {
   "name": "waveamp",
-  "version": "1.29.1",
+  "version": "1.34.0",
   "private": true,
   "description": "Retro-style desktop audio player with internet radio, built on Electron",
   "author": "Dark.Dmake",
@@ -103,6 +103,8 @@
     }
   },
   "dependencies": {
+    "@wasm-audio-decoders/flac": "0.2.11",
+    "codec-parser": "2.5.0",
     "music-metadata": "^11.16.1"
   }
 }

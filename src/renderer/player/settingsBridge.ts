@@ -5,6 +5,7 @@ import { state } from "./state";
 import { persistConfig } from "./config";
 import { BASE_ZOOM, setScale, syncElectronWindowSize } from "./layout";
 import { applySeparateWindows } from "./separateWindows";
+import { refreshChords } from "./chords";
 import { setVizResponse } from "./visualizer";
 import { applyEqBandCount, renderEqToggle } from "./equalizer";
 import { normalizeBandCount } from "../../shared/eqCurve";
@@ -80,6 +81,7 @@ export function setLanguage(lang: string): void {
   renderRadioResults();
   renderRadioFavorites();
   renderSavedTracks();
+  refreshChords();
   refreshPresetsText();
   updateStationFormText();
   persistConfig();

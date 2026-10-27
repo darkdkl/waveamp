@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attachedGroup, clampToAreas, offsetFrom, reflowAfterResize, snapDelta, touching, type Rect } from "../../src/shared/dock";
+import { attachedGroup, clampToAreas, offsetFrom, reflowAfterResize, resizedRect, snapDelta, touching, type Rect } from "../../src/shared/dock";
 
 const main: Rect = { x: 100, y: 100, width: 410, height: 174 };
 const eq: Rect = { x: 100, y: 274, width: 410, height: 174 };
@@ -104,5 +104,29 @@ describe("clampToAreas", () => {
 describe("offsetFrom", () => {
   it("measures a window relative to the main one", () => {
     expect(offsetFrom(main, panel)).toEqual({ x: 0, y: 348 });
+  });
+});
+
+describe("resizedRect", () => {
+  const area: Rect = { x: 0, y: 0, width: 1920, height: 1080 };
+  const start: Rect = { x: 500, y: 300, width: 410, height: 150 };
+  const min = { width: 410, height: 150 };
+
+  it("grows to the right and down from the right grip", () => {
+    expect(resizedRect(start, "right", { x: 200, y: 100 }, min, area)).toEqual({ x: 500, y: 300, width: 610, height: 250 });
+  });
+
+  it("grows to the left from the left grip and keeps the right edge", () => {
+    expect(resizedRect(start, "left", { x: -200, y: 50 }, min, area)).toEqual({ x: 300, y: 300, width: 610, height: 200 });
+  });
+
+  it("never shrinks below the minimum size", () => {
+    expect(resizedRect(start, "right", { x: -300, y: -300 }, min, area)).toEqual(start);
+    expect(resizedRect(start, "left", { x: 300, y: -300 }, min, area)).toEqual(start);
+  });
+
+  it("stops at the edges of the screen", () => {
+    expect(resizedRect(start, "right", { x: 5000, y: 5000 }, min, area)).toEqual({ x: 500, y: 300, width: 1420, height: 780 });
+    expect(resizedRect(start, "left", { x: -5000, y: 0 }, min, area)).toEqual({ x: 0, y: 300, width: 910, height: 150 });
   });
 });

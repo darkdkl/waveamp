@@ -71,6 +71,10 @@ export function persistConfig(): void {
         radioOpen: state.radioOpen,
         vizMode: state.vizMode,
         dock: state.dockLayout,
+        chordsOpen: state.chordsOpen,
+        chordsCapo: state.chordsCapo,
+        chordsSimplify: state.chordsSimplify,
+        chordsWindowSize: state.chordsDockedSize,
       },
     });
   }, 300);

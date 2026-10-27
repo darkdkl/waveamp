@@ -1,4 +1,5 @@
 import {
+  chordsSection,
   eq,
   eqBtn,
   player,
@@ -21,14 +22,13 @@ import type { DockName } from "../../shared/types";
 import { persistConfig } from "./config";
 import { ensureRadioFilters } from "./radio/panel";
 import { onEveryDocument } from "./documents";
-import { syncDockWindows } from "./separateWindows";
+import { isChordsFloating, sectionMaxHeight, syncDockWindows, WINDOW_WIDTH_BASE } from "./separateWindows";
 
 export const BASE_ZOOM = 0.855;
 export const SCALE_MIN = 70;
 export const SCALE_MAX = 150;
 export const SCALE_STEP = 10;
 
-const WINDOW_WIDTH_BASE = 480;
 const LIST_MIN_HEIGHT = 240;
 const FRAME_MIN_HEIGHT = 60;
 const LIST_MAX_HEIGHT = 1920;
@@ -46,6 +46,7 @@ export function syncElectronWindowSize(instant = false): void {
   if (!state.separateActive) {
     if (state.playlistOpen) target += playlist.scrollHeight;
     if (state.eqOpen) target += eq.scrollHeight;
+    if (state.chordsOpen && chordsSection.ownerDocument === document) target += chordsSection.scrollHeight;
     if (state.radioOpen) target += radio.scrollHeight;
   }
   target *= state.uiScale;
@@ -55,12 +56,7 @@ export function syncElectronWindowSize(instant = false): void {
   } else {
     window.electronAPI.resizeWindow(target, targetWidth);
   }
-  if (state.separateActive) syncDockWindows(mainHeight, targetWidth, state.uiScale);
-}
-
-function sectionMaxHeight(section: HTMLElement, open: boolean): string {
-  if (!open) return "0px";
-  return state.separateActive ? "none" : section.scrollHeight + "px";
+  if (state.separateActive || isChordsFloating()) syncDockWindows(mainHeight, targetWidth, state.uiScale);
 }
 
 export function setPlaylistOpen(open: boolean): void {
@@ -71,6 +67,12 @@ export function setPlaylistOpen(open: boolean): void {
   if (open && state.radioOpen) setRadioOpen(false);
   syncElectronWindowSize();
   persistConfig();
+}
+
+export function showSection(section: HTMLElement, open: boolean): void {
+  section.classList.toggle("is-open", open);
+  section.style.maxHeight = sectionMaxHeight(section, open);
+  syncElectronWindowSize();
 }
 
 export function setEqOpen(open: boolean): void {
@@ -165,8 +167,10 @@ export function initPanelToggles(): void {
 
 function closeDockWindow(name: DockName): void {
   if (name === "eq") setEqOpen(false);
-  else if (state.radioOpen) setRadioOpen(false);
-  else setPlaylistOpen(false);
+  else if (name === "panel") {
+    if (state.radioOpen) setRadioOpen(false);
+    else setPlaylistOpen(false);
+  }
 }
 
 export function initListResize(): void {

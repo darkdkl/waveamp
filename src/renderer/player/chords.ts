@@ -1,0 +1,394 @@
+import { i18n } from "../i18n";
+import {
+  audio,
+  chordsAnalyzeBtn,
+  chordsBtn,
+  chordsCapoSelect,
+  chordsCloseBtn,
+  chordsKey,
+  chordsMessage,
+  chordsMessageText,
+  chordsNext,
+  chordsNow,
+  chordsPopoutBtn,
+  chordsPrev,
+  chordsResult,
+  chordsSection,
+  chordsSimplifyBtn,
+} from "./dom";
+import { state, type Track } from "./state";
+import { persistConfig } from "./config";
+import { showSection, syncElectronWindowSize } from "./layout";
+import { isChordsFloating, popOutChords, returnChords } from "./separateWindows";
+import { trackPosition } from "./trackTime";
+import { renderSwitch } from "../switchControl";
+import { chordDiagramSvg, emptyChordDiagramSvg } from "./chordDiagram";
+import { startChordTap } from "./audioGraph";
+import { Resampler } from "../../shared/resample";
+import { liveStateAfter, radioIdleState, type LiveSignal, type LiveState } from "./chordsLive";
+import { chordShape } from "../../shared/chordShapes";
+import {
+  ANALYSIS_SAMPLE_RATE,
+  analyzeChordsInSteps,
+  MAX_ANALYSIS_SECONDS,
+  capoShape,
+  chordName,
+  eventAt,
+  LiveChordTracker,
+  noteName,
+  simplifyChord,
+  usesFlats,
+  type Chord,
+  type ChordAnalysis,
+  type ChordEvent,
+  type MusicalKey,
+} from "../../shared/chords";
+
+const CAPO_MAX = 7;
+const SCROLL_MS = 260;
+const SCROLL_SHIFT = 18;
+
+type Status = "idle" | "analyzing" | "done" | "tooLong" | "tooLarge" | "failed" | "listening" | "live" | "unavailable";
+
+interface ChordView {
+  key: MusicalKey | null;
+  events: ChordEvent[];
+}
+
+type Source = { kind: "file"; track: Track; key: string | null } | { kind: "radio"; key: string };
+
+const cache = new Map<string, ChordAnalysis>();
+let status: Status = "idle";
+let analysis: ChordView | null = null;
+let stopLive: (() => void) | null = null;
+let currentKey: string | null = null;
+let shownIndex = -1;
+let frame = 0;
+let progress: number | null = null;
+let decodedFile: { path: string; samples: Float32Array } | null = null;
+let request = 0;
+
+function localTrack(): Track | null {
+  if (state.playbackMode !== "local") return null;
+  return state.queue[state.currentIndex] ?? null;
+}
+
+function trackKey(track: Track): string | null {
+  return track.path ? `${track.path}|${track.start ?? 0}|${track.end ?? ""}` : null;
+}
+
+function currentSource(): Source | null {
+  if (state.playbackMode === "radio") {
+    const station = state.currentStation;
+    return station ? { kind: "radio", key: `radio|${station.stationuuid || station.url}` } : null;
+  }
+  const track = localTrack();
+  return track ? { kind: "file", track, key: trackKey(track) } : null;
+}
+
+function isLive(): boolean {
+  return status === "listening" || status === "live";
+}
+
+function streamBlocked(): boolean {
+  return audio.crossOrigin === null;
+}
+
+function displayedChord(chord: Chord): Chord {
+  return capoShape(state.chordsSimplify ? simplifyChord(chord) : chord, state.chordsCapo);
+}
+
+function flats(): boolean {
+  return analysis?.key ? usesFlats(analysis.key) : false;
+}
+
+function keyText(): string {
+  const key = analysis?.key;
+  return key ? `${noteName(key.tonic, usesFlats(key))} ${i18n.t(key.minor ? "chordsMinor" : "chordsMajor")}` : "";
+}
+
+function chordMarkup(chord: Chord | null): string {
+  if (!chord) return `<span class="chords__name">—</span>`;
+  const shown = displayedChord(chord);
+  return `${chordDiagramSvg(chordShape(shown))}<span class="chords__name">${chordName(shown, flats())}</span>`;
+}
+
+function emptyMarkup(): string {
+  return `${emptyChordDiagramSvg()}<span class="chords__name">&nbsp;</span>`;
+}
+
+function showMessage(text: string, analyzable: boolean): void {
+  chordsResult.hidden = true;
+  chordsMessage.hidden = false;
+  chordsMessageText.textContent = text;
+  chordsAnalyzeBtn.hidden = !analyzable;
+  chordsAnalyzeBtn.disabled = status === "analyzing";
+}
+
+function nearChordIndex(index: number, step: 1 | -1): number {
+  const events = analysis?.events ?? [];
+  for (let i = index + step; i >= 0 && i < events.length; i += step) if (events[i].chord) return i;
+  return -1;
+}
+
+function scrollTape(): void {
+  for (const slot of [chordsPrev, chordsNow, chordsNext]) {
+    slot.animate([{ transform: `translateX(${SCROLL_SHIFT}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: SCROLL_MS, easing: "ease-out" });
+  }
+}
+
+function visible(): boolean {
+  return state.chordsOpen;
+}
+
+function updatePosition(force = false): void {
+  if (!analysis || (status !== "done" && status !== "live")) return;
+  const events = analysis.events;
+  const index = eventAt(events, status === "live" ? Infinity : trackPosition());
+  if (index === shownIndex && !force) return;
+  const forward = !force && shownIndex >= 0 && index > shownIndex;
+  shownIndex = index;
+  const prev = nearChordIndex(index, -1);
+  const next = nearChordIndex(index, 1);
+  chordsPrev.innerHTML = prev >= 0 ? chordMarkup(events[prev].chord) : "";
+  chordsNow.innerHTML = chordMarkup(events[index]?.chord ?? null);
+  chordsNext.innerHTML = next >= 0 ? chordMarkup(events[next].chord) : emptyMarkup();
+  if (forward) scrollTape();
+}
+
+function render(): void {
+  const source = currentSource();
+  if (!source) {
+    showMessage(i18n.t("chordsNoTrack"), false);
+    return;
+  }
+  if ((status === "done" || status === "live") && analysis) {
+    chordsMessage.hidden = true;
+    chordsResult.hidden = false;
+    chordsKey.textContent = keyText();
+    updatePosition(true);
+    return;
+  }
+  if (source.kind === "radio") {
+    if (status === "listening") showMessage(i18n.t("chordsListening"), false);
+    else if (status === "unavailable" || radioIdleState(streamBlocked()) === "unavailable") showMessage(i18n.t("chordsNoStream"), false);
+    else if (status === "failed") showMessage(i18n.t("chordsLiveFailed"), false);
+    else if (audio.paused) showMessage(i18n.t("chordsPlayStation"), false);
+    else showMessage(i18n.t("chordsRadioPrompt"), true);
+    return;
+  }
+  if (status === "analyzing") showMessage(progress == null ? i18n.t("chordsAnalyzing") : `${i18n.t("chordsAnalyzing")} ${Math.round(progress * 100)}%`, true);
+  else if (status === "tooLong") showMessage(i18n.t("chordsTooLong"), false);
+  else if (status === "tooLarge") showMessage(i18n.t("chordsTooLarge"), false);
+  else if (status === "failed") showMessage(i18n.t("chordsFailed"), false);
+  else showMessage(i18n.t("chordsPrompt"), !!source.track.path);
+}
+
+function tick(): void {
+  frame = 0;
+  updatePosition();
+  scheduleTick();
+}
+
+function scheduleTick(): void {
+  if (frame || !visible() || status !== "done" || audio.paused) return;
+  frame = requestAnimationFrame(tick);
+}
+
+function endLive(next: Status = "idle"): void {
+  stopLive?.();
+  stopLive = null;
+  request++;
+  analysis = null;
+  status = next;
+  shownIndex = -1;
+}
+
+export function refreshChords(): void {
+  const key = currentSource()?.key ?? null;
+  if (key !== currentKey) {
+    if (status === "analyzing") {
+      request++;
+      window.electronAPI?.cancelAudioData?.();
+    }
+    if (isLive()) endLive();
+    currentKey = key;
+    analysis = key ? (cache.get(key) ?? null) : null;
+    status = analysis ? "done" : "idle";
+    shownIndex = -1;
+  }
+  render();
+  scheduleTick();
+}
+
+function monoSamples(buffer: AudioBuffer): Float32Array {
+  const out = new Float32Array(buffer.length);
+  for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+    const data = buffer.getChannelData(channel);
+    for (let i = 0; i < out.length; i++) out[i] += data[i] / buffer.numberOfChannels;
+  }
+  return out;
+}
+
+function trackPart(samples: Float32Array, track: Track): Float32Array {
+  const from = Math.round((track.start ?? 0) * ANALYSIS_SAMPLE_RATE);
+  const to = track.end != null ? Math.round(track.end * ANALYSIS_SAMPLE_RATE) : samples.length;
+  return samples.subarray(from, to);
+}
+
+async function trackSamples(track: Track & { path: string }): Promise<Float32Array | Exclude<Status, "idle" | "analyzing" | "done">> {
+  if (decodedFile?.path === track.path) return trackPart(decodedFile.samples, track);
+  const read = await window.electronAPI!.readAudioData(track.path, !!track.alac, track.start ?? 0, track.end ?? null);
+  if (!read.ok) return read.error;
+  if ("samples" in read) return read.samples;
+  const { buffer, byteOffset, byteLength } = read.data;
+  const bytes = byteOffset === 0 && byteLength === buffer.byteLength ? buffer : buffer.slice(byteOffset, byteOffset + byteLength);
+  const decoded = await new OfflineAudioContext(1, 1, ANALYSIS_SAMPLE_RATE).decodeAudioData(bytes as ArrayBuffer);
+  if (decoded.duration > MAX_ANALYSIS_SECONDS) return "tooLong";
+  decodedFile = { path: track.path, samples: monoSamples(decoded) };
+  return trackPart(decodedFile.samples, track);
+}
+
+async function listenToStation(key: string): Promise<void> {
+  if (streamBlocked()) {
+    status = "unavailable";
+    render();
+    return;
+  }
+  const id = ++request;
+  status = "listening";
+  analysis = null;
+  render();
+  const tracker = new LiveChordTracker();
+  let resampler: Resampler | null = null;
+  try {
+    const stop = await startChordTap((samples, sampleRate) => {
+      resampler ??= new Resampler(sampleRate, ANALYSIS_SAMPLE_RATE);
+      if (!tracker.push(resampler.push(samples))) return;
+      const result = tracker.result();
+      if (!result.events.some((event) => event.chord)) return;
+      analysis = result;
+      if (status === "listening") {
+        status = "live";
+        shownIndex = -1;
+        render();
+      } else {
+        chordsKey.textContent = keyText();
+        updatePosition();
+      }
+    });
+    if (id !== request || currentKey !== key) stop();
+    else stopLive = stop;
+  } catch {
+    if (id === request) {
+      status = "failed";
+      render();
+    }
+  }
+}
+
+async function analyzeCurrent(): Promise<void> {
+  const source = currentSource();
+  if (source?.kind === "radio") {
+    if (!isLive() && !audio.paused) await listenToStation(source.key);
+    return;
+  }
+  const track = localTrack();
+  const key = track ? trackKey(track) : null;
+  if (!track?.path || !key || status === "analyzing" || !window.electronAPI?.readAudioData) return;
+  const id = ++request;
+  const stale = () => id !== request || currentKey !== key;
+  status = "analyzing";
+  progress = null;
+  render();
+  let result: Status = "failed";
+  try {
+    const samples = await trackSamples(track as Track & { path: string });
+    if (typeof samples === "string") result = samples;
+    else {
+      const analysed = await analyzeChordsInSteps(
+        samples,
+        (fraction) => {
+          if (stale()) return;
+          progress = fraction;
+          render();
+        },
+        () => new Promise((resolve, reject) => setTimeout(() => (stale() ? reject(new Error("cancelled")) : resolve()), 0))
+      );
+      cache.set(key, analysed);
+      result = "done";
+    }
+  } catch {
+    result = "failed";
+  }
+  if (stale()) return;
+  status = result;
+  progress = null;
+  analysis = cache.get(key) ?? null;
+  shownIndex = -1;
+  render();
+  scheduleTick();
+}
+
+function refreshPopoutButton(): void {
+  const key = isChordsFloating() ? "chordsPopIn" : "chordsPopOut";
+  chordsPopoutBtn.dataset.i18nTitle = key;
+  chordsPopoutBtn.dataset.i18nAria = key;
+  chordsPopoutBtn.title = i18n.t(key);
+  chordsPopoutBtn.setAttribute("aria-label", i18n.t(key));
+}
+
+function afterWindowChange(): void {
+  refreshPopoutButton();
+  syncElectronWindowSize();
+}
+
+export function setChordsOpen(open: boolean): void {
+  state.chordsOpen = open;
+  chordsBtn.classList.toggle("is-active", open);
+  chordsBtn.setAttribute("aria-pressed", String(open));
+  if (!open && isLive()) endLive();
+  refreshChords();
+  showSection(chordsSection, open);
+  if (!open && isChordsFloating()) void returnChords().then(afterWindowChange);
+  persistConfig();
+}
+
+export function setChordsCapo(capo: number): void {
+  state.chordsCapo = Math.max(0, Math.min(CAPO_MAX, Math.round(capo) || 0));
+  chordsCapoSelect.value = String(state.chordsCapo);
+  updatePosition(true);
+  persistConfig();
+}
+
+export function setChordsSimplify(simplify: boolean): void {
+  state.chordsSimplify = simplify;
+  renderSwitch(chordsSimplifyBtn, simplify);
+  updatePosition(true);
+  persistConfig();
+}
+
+export function initChords(): void {
+  chordsBtn.addEventListener("click", () => setChordsOpen(!state.chordsOpen));
+  chordsCloseBtn.addEventListener("click", () => setChordsOpen(false));
+  window.electronAPI?.onDockClose?.((name) => {
+    if (name === "chords" && (isChordsFloating() || state.separateActive)) setChordsOpen(false);
+  });
+  chordsPopoutBtn.addEventListener("click", () => void (isChordsFloating() ? returnChords() : popOutChords()).then(afterWindowChange));
+  chordsAnalyzeBtn.addEventListener("click", () => void analyzeCurrent());
+  chordsSimplifyBtn.addEventListener("click", () => setChordsSimplify(!state.chordsSimplify));
+  chordsCapoSelect.addEventListener("change", () => setChordsCapo(Number(chordsCapoSelect.value)));
+  for (const type of ["play", "seeked", "timeupdate"]) audio.addEventListener(type, () => {
+    updatePosition();
+    scheduleTick();
+  });
+  for (const signal of ["pause", "ended", "emptied", "play", "waiting", "playing"] as LiveSignal[]) {
+    audio.addEventListener(signal, () => {
+      if (currentSource()?.kind !== "radio") return;
+      const next = liveStateAfter(status as LiveState, signal, streamBlocked());
+      if (isLive() && next !== status) endLive(next);
+      if (!isLive()) render();
+    });
+  }
+  refreshChords();
+}

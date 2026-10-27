@@ -3,6 +3,7 @@ import { state } from "./state";
 import { bandFilter, EQ_LAYOUTS, filterGainsFor } from "../../shared/eqCurve";
 import { dbToGain } from "./format";
 import { logEvent } from "./log";
+import chordTapUrl from "./chordTap.worklet.ts?worker&url";
 
 export const audioCtx = new AudioContext();
 const sourceNode = audioCtx.createMediaElementSource(audio);
@@ -182,4 +183,27 @@ export function resumeAudioContext(): void {
   if (audioCtx.state === "suspended") {
     audioCtx.resume().catch((err) => logEvent("error", "audio-context", err.message));
   }
+}
+
+let chordTapModule: Promise<void> | null = null;
+
+export async function startChordTap(onSamples: (samples: Float32Array, sampleRate: number) => void): Promise<() => void> {
+  chordTapModule ??= audioCtx.audioWorklet.addModule(chordTapUrl).catch((err: unknown) => {
+    chordTapModule = null;
+    throw err;
+  });
+  await chordTapModule;
+  const tap = new AudioWorkletNode(audioCtx, "chord-tap", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] });
+  const mute = audioCtx.createGain();
+  mute.gain.value = 0;
+  tap.port.onmessage = (event: MessageEvent<Float32Array>) => onSamples(event.data, audioCtx.sampleRate);
+  sourceNode.connect(tap);
+  tap.connect(mute);
+  mute.connect(audioCtx.destination);
+  return () => {
+    tap.port.onmessage = null;
+    sourceNode.disconnect(tap);
+    tap.disconnect();
+    mute.disconnect();
+  };
 }

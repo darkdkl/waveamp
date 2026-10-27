@@ -94,9 +94,8 @@ function intersection(a: Rect, b: Rect): number {
   return Math.max(0, overlap(a.x, right(a), b.x, right(b))) * Math.max(0, overlap(a.y, bottom(a), b.y, bottom(b)));
 }
 
-export function clampToAreas(rect: Rect, areas: Rect[]): Rect {
-  if (!areas.length) return rect;
-  let area = areas[0];
+export function areaOf(rect: Rect, areas: Rect[]): Rect | null {
+  let area: Rect | null = null;
   let best = -1;
   for (const candidate of areas) {
     const shared = intersection(rect, candidate);
@@ -105,6 +104,12 @@ export function clampToAreas(rect: Rect, areas: Rect[]): Rect {
       area = candidate;
     }
   }
+  return area;
+}
+
+export function clampToAreas(rect: Rect, areas: Rect[]): Rect {
+  const area = areaOf(rect, areas);
+  if (!area) return rect;
   const x = Math.max(area.x, Math.min(rect.x, right(area) - rect.width));
   const y = Math.max(area.y, Math.min(rect.y, bottom(area) - rect.height));
   return { ...rect, x, y };
@@ -112,4 +117,20 @@ export function clampToAreas(rect: Rect, areas: Rect[]): Rect {
 
 export function offsetFrom(origin: Rect, rect: Rect): Point {
   return { x: rect.x - origin.x, y: rect.y - origin.y };
+}
+
+export type ResizeEdge = "left" | "right";
+
+export interface Size {
+  width: number;
+  height: number;
+}
+
+const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(value, Math.max(min, max)));
+
+export function resizedRect(start: Rect, edge: ResizeEdge, delta: Point, min: Size, area: Rect): Rect {
+  const height = clamp(start.height + delta.y, min.height, bottom(area) - start.y);
+  if (edge === "right") return { ...start, width: clamp(start.width + delta.x, min.width, right(area) - start.x), height };
+  const width = clamp(start.width - delta.x, min.width, right(start) - area.x);
+  return { ...start, x: right(start) - width, width, height };
 }

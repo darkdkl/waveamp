@@ -7,7 +7,16 @@ export type VizResponse = "slow" | "smooth" | "peak";
 export type ProxyType = "http" | "socks5";
 export type WindowControlsSide = "left" | "right";
 
-export type DockName = "eq" | "panel";
+export interface AudioSegment {
+  start: number;
+  end: number | null;
+}
+
+export type AudioDataError = "tooLong" | "tooLarge" | "failed";
+
+export type AudioDataResult = { ok: true; data: Uint8Array } | { ok: true; samples: Float32Array } | { ok: false; error: AudioDataError };
+
+export type DockName = "eq" | "chords" | "panel";
 
 export type DockLayout = Partial<Record<DockName | "settings", { x: number; y: number }>>;
 
@@ -174,6 +183,10 @@ export interface AppConfig {
     radioOpen: boolean;
     vizMode: VizMode;
     dock: DockLayout;
+    chordsOpen: boolean;
+    chordsCapo: number;
+    chordsSimplify: boolean;
+    chordsWindowSize: { width: number; height: number } | null;
   };
 }
 

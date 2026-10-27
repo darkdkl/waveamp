@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, clipboard, dialog, ipcMain, type WebContents } from "electron";
 import { loadConfig, saveConfig } from "./config";
 import { clearLogs, openLogFolder, setLoggingEnabled, isLoggingEnabled, writeLog } from "./logging";
 import { applyProxyConfig } from "./network";
@@ -38,13 +38,21 @@ import {
 import { applyGlobalHotkeys } from "./shortcuts";
 import { readAudioFormat, readTrackTags } from "./tags";
 import { systemNaturalScroll } from "./scrollDirection";
+import { audioSegment, readAudioData } from "./audioData";
+import { createWorkerReader } from "./analysisReader";
+import createAnalysisWorker from "./analysisWorker?nodeWorker";
 import {
+  canPositionWindows,
   dockNameOf,
   isManagedName,
+  resizeDock,
   setDockZoom,
   setSeparateWindows,
   startDockDrag,
+  startDockResize,
   stopDockDrag,
+  stopDockResize,
+  toggleDockFull,
   updateDock,
 } from "./dock";
 import { expandPlaylistPaths } from "./cue";
@@ -65,6 +73,11 @@ import type {
   SettingsState,
   StationSearchParams,
 } from "../shared/types";
+
+const analysisReader = createWorkerReader(
+  () => createAnalysisWorker({}),
+  (message) => writeLog("warn", "chords", message)
+);
 
 export function registerIpcHandlers(): void {
   ipcMain.on("settings-window-scale", (_event, percent: number) => setSettingsWindowScale(percent));
@@ -106,13 +119,35 @@ export function registerIpcHandlers(): void {
 
   ipcMain.on("dock-zoom", (_event, factor: number) => setDockZoom(Number(factor)));
 
-  ipcMain.on("dock-drag-start", (event, name: unknown) => {
-    const sender = dockNameOf(event.sender);
-    const target = sender === "main" && isManagedName(name) ? name : sender;
-    if (target) startDockDrag(target);
+  const dockTarget = (sender: WebContents, name: unknown) => {
+    const own = dockNameOf(sender);
+    return own === "main" && isManagedName(name) ? name : own;
+  };
+
+  ipcMain.on("dock-drag-start", (event, name: unknown, movedX: unknown, movedY: unknown) => {
+    const target = dockTarget(event.sender, name);
+    if (target) startDockDrag(target, { x: Number(movedX) || 0, y: Number(movedY) || 0 });
   });
 
   ipcMain.on("dock-drag-end", () => stopDockDrag());
+
+  ipcMain.handle("dock-can-position", () => canPositionWindows());
+
+  ipcMain.on("dock-resize-start", (event, name: unknown, edge: unknown, width: unknown, height: unknown) => {
+    const target = dockTarget(event.sender, name);
+    const min = { width: Number(width), height: Number(height) };
+    if (!target || (edge !== "left" && edge !== "right") || !(min.width > 0) || !(min.height > 0)) return;
+    startDockResize(target, edge, min);
+  });
+
+  ipcMain.on("dock-resize", (_event, dx: unknown, dy: unknown) => resizeDock({ x: Number(dx) || 0, y: Number(dy) || 0 }));
+
+  ipcMain.on("dock-resize-end", () => stopDockResize());
+
+  ipcMain.on("dock-toggle-full", (event, name: unknown) => {
+    const target = dockTarget(event.sender, name);
+    if (target) toggleDockFull(target);
+  });
 
   ipcMain.on("window-minimize", (event) => minimizeSenderWindow(event.sender));
 
@@ -157,6 +192,15 @@ export function registerIpcHandlers(): void {
   );
 
   ipcMain.handle("read-track-cover", (_event, filePath: string) => readCoverArt(filePath));
+
+  ipcMain.handle("read-audio-data", (_event, filePath: string, alac: boolean, start: unknown, end: unknown) =>
+    readAudioData(String(filePath), alac === true, audioSegment(start, end), analysisReader.read).catch((err) => {
+      writeLog("warn", "chords", `Could not read "${filePath}" for chord analysis: ${err.message}`);
+      return { ok: false, error: "failed" } as const;
+    })
+  );
+
+  ipcMain.on("cancel-audio-data", () => analysisReader.cancel());
 
   ipcMain.handle("radio-search", (_event, params: StationSearchParams) => searchStations(params));
   ipcMain.handle("radio-countries", () => fetchCountries());

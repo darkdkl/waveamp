@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils, webFrame } from "electron";
 import type {
   AppConfig,
+  AudioDataResult,
   CountedOption,
   CountryOption,
   DockLayout,
@@ -47,10 +48,18 @@ const api = {
   dockSetSeparate: (enabled: boolean, layout: DockLayout): Promise<boolean> => ipcRenderer.invoke("dock-set-separate", enabled, layout),
   dockUpdate: (update: DockUpdate): void => ipcRenderer.send("dock-update", update),
   dockZoom: (factor: number): void => ipcRenderer.send("dock-zoom", factor),
-  dockDragStart: (name?: "main" | DockName): void => ipcRenderer.send("dock-drag-start", name),
+  dockDragStart: (name?: "main" | DockName, movedX = 0, movedY = 0): void => ipcRenderer.send("dock-drag-start", name, movedX, movedY),
   dockDragEnd: (): void => ipcRenderer.send("dock-drag-end"),
   onDockLayout: (callback: (layout: DockLayout) => void) => ipcRenderer.on("dock-layout", (_event, layout) => callback(layout)),
   onDockClose: (callback: (name: DockName) => void) => ipcRenderer.on("dock-close", (_event, name) => callback(name)),
+  onDockSize: (callback: (name: DockName, size: { width: number; height: number }) => void) =>
+    ipcRenderer.on("dock-size", (_event, name, size) => callback(name, size)),
+  dockCanPosition: (): Promise<boolean> => ipcRenderer.invoke("dock-can-position"),
+  dockResizeStart: (name: DockName, edge: "left" | "right", width: number, height: number): void =>
+    ipcRenderer.send("dock-resize-start", name, edge, width, height),
+  dockResize: (dx: number, dy: number): void => ipcRenderer.send("dock-resize", dx, dy),
+  dockResizeEnd: (): void => ipcRenderer.send("dock-resize-end"),
+  dockToggleFull: (name: DockName): void => ipcRenderer.send("dock-toggle-full", name),
   resizeWindow: (height: number, width: number): void => ipcRenderer.send("window-resize", height, width),
   resizeWindowInstant: (height: number, width: number): void => ipcRenderer.send("window-resize-instant", height, width),
   setZoomFactor: (factor: number): void => webFrame.setZoomFactor(factor),
@@ -60,6 +69,9 @@ const api = {
   readAudioFormat: (filePath: string): Promise<AudioFormat | null> => ipcRenderer.invoke("read-audio-format", filePath),
   expandPlaylistPaths: (paths: string[]): Promise<PlaylistEntry[]> => ipcRenderer.invoke("expand-playlist-paths", paths),
   readTrackCover: (filePath: string): Promise<string | null> => ipcRenderer.invoke("read-track-cover", filePath),
+  readAudioData: (filePath: string, alac: boolean, start: number, end: number | null): Promise<AudioDataResult> =>
+    ipcRenderer.invoke("read-audio-data", filePath, alac, start, end),
+  cancelAudioData: (): void => ipcRenderer.send("cancel-audio-data"),
   getFilePath: (file: File): string | null => {
     try {
       return webUtils.getPathForFile(file) || null;

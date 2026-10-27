@@ -4,6 +4,83 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.34.0] — 2026-10-27
+
+### Added
+- The player can be moved by any empty spot, not only by its title bar:
+  the gaps between buttons, the section headers and titles, the equalizer
+  labels and the margins. Buttons, sliders, lists and screens work as before,
+  and a move starts only after the mouse travels a few pixels. With separate
+  windows this works in every window. On a Linux Wayland desktop without
+  separate windows the player still moves by its title bar
+
+## [1.33.0] — 2026-10-27
+
+### Added
+- Chords on the radio: «Detect chords» listens to the playing station and
+  shows its chords live, about a second late; the key appears after some
+  twenty seconds of music. Pausing or changing the station stops it. Live
+  detection is less accurate than the analysis of files
+- When the next chord is not known yet, an empty fretboard stands in its
+  place, on the radio and at the end of a song
+
+## [1.32.1] — 2026-10-27
+
+### Fixed
+- Chords of a track from a CUE album in one FLAC or WAV file are found from
+  that track alone, so the 20-minute limit counts the track, not the whole
+  album. FLAC and WAV files are read in parts for the analysis, which takes
+  far less memory on long and hi-res files; playback is unchanged
+
+## [1.32.0] — 2026-10-26
+
+### Added
+- The chords window can be stretched by the grips in its bottom corners, up
+  to the whole screen; the chords and fingerings grow with it so they can be
+  read from across the room. A double click on its header fills the screen
+  and brings it back
+- Without separate windows, the button in the chords header pops them out
+  into a window of their own beside the player and brings them back. The
+  popped-out window is not remembered: after a restart the chords are back
+  under the equalizer. With separate windows the chords window keeps its
+  place and size
+
+## [1.31.0] — 2026-10-26
+
+### Changed
+- Chords are a section of their own between the equalizer and the playlist,
+  opened by the guitar button next to the playlist button; they show with
+  the radio too. «Simpler» and «Capo» sit in the section header. With
+  separate windows it gets a window of its own between the equalizer and
+  the playlist
+- The settings button moved to the title bar, on the side opposite the
+  window buttons
+
+## [1.30.1] — 2026-10-26
+
+### Changed
+- The chords screen is taller and shows the previous, current and next chord
+  side by side, each fingering with its name below; on a chord change the row
+  slides left like a tape. The strip of upcoming chords under it is gone
+
+### Fixed
+- The capo list opens inside the window instead of running past its right
+  edge
+- Fmaj7-style shapes up the neck (F#maj7, G#maj7) no longer show a barre
+  across the muted string
+
+## [1.30.0] — 2026-10-26
+
+### Added
+- Chords of the playing song: the guitar button in the playlist header opens
+  a block above the list, and «Detect chords» analyses the track in a few
+  seconds. It shows the current chord with its fingering, the next one and
+  the chords ahead, and follows playback and seeking. Capo (0–7) moves the
+  shapes, «Simpler» turns sevenths into plain chords. Major, minor and
+  seventh chords are recognised; the key picks sharps or flats. Local files
+  up to 20 minutes (for a CUE album, the whole album file); everything runs
+  on the computer
+
 ## [1.29.1] — 2026-10-18
 
 ### Added

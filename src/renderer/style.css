@@ -157,6 +157,29 @@ body.is-electron .player::before {
   background: #b03a3a;
 }
 
+.player__settings {
+  position: absolute;
+  right: 0;
+  top: -2px;
+  padding: 0;
+  -webkit-app-region: no-drag;
+}
+
+.player__settings svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
+.player__settings.is-active {
+  color: var(--accent);
+}
+
+.window-controls-right .player__settings {
+  right: auto;
+  left: 0;
+}
+
 .section-close {
   display: none;
   flex: none;
@@ -187,14 +210,14 @@ body.is-detached .section-title {
   flex: 1;
 }
 
-body.is-detached :is(.eq__header, .playlist__header, .radio__header) {
+body.is-detached :is(.eq__header, .chords-section__header, .playlist__header, .radio__header) {
   gap: 10px;
   min-height: calc(var(--section-header-height) + 1px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: calc(12px - var(--section-gap));
 }
 
-body.is-detached :is(.eq__inner, .playlist__inner, .radio__inner) {
+body.is-detached :is(.eq__inner, .chords-section__inner, .playlist__inner, .radio__inner) {
   padding-top: 0;
 }
 
@@ -202,7 +225,54 @@ body.is-detached .eq__inner {
   padding-bottom: 0;
 }
 
-body.is-detached :is(.eq, .playlist, .radio) {
+body.is-detached .chords-section__inner {
+  padding-bottom: calc(var(--player-padding) - 6px);
+}
+
+.player--detached:has(> .chords-section) {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.player--detached > .chords-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.player--detached :is(.chords-section__inner, .chords) {
+  flex: 1;
+  min-height: 0;
+}
+
+.player--detached .chords__lcd {
+  flex: 1;
+  height: auto;
+  min-height: var(--chords-lcd-height);
+}
+
+.chords__popout-in,
+body.is-floating .chords__popout-out,
+body.is-separated .chords__popout,
+body.is-detached:not(.is-floating) .chords__popout {
+  display: none;
+}
+
+body.is-floating .chords__popout-in {
+  display: block;
+}
+
+body.cannot-position.is-floating .chords-section__header {
+  -webkit-app-region: drag;
+}
+
+body.cannot-position.is-floating .chords-section__header :is(button, select, label) {
+  -webkit-app-region: no-drag;
+}
+
+body.is-detached :is(.eq, .chords-section, .playlist, .radio) {
   transition: none;
 }
 
@@ -807,6 +877,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header .btn--icon,
+.chords-section__header .btn--icon,
 .playlist__header .btn--icon,
 .radio__header .btn--icon,
 .radio__subheader .btn--icon,
@@ -818,6 +889,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header .btn--icon:hover:not(:disabled),
+.chords-section__header .btn--icon:hover,
 .playlist__header .btn--icon:hover,
 .radio__header .btn--icon:hover,
 .radio__subheader .btn--icon:hover,
@@ -826,6 +898,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header .btn--icon svg,
+.chords-section__header .btn--icon svg,
 .playlist__header .btn--icon svg,
 .radio__header .btn--icon svg,
 .radio__subheader .btn--icon svg,
@@ -886,6 +959,7 @@ input[type="range"]:disabled {
 .playlist.is-resizing,
 .is-restoring .playlist,
 .is-restoring .eq,
+.is-restoring .chords-section,
 .is-restoring .radio {
   transition: none;
 }
@@ -896,6 +970,209 @@ input[type="range"]:disabled {
   gap: var(--section-gap);
   padding-top: var(--section-pad-top);
 }
+
+.chords-section {
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: max-height 180ms ease;
+}
+
+.chords-section.is-open {
+  pointer-events: auto;
+}
+
+.chords-section__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  padding-top: var(--section-pad-top);
+}
+
+.chords {
+  --chords-font: "DejaVu Sans Mono", "Courier New", monospace;
+  --chords-lcd-height: 111px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chords__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.chords__popout {
+  margin-left: 12px;
+}
+
+.chords__capo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+.chords__select {
+  height: var(--control-height);
+  min-height: 0;
+  line-height: 1;
+  padding: 0 6px;
+  align-items: center;
+  background: linear-gradient(180deg, var(--btn-bg), var(--btn-bg-active));
+  border: 1px solid #000;
+  border-radius: var(--control-radius);
+  color: var(--text);
+  font-size: var(--control-font-size);
+  cursor: pointer;
+}
+
+.chords__lcd {
+  position: relative;
+  overflow: hidden;
+  height: var(--chords-lcd-height);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--lcd-bg);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  font-family: var(--chords-font);
+  color: var(--lcd-fg);
+  container-type: size;
+  --px: min(calc(100cqh / 109), calc(100cqw / 200));
+}
+
+.chords__message {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(8 * var(--px));
+  font-size: calc(11 * var(--px));
+  color: var(--lcd-fg-dim);
+  text-align: center;
+}
+
+.chords__message[hidden],
+.chords__result[hidden],
+.chords__analyze[hidden] {
+  display: none;
+}
+
+.chords__analyze {
+  height: var(--control-height);
+  padding: 0 var(--control-pad-x);
+  background: linear-gradient(180deg, var(--btn-bg), var(--btn-bg-active));
+  border: 1px solid #000;
+  border-radius: var(--control-radius);
+  color: var(--text);
+  font-size: var(--control-font-size);
+  cursor: pointer;
+}
+
+.chords__analyze:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--btn-bg-hover), var(--btn-bg));
+}
+
+.chords__analyze:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.chords__result {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: calc(5 * var(--px)) 0;
+}
+
+.chords__chord {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--px));
+}
+
+.chords__chord--side {
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+.chords__name {
+  font-size: calc(24 * var(--px));
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 0 6px hsl(var(--accent-h) var(--accent-s) 74% / 0.55);
+}
+
+.chords__chord--side .chords__name {
+  font-size: calc(15 * var(--px));
+  color: var(--lcd-fg-dim);
+  text-shadow: none;
+}
+
+.chords__chord--side .chords__diagram {
+  opacity: 0.5;
+}
+
+.chords__diagram {
+  width: calc(66 * var(--px));
+  height: calc(73 * var(--px));
+  flex: none;
+}
+
+.chords__chord--side .chords__diagram {
+  width: calc(49 * var(--px));
+  height: calc(54 * var(--px));
+}
+
+.chords__line {
+  stroke: var(--lcd-fg-dim);
+  stroke-width: 0.8;
+}
+
+.chords__nut {
+  stroke: var(--lcd-fg-dim);
+  stroke-width: 2.2;
+}
+
+.chords__dot {
+  fill: var(--lcd-fg);
+}
+
+.chords__open {
+  fill: none;
+  stroke: var(--lcd-fg);
+  stroke-width: 0.9;
+}
+
+.chords__mute,
+.chords__fret {
+  fill: var(--lcd-fg-dim);
+  font-family: var(--chords-font);
+  font-size: 7px;
+}
+
+.chords__mute {
+  text-anchor: middle;
+}
+
+.chords__meta {
+  position: absolute;
+  top: calc(6 * var(--px));
+  right: calc(10 * var(--px));
+  font-size: calc(10 * var(--px));
+  color: var(--lcd-fg-dim);
+  text-align: right;
+}
+
 
 .playlist__list-frame {
   height: var(--list-height);
@@ -1110,6 +1387,7 @@ input[type="range"]:disabled {
 }
 
 .eq__header,
+.chords-section__header,
 .playlist__header,
 .radio__header {
   display: flex;
@@ -2026,16 +2304,20 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
 }
 
 .radio__select,
-.radio__select::picker(select) {
+.radio__select::picker(select),
+.chords__select,
+.chords__select::picker(select) {
   appearance: base-select;
 }
 
-.radio__select::picker-icon {
+.radio__select::picker-icon,
+.chords__select::picker-icon {
   color: var(--text-muted);
   font-size: 9px;
 }
 
-.radio__select::picker(select) {
+.radio__select::picker(select),
+.chords__select::picker(select) {
   position-area: bottom span-right;
   position-try-fallbacks: none;
   margin-top: 2px;
@@ -2050,38 +2332,51 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
 }
 
-.radio__select::picker(select)::-webkit-scrollbar {
+.chords__select::picker(select) {
+  position-area: bottom span-left;
+  min-width: anchor-size(width);
+}
+
+.radio__select::picker(select)::-webkit-scrollbar,
+.chords__select::picker(select)::-webkit-scrollbar {
   width: 8px;
 }
 
-.radio__select::picker(select)::-webkit-scrollbar-track {
+.radio__select::picker(select)::-webkit-scrollbar-track,
+.chords__select::picker(select)::-webkit-scrollbar-track {
   background: var(--well);
   border-radius: 3px;
 }
 
-.radio__select::picker(select)::-webkit-scrollbar-thumb {
+.radio__select::picker(select)::-webkit-scrollbar-thumb,
+.chords__select::picker(select)::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--knob-1), var(--knob-2));
   border: 1px solid #000;
   border-radius: 3px;
 }
 
-.radio__select option {
+.radio__select option,
+.chords__select option {
   padding: 4px 10px;
   font-size: 11px;
   white-space: nowrap;
 }
 
-.radio__select option::checkmark {
+.radio__select option::checkmark,
+.chords__select option::checkmark {
   display: none;
 }
 
 .radio__select option:hover,
-.radio__select option:focus-visible {
+.radio__select option:focus-visible,
+.chords__select option:hover,
+.chords__select option:focus-visible {
   background: var(--btn-bg-hover);
   outline: none;
 }
 
-.radio__select option:checked {
+.radio__select option:checked,
+.chords__select option:checked {
   background: var(--accent-dim);
   color: #fff;
 }
@@ -2146,6 +2441,32 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
 .window-grip--player {
   --grip-right: calc(var(--player-padding) / 2 - 1.5px);
   --grip-bottom: 8.5px;
+  display: none;
+}
+
+.window-grip--chords {
+  --grip-right: calc(var(--player-padding) / 2 - 1.5px);
+  --grip-bottom: 3px;
+  display: none;
+}
+
+.window-grip--chords-left {
+  right: auto;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.window-grip--chords-left svg {
+  right: auto;
+  left: calc(var(--grip-right) - 1px);
+  transform: scaleX(-1);
+}
+
+body.is-detached .window-grip--chords {
+  display: block;
+}
+
+body.cannot-position .window-grip--chords-left {
   display: none;
 }
 
