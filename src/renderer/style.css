@@ -1043,7 +1043,7 @@ input[type="range"]:disabled {
   font-family: var(--chords-font);
   color: var(--lcd-fg);
   container-type: size;
-  --px: min(calc(100cqh / 109), calc(100cqw / 426));
+  --px: min(calc(100cqh / 109), calc(100cqw / 200));
 }
 
 .chords__message {
