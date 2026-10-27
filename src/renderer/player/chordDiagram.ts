@@ -4,10 +4,7 @@ const STRING_X = (string: number) => 9 + string * 8;
 const FRET_Y = (fret: number) => 12 + fret * 12;
 const FRETS_SHOWN = 4;
 
-export function chordDiagramSvg(shape: ChordShape): string {
-  const played = shape.frets.filter((fret) => fret > 0);
-  const highest = played.length ? Math.max(...played) : 0;
-  const base = highest > FRETS_SHOWN ? Math.min(...played) : 1;
+function grid(base: number): string[] {
   const parts: string[] = [];
   for (let string = 0; string < 6; string++) {
     parts.push(`<line x1="${STRING_X(string)}" y1="${FRET_Y(0)}" x2="${STRING_X(string)}" y2="${FRET_Y(FRETS_SHOWN)}" class="chords__line"/>`);
@@ -16,6 +13,22 @@ export function chordDiagramSvg(shape: ChordShape): string {
     const nut = fret === 0 && base === 1;
     parts.push(`<line x1="${STRING_X(0)}" y1="${FRET_Y(fret)}" x2="${STRING_X(5)}" y2="${FRET_Y(fret)}" class="${nut ? "chords__nut" : "chords__line"}"/>`);
   }
+  return parts;
+}
+
+function svg(parts: string[]): string {
+  return `<svg class="chords__diagram" viewBox="0 0 58 64" aria-hidden="true">${parts.join("")}</svg>`;
+}
+
+export function emptyChordDiagramSvg(): string {
+  return svg(grid(1));
+}
+
+export function chordDiagramSvg(shape: ChordShape): string {
+  const played = shape.frets.filter((fret) => fret > 0);
+  const highest = played.length ? Math.max(...played) : 0;
+  const base = highest > FRETS_SHOWN ? Math.min(...played) : 1;
+  const parts = grid(base);
   if (base > 1) parts.push(`<text x="1" y="${FRET_Y(0) + 9}" class="chords__fret">${base}</text>`);
   const row = (fret: number) => (FRET_Y(fret - base) + FRET_Y(fret - base + 1)) / 2;
   if (shape.barre) {
@@ -30,5 +43,5 @@ export function chordDiagramSvg(shape: ChordShape): string {
       parts.push(`<circle cx="${x}" cy="${row(fret)}" r="3.4" class="chords__dot"/>`);
     }
   });
-  return `<svg class="chords__diagram" viewBox="0 0 58 64" aria-hidden="true">${parts.join("")}</svg>`;
+  return svg(parts);
 }

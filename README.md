@@ -64,7 +64,10 @@ Runs on macOS, Windows and Linux.
 - **Chords of the playing song** — analyses a track on request and shows the
   previous, current and next chord with guitar fingerings as it plays, with
   capo and a simpler mode; the chords can pop out into their own window and
-  stretch up to the whole screen; all on your computer
+  stretch up to the whole screen; all on your computer. On the radio the
+  chords are detected live as the station plays: they come about a second
+  late and are less accurate than for files, since there is no look ahead and
+  speech or adverts get in the way
 - **Separate windows** — the equalizer, the chords and the playlist/radio can
   live in their own windows that snap to each other and to the screen edges,
   move with the player and remember where they were (on a Linux Wayland

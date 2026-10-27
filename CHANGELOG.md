@@ -4,6 +4,16 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.33.0] — 2026-10-27
+
+### Added
+- Chords on the radio: «Detect chords» listens to the playing station and
+  shows its chords live, about a second late; the key appears after some
+  twenty seconds of music. Pausing or changing the station stops it. Live
+  detection is less accurate than the analysis of files
+- When the next chord is not known yet, an empty fretboard stands in its
+  place, on the radio and at the end of a song
+
 ## [1.32.1] — 2026-10-27
 
 ### Fixed

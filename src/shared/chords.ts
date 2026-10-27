@@ -226,53 +226,68 @@ export function chordScores(frame: ChromaFrame): number[] {
   });
 }
 
-export function smoothChords(frames: (ChromaFrame | null)[]): (Chord | null)[] {
-  const states = ALL_CHORDS.length + 1;
-  const noChord = ALL_CHORDS.length;
-  const stay = Math.log(1 - SWITCH_PROBABILITY);
-  const move = Math.log(SWITCH_PROBABILITY / (states - 1));
-  const emissions = frames.map((frame) => {
-    const row = new Float64Array(states);
-    if (!frame) {
-      row.fill(-EMISSION_SHARPNESS);
-      row[noChord] = 0;
-      return row;
-    }
-    chordScores(frame).forEach((score, i) => (row[i] = EMISSION_SHARPNESS * score));
-    row[noChord] = EMISSION_SHARPNESS * NO_CHORD_SCORE;
+const STATES = ALL_CHORDS.length + 1;
+const NO_CHORD = ALL_CHORDS.length;
+const STAY = Math.log(1 - SWITCH_PROBABILITY);
+const MOVE = Math.log(SWITCH_PROBABILITY / (STATES - 1));
+
+function emission(frame: ChromaFrame | null): Float64Array {
+  const row = new Float64Array(STATES);
+  if (!frame) {
+    row.fill(-EMISSION_SHARPNESS);
+    row[NO_CHORD] = 0;
     return row;
-  });
-  if (!emissions.length) return [];
-  let scores = Float64Array.from(emissions[0]);
-  const back: Int32Array[] = [];
-  for (let t = 1; t < emissions.length; t++) {
-    let best = 0;
-    for (let s = 1; s < states; s++) if (scores[s] > scores[best]) best = s;
-    const next = new Float64Array(states);
-    const from = new Int32Array(states);
-    for (let s = 0; s < states; s++) {
-      const kept = scores[s] + stay;
-      const switched = scores[best] + move;
-      if (kept >= switched || best === s) {
-        next[s] = kept + emissions[t][s];
-        from[s] = s;
-      } else {
-        next[s] = switched + emissions[t][s];
-        from[s] = best;
-      }
+  }
+  chordScores(frame).forEach((score, i) => (row[i] = EMISSION_SHARPNESS * score));
+  row[NO_CHORD] = EMISSION_SHARPNESS * NO_CHORD_SCORE;
+  return row;
+}
+
+function bestState(scores: Float64Array): number {
+  let best = 0;
+  for (let s = 1; s < STATES; s++) if (scores[s] > scores[best]) best = s;
+  return best;
+}
+
+function viterbiStep(scores: Float64Array, row: Float64Array): { next: Float64Array; from: Int32Array } {
+  const best = bestState(scores);
+  const next = new Float64Array(STATES);
+  const from = new Int32Array(STATES);
+  for (let s = 0; s < STATES; s++) {
+    const kept = scores[s] + STAY;
+    const switched = scores[best] + MOVE;
+    if (kept >= switched || best === s) {
+      next[s] = kept + row[s];
+      from[s] = s;
+    } else {
+      next[s] = switched + row[s];
+      from[s] = best;
     }
+  }
+  return { next, from };
+}
+
+function stateChord(state: number): Chord | null {
+  return state === NO_CHORD ? null : ALL_CHORDS[state];
+}
+
+export function smoothChords(frames: (ChromaFrame | null)[]): (Chord | null)[] {
+  if (!frames.length) return [];
+  let scores = emission(frames[0]);
+  const back: Int32Array[] = [];
+  for (let t = 1; t < frames.length; t++) {
+    const { next, from } = viterbiStep(scores, emission(frames[t]));
     back.push(from);
     scores = next;
   }
-  let state = 0;
-  for (let s = 1; s < states; s++) if (scores[s] > scores[state]) state = s;
-  const path = new Int32Array(emissions.length);
-  path[emissions.length - 1] = state;
-  for (let t = emissions.length - 1; t > 0; t--) {
+  let state = bestState(scores);
+  const path = new Int32Array(frames.length);
+  path[frames.length - 1] = state;
+  for (let t = frames.length - 1; t > 0; t--) {
     state = back[t - 1][state];
     path[t - 1] = state;
   }
-  return Array.from(path, (s) => (s === noChord ? null : ALL_CHORDS[s]));
+  return Array.from(path, stateChord);
 }
 
 export function estimateKey(events: ChordEvent[]): MusicalKey {
@@ -313,7 +328,7 @@ function sameChord(a: Chord | null, b: Chord | null): boolean {
   return a === b || (!!a && !!b && a.root === b.root && a.quality === b.quality);
 }
 
-export function toEvents(chords: (Chord | null)[], sampleRate = ANALYSIS_SAMPLE_RATE): ChordEvent[] {
+export function toEvents(chords: (Chord | null)[], sampleRate = ANALYSIS_SAMPLE_RATE, keepLast = false): ChordEvent[] {
   const frameSeconds = HOP_SIZE / sampleRate;
   const offset = FRAME_SIZE / 2 / sampleRate - frameSeconds / 2;
   const events: ChordEvent[] = [];
@@ -324,7 +339,7 @@ export function toEvents(chords: (Chord | null)[], sampleRate = ANALYSIS_SAMPLE_
     else events.push({ start, end: start + frameSeconds, chord });
   });
   for (let i = 0; i < events.length; i++) {
-    if (events.length < 2 || events[i].end - events[i].start >= MIN_EVENT_SECONDS) continue;
+    if (events.length < 2 || events[i].end - events[i].start >= MIN_EVENT_SECONDS || (keepLast && i === events.length - 1)) continue;
     const target = i > 0 ? i - 1 : i + 1;
     events[target].start = Math.min(events[target].start, events[i].start);
     events[target].end = Math.max(events[target].end, events[i].end);
@@ -364,6 +379,93 @@ export async function analyzeChordsInSteps(
   }
   const events = toEvents(smoothChords(frames));
   return { key: estimateKey(events), events };
+}
+
+export interface LiveChords {
+  key: MusicalKey | null;
+  events: ChordEvent[];
+}
+
+export const LIVE_LAG_SECONDS = 0.7;
+const LIVE_LAG_FRAMES = Math.max(1, Math.round((LIVE_LAG_SECONDS * ANALYSIS_SAMPLE_RATE) / HOP_SIZE));
+const LIVE_HISTORY_FRAMES = Math.round((10 * 60 * ANALYSIS_SAMPLE_RATE) / HOP_SIZE);
+const LIVE_KEY_WINDOW_SECONDS = 60;
+const LIVE_KEY_MIN_SECONDS = 20;
+
+export class LiveChordTracker {
+  private pending = new Float32Array(0);
+  private pendingStart = 0;
+  private nextFrame = 0;
+  private scores: Float64Array | null = null;
+  private back: Int32Array[] = [];
+  private chords: (Chord | null)[] = [];
+  private dropped = 0;
+  private readonly re = new Float64Array(FRAME_SIZE);
+  private readonly im = new Float64Array(FRAME_SIZE);
+
+  push(samples: Float32Array): boolean {
+    const merged = new Float32Array(this.pending.length + samples.length);
+    merged.set(this.pending);
+    merged.set(samples, this.pending.length);
+    this.pending = merged;
+    const before = this.chords.length + this.dropped;
+    while (this.nextFrame + FRAME_SIZE <= this.pendingStart + this.pending.length) {
+      this.step(chromaFrame(this.pending, this.nextFrame - this.pendingStart, ANALYSIS_SAMPLE_RATE, this.re, this.im));
+      this.nextFrame += HOP_SIZE;
+    }
+    this.pending = this.pending.subarray(this.nextFrame - this.pendingStart);
+    this.pendingStart = this.nextFrame;
+    return this.chords.length + this.dropped > before;
+  }
+
+  flush(): void {
+    while (this.scores && this.back.length) this.finalizeOldest();
+    if (this.scores) this.chords.push(stateChord(bestState(this.scores)));
+    this.scores = null;
+  }
+
+  get time(): number {
+    return (this.dropped + this.chords.length) * (HOP_SIZE / ANALYSIS_SAMPLE_RATE);
+  }
+
+  result(): LiveChords {
+    const shift = this.dropped * (HOP_SIZE / ANALYSIS_SAMPLE_RATE);
+    const events = toEvents(this.chords, ANALYSIS_SAMPLE_RATE, true).map((event) => ({ ...event, start: event.start + shift, end: event.end + shift }));
+    return { key: this.key(events), events };
+  }
+
+  private key(events: ChordEvent[]): MusicalKey | null {
+    const from = this.time - LIVE_KEY_WINDOW_SECONDS;
+    const recent = events
+      .filter((event) => event.end > from)
+      .map((event) => ({ ...event, start: Math.max(event.start, from) }));
+    const voiced = recent.reduce((sum, event) => sum + (event.chord ? event.end - event.start : 0), 0);
+    return voiced >= LIVE_KEY_MIN_SECONDS ? estimateKey(recent) : null;
+  }
+
+  private step(frame: ChromaFrame | null): void {
+    const row = emission(frame);
+    if (!this.scores) {
+      this.scores = row;
+      return;
+    }
+    const { next, from } = viterbiStep(this.scores, row);
+    this.back.push(from);
+    this.scores = next;
+    if (this.back.length > LIVE_LAG_FRAMES) this.finalizeOldest();
+  }
+
+  private finalizeOldest(): void {
+    let state = bestState(this.scores as Float64Array);
+    for (let i = this.back.length - 1; i >= 0; i--) state = this.back[i][state];
+    this.chords.push(stateChord(state));
+    this.back.shift();
+    if (this.chords.length > LIVE_HISTORY_FRAMES) {
+      const excess = this.chords.length - LIVE_HISTORY_FRAMES;
+      this.chords.splice(0, excess);
+      this.dropped += excess;
+    }
+  }
 }
 
 export function simplifyChord(chord: Chord): Chord {

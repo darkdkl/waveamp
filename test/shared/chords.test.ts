@@ -12,6 +12,8 @@ import {
   estimateKey,
   eventAt,
   fft,
+  LIVE_LAG_SECONDS,
+  LiveChordTracker,
   simplifyChord,
   usesFlats,
   type Chord,
@@ -126,6 +128,52 @@ describe("chord recognition", () => {
   it("marks silence as no chord", () => {
     const { events } = analyzeChords(synth([am, null, am], 2));
     expect(events.map((event) => event.chord)).toEqual([am, null, am]);
+  });
+});
+
+function live(samples: Float32Array, chunk: number, flush = true): LiveChordTracker {
+  const tracker = new LiveChordTracker();
+  for (let i = 0; i < samples.length; i += chunk) tracker.push(samples.subarray(i, i + chunk));
+  if (flush) tracker.flush();
+  return tracker;
+}
+
+describe("live chord tracking", () => {
+  it("follows a progression fed in small chunks, like the full analysis", () => {
+    const { events } = live(synth([am, f, c, g], 2), 1000).result();
+    expect(events.map((event) => event.chord)).toEqual([am, f, c, g]);
+    events.slice(1).forEach((event, i) => expect(Math.abs(event.start - (i + 1) * 2)).toBeLessThan(0.45));
+  });
+
+  it("recognises strummed chords over drums as it goes", () => {
+    const song: Chord[] = [c, am, { root: 2, quality: "m7" }, { root: 7, quality: "7" }, { root: 0, quality: "maj7" }, f];
+    const { events } = live(strummed(song, 2), 4096).result();
+    expect(song.map((_, bar) => events[eventAt(events, bar * 2 + 1)].chord)).toEqual(song);
+  });
+
+  it("settles a chord change about a second after it is heard", () => {
+    const samples = synth([am, f], 4);
+    const tracker = new LiveChordTracker();
+    let shownAt = -1;
+    for (let i = 0; i < samples.length && shownAt < 0; i += 512) {
+      tracker.push(samples.subarray(i, i + 512));
+      if (tracker.result().events.some((event) => event.chord === f || (event.chord && event.chord.root === f.root && event.chord.quality === f.quality))) shownAt = (i + 512) / RATE;
+    }
+    expect(shownAt - 4).toBeGreaterThanOrEqual(LIVE_LAG_SECONDS);
+    expect(shownAt - 4).toBeLessThan(LIVE_LAG_SECONDS + 0.8);
+  });
+
+  it("names the key only after enough music, from the recent part", () => {
+    const short = live(synth([am, f, c, g], 2), 4096).result();
+    expect(short.key).toBeNull();
+    const samples = synth([am, f, c, g, am, f, c, g, am, f, c, g], 2);
+    expect(live(samples, 4096).result().key).toEqual(analyzeChords(samples).key);
+  });
+
+  it("reports when new chords have been settled", () => {
+    const tracker = new LiveChordTracker();
+    expect(tracker.push(new Float32Array(1000))).toBe(false);
+    expect(tracker.push(synth([am], 2))).toBe(true);
   });
 });
 
