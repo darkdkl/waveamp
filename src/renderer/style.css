@@ -1005,7 +1005,7 @@ input[type="range"]:disabled {
 }
 
 .chords__popout {
-  margin-left: 6px;
+  margin-left: 12px;
 }
 
 .chords__capo {
