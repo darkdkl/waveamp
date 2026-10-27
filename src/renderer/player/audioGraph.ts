@@ -188,7 +188,10 @@ export function resumeAudioContext(): void {
 let chordTapModule: Promise<void> | null = null;
 
 export async function startChordTap(onSamples: (samples: Float32Array, sampleRate: number) => void): Promise<() => void> {
-  chordTapModule ??= audioCtx.audioWorklet.addModule(chordTapUrl);
+  chordTapModule ??= audioCtx.audioWorklet.addModule(chordTapUrl).catch((err: unknown) => {
+    chordTapModule = null;
+    throw err;
+  });
   await chordTapModule;
   const tap = new AudioWorkletNode(audioCtx, "chord-tap", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] });
   const mute = audioCtx.createGain();

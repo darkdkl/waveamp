@@ -328,7 +328,7 @@ function sameChord(a: Chord | null, b: Chord | null): boolean {
   return a === b || (!!a && !!b && a.root === b.root && a.quality === b.quality);
 }
 
-export function toEvents(chords: (Chord | null)[], sampleRate = ANALYSIS_SAMPLE_RATE, keepLast = false): ChordEvent[] {
+export function toEvents(chords: (Chord | null)[], sampleRate = ANALYSIS_SAMPLE_RATE, mergeShort = true): ChordEvent[] {
   const frameSeconds = HOP_SIZE / sampleRate;
   const offset = FRAME_SIZE / 2 / sampleRate - frameSeconds / 2;
   const events: ChordEvent[] = [];
@@ -339,7 +339,7 @@ export function toEvents(chords: (Chord | null)[], sampleRate = ANALYSIS_SAMPLE_
     else events.push({ start, end: start + frameSeconds, chord });
   });
   for (let i = 0; i < events.length; i++) {
-    if (events.length < 2 || events[i].end - events[i].start >= MIN_EVENT_SECONDS || (keepLast && i === events.length - 1)) continue;
+    if (!mergeShort || events.length < 2 || events[i].end - events[i].start >= MIN_EVENT_SECONDS) continue;
     const target = i > 0 ? i - 1 : i + 1;
     events[target].start = Math.min(events[target].start, events[i].start);
     events[target].end = Math.max(events[target].end, events[i].end);
@@ -430,7 +430,7 @@ export class LiveChordTracker {
 
   result(): LiveChords {
     const shift = this.dropped * (HOP_SIZE / ANALYSIS_SAMPLE_RATE);
-    const events = toEvents(this.chords, ANALYSIS_SAMPLE_RATE, true).map((event) => ({ ...event, start: event.start + shift, end: event.end + shift }));
+    const events = toEvents(this.chords, ANALYSIS_SAMPLE_RATE, false).map((event) => ({ ...event, start: event.start + shift, end: event.end + shift }));
     return { key: this.key(events), events };
   }
 

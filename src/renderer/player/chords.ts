@@ -25,6 +25,7 @@ import { renderSwitch } from "../switchControl";
 import { chordDiagramSvg, emptyChordDiagramSvg } from "./chordDiagram";
 import { startChordTap } from "./audioGraph";
 import { Resampler } from "../../shared/resample";
+import { liveStateAfter, radioIdleState, type LiveSignal, type LiveState } from "./chordsLive";
 import { chordShape } from "../../shared/chordShapes";
 import {
   ANALYSIS_SAMPLE_RATE,
@@ -87,6 +88,10 @@ function currentSource(): Source | null {
 
 function isLive(): boolean {
   return status === "listening" || status === "live";
+}
+
+function streamBlocked(): boolean {
+  return audio.crossOrigin === null;
 }
 
 function displayedChord(chord: Chord): Chord {
@@ -166,8 +171,8 @@ function render(): void {
   }
   if (source.kind === "radio") {
     if (status === "listening") showMessage(i18n.t("chordsListening"), false);
-    else if (status === "unavailable") showMessage(i18n.t("chordsNoStream"), false);
-    else if (status === "failed") showMessage(i18n.t("chordsFailed"), false);
+    else if (status === "unavailable" || radioIdleState(streamBlocked()) === "unavailable") showMessage(i18n.t("chordsNoStream"), false);
+    else if (status === "failed") showMessage(i18n.t("chordsLiveFailed"), false);
     else if (audio.paused) showMessage(i18n.t("chordsPlayStation"), false);
     else showMessage(i18n.t("chordsRadioPrompt"), true);
     return;
@@ -245,7 +250,7 @@ async function trackSamples(track: Track & { path: string }): Promise<Float32Arr
 }
 
 async function listenToStation(key: string): Promise<void> {
-  if (audio.crossOrigin === null) {
+  if (streamBlocked()) {
     status = "unavailable";
     render();
     return;
@@ -377,16 +382,13 @@ export function initChords(): void {
     updatePosition();
     scheduleTick();
   });
-  for (const type of ["play", "pause", "emptied", "ended"]) audio.addEventListener(type, () => {
-    if (currentSource()?.kind !== "radio") return;
-    if (type !== "play" && isLive()) endLive();
-    render();
-  });
-  audio.addEventListener("playing", () => {
-    if (isLive() && audio.crossOrigin === null) {
-      endLive("unavailable");
-      render();
-    }
-  });
+  for (const signal of ["pause", "ended", "emptied", "play", "waiting", "playing"] as LiveSignal[]) {
+    audio.addEventListener(signal, () => {
+      if (currentSource()?.kind !== "radio") return;
+      const next = liveStateAfter(status as LiveState, signal, streamBlocked());
+      if (isLive() && next !== status) endLive(next);
+      if (!isLive()) render();
+    });
+  }
   refreshChords();
 }
