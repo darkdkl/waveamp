@@ -124,9 +124,9 @@ export function registerIpcHandlers(): void {
     return own === "main" && isManagedName(name) ? name : own;
   };
 
-  ipcMain.on("dock-drag-start", (event, name: unknown) => {
+  ipcMain.on("dock-drag-start", (event, name: unknown, movedX: unknown, movedY: unknown) => {
     const target = dockTarget(event.sender, name);
-    if (target) startDockDrag(target);
+    if (target) startDockDrag(target, { x: Number(movedX) || 0, y: Number(movedY) || 0 });
   });
 
   ipcMain.on("dock-drag-end", () => stopDockDrag());

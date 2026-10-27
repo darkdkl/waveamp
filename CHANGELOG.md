@@ -4,6 +4,16 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.34.0] — 2026-10-27
+
+### Added
+- The player can be moved by any empty spot, not only by its title bar:
+  the gaps between buttons, the section headers and titles, the equalizer
+  labels and the margins. Buttons, sliders, lists and screens work as before,
+  and a move starts only after the mouse travels a few pixels. With separate
+  windows this works in every window. On a Linux Wayland desktop without
+  separate windows the player still moves by its title bar
+
 ## [1.33.0] — 2026-10-27
 
 ### Added

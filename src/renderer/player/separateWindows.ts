@@ -4,9 +4,9 @@ import { persistConfig } from "./config";
 import { addPlayerDocument, removePlayerDocument } from "./documents";
 import { attachDropTarget } from "./playlist";
 import type { DockName, DockUpdate, DockWindowState } from "../../shared/types";
+import { dragMoved, startsDrag } from "./dragHandle";
 
 const INTERACTIVE = "button, select, input, textarea, a, label, [role='switch'], [contenteditable='true'], .playlist__add-menu";
-const SECTION_HEADERS = ".eq__header, .chords-section__header, .playlist__header, .radio__header";
 
 interface DockWindow {
   win: Window;
@@ -22,7 +22,7 @@ let mirror: MutationObserver | null = null;
 let queue: Promise<void> = Promise.resolve();
 let floating: DockWindow | null = null;
 let floatingSize: Size | null = null;
-let canPosition = true;
+let canPosition = false;
 
 export const WINDOW_WIDTH_BASE = 480;
 
@@ -69,21 +69,47 @@ function stopMirror(): void {
 }
 
 function dragAllowed(name: "main" | DockName): boolean {
-  return state.separateActive || (name === "chords" && !!floating && canPosition);
+  if (state.separateActive) return true;
+  return canPosition && (name === "main" || (name === "chords" && !!floating));
 }
 
-function enableDrag(root: HTMLElement, name: "main" | DockName, isHandle: (target: Element) => boolean): void {
+function pathToRoot(target: EventTarget | null, root: HTMLElement): Element[] {
+  const path: Element[] = [];
+  for (let node = target as Element | null; node; node = node.parentElement) {
+    path.push(node);
+    if (node === root) return path;
+  }
+  return [];
+}
+
+function enableDrag(root: HTMLElement, name: "main" | DockName): void {
+  let pressed: { id: number; x: number; y: number } | null = null;
+  let dragging = false;
   root.addEventListener("pointerdown", (e) => {
-    if (!dragAllowed(name) || e.button !== 0) return;
-    const target = e.target as Element;
-    if (target.closest(INTERACTIVE) || !isHandle(target)) return;
+    if (e.button !== 0 || !dragAllowed(name) || !startsDrag(pathToRoot(e.target, root))) return;
+    pressed = { id: e.pointerId, x: e.screenX, y: e.screenY };
+  });
+  root.addEventListener("pointermove", (e) => {
+    if (!pressed || dragging || e.pointerId !== pressed.id) return;
+    if (!(e.buttons & 1)) {
+      pressed = null;
+      return;
+    }
+    const dx = e.screenX - pressed.x;
+    const dy = e.screenY - pressed.y;
+    if (!dragMoved(dx, dy)) return;
+    dragging = true;
     root.setPointerCapture(e.pointerId);
-    window.electronAPI?.dockDragStart?.(name);
+    window.electronAPI?.dockDragStart?.(name, dx, dy);
   });
   const end = () => {
-    if (dragAllowed(name)) window.electronAPI?.dockDragEnd?.();
+    pressed = null;
+    if (!dragging) return;
+    dragging = false;
+    window.electronAPI?.dockDragEnd?.();
   };
   root.addEventListener("pointerup", end);
+  root.addEventListener("pointercancel", end);
   root.addEventListener("lostpointercapture", end);
 }
 
@@ -112,7 +138,7 @@ async function openWindow(name: DockName, nodes: HTMLElement[]): Promise<DockWin
   doc.body.append(root);
   mirrorInto(doc);
   addPlayerDocument(doc);
-  enableDrag(root, name, (target) => target === root || !!target.closest(SECTION_HEADERS));
+  enableDrag(root, name);
   root.addEventListener("mousedown", (e) => {
     if ((e.target as HTMLElement).closest("button")) e.preventDefault();
   });
@@ -143,6 +169,7 @@ async function separate(): Promise<void> {
   dockFloatingBack();
   const api = window.electronAPI;
   if (!api?.dockSetSeparate || !(await api.dockSetSeparate(true, state.dockLayout))) return;
+  canPosition = true;
   api.dockZoom?.(state.uiScale);
   const eqWindow = await openWindow("eq", [eq]);
   const chordsWindow = await openWindow("chords", [chordsSection]);
@@ -298,7 +325,10 @@ export function syncDockWindows(mainHeight: number, width: number, scale: number
 }
 
 export function initSeparateWindows(): void {
-  enableDrag(player, "main", (target) => target === player || !!target.closest(".player__titlebar"));
+  enableDrag(player, "main");
+  void window.electronAPI?.dockCanPosition?.().then((allowed) => {
+    canPosition = allowed;
+  });
   window.electronAPI?.onDockLayout?.((layout) => {
     state.dockLayout = layout;
     persistConfig();

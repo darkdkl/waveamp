@@ -386,21 +386,35 @@ function dragTick(): void {
   if (!drag) return;
   const cursor = screen.getCursorScreenPoint();
   const delta = { x: cursor.x - drag.cursor.x, y: cursor.y - drag.cursor.y };
-  const snapped = snapDelta([...drag.origin.values()], delta, drag.others, drag.areas);
-  for (const [name, origin] of drag.origin) {
-    applyBounds(name, { ...origin, x: origin.x + snapped.x, y: origin.y + snapped.y });
+  const moving = [...drag.origin].map(([name, origin]) => {
+    const entry = entries.get(name);
+    return { name, rect: alive(entry) ? { ...origin, width: entry.last.width, height: entry.last.height } : origin };
+  });
+  const snapped = snapDelta(moving.map(({ rect }) => rect), delta, drag.others, drag.areas);
+  for (const { name, rect } of moving) {
+    applyBounds(name, { ...rect, x: rect.x + snapped.x, y: rect.y + snapped.y });
   }
 }
 
-export function startDockDrag(name: Managed): void {
+const MAX_DRAG_LEAD = 32;
+
+export function startDockDrag(name: Managed, moved: Point = { x: 0, y: 0 }): void {
   stopDockDrag();
   const entry = entries.get(name);
-  if (!(enabled || name === "chords") || !alive(entry) || !entry.win.isVisible() || entry.full) return;
+  if (!(enabled || name === "chords" || name === "main") || !alive(entry) || !entry.win.isVisible() || entry.full) return;
   const rects = visibleRects();
   const moving = name === "main" ? attachedGroup(rects, "main") : [name];
   const origin = new Map<Managed, Rect>(moving.map((member) => [member, rects[member] as Rect]));
   const others = (Object.keys(rects) as Managed[]).filter((member) => !moving.includes(member)).map((member) => rects[member] as Rect);
-  drag = { cursor: screen.getCursorScreenPoint(), origin, others, areas: workAreas(), timer: setInterval(dragTick, DRAG_INTERVAL_MS) };
+  const cursor = screen.getCursorScreenPoint();
+  const lead = (value: number) => Math.max(-MAX_DRAG_LEAD, Math.min(MAX_DRAG_LEAD, value));
+  drag = {
+    cursor: { x: cursor.x - lead(moved.x), y: cursor.y - lead(moved.y) },
+    origin,
+    others,
+    areas: workAreas(),
+    timer: setInterval(dragTick, DRAG_INTERVAL_MS),
+  };
 }
 
 export function stopDockDrag(): void {

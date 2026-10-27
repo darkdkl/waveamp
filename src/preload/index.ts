@@ -48,7 +48,7 @@ const api = {
   dockSetSeparate: (enabled: boolean, layout: DockLayout): Promise<boolean> => ipcRenderer.invoke("dock-set-separate", enabled, layout),
   dockUpdate: (update: DockUpdate): void => ipcRenderer.send("dock-update", update),
   dockZoom: (factor: number): void => ipcRenderer.send("dock-zoom", factor),
-  dockDragStart: (name?: "main" | DockName): void => ipcRenderer.send("dock-drag-start", name),
+  dockDragStart: (name?: "main" | DockName, movedX = 0, movedY = 0): void => ipcRenderer.send("dock-drag-start", name, movedX, movedY),
   dockDragEnd: (): void => ipcRenderer.send("dock-drag-end"),
   onDockLayout: (callback: (layout: DockLayout) => void) => ipcRenderer.on("dock-layout", (_event, layout) => callback(layout)),
   onDockClose: (callback: (name: DockName) => void) => ipcRenderer.on("dock-close", (_event, name) => callback(name)),
