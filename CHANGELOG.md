@@ -4,6 +4,12 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.34.1] — 2026-10-28
+
+### Fixed
+- The counters on the radio's favorites and saved titles buttons are no longer
+  cut off at the right edge
+
 ## [1.34.0] — 2026-10-27
 
 ### Added

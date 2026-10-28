@@ -3,7 +3,8 @@
 **English** | [Русский](README.ru.md)
 
 A retro-style desktop audio player with internet radio, in the spirit of
-classic Winamp: dark chrome, a glowing LCD and a real 10-band equalizer.
+classic Winamp: dark chrome, a glowing LCD and a real equalizer with 10 or
+19 bands.
 Runs on macOS, Windows and Linux.
 
 **Also for VS Code:** WaveAMP in the editor sidebar —
@@ -14,11 +15,16 @@ Runs on macOS, Windows and Linux.
 </p>
 
 <p align="center">
-  <img src="docs/radio.png" alt="Radio: the station's current track and saved track titles" width="400" />
+  <img src="docs/player.png" alt="The 19-band equalizer and the playlist, with cover art" width="400" />
+  <img src="docs/chords.png" alt="Chords of the playing song above the playlist" width="400" />
 </p>
 
 <p align="center">
-  <img src="docs/player.png" alt="Equalizer and playlist with cover art" width="400" />
+  <img src="docs/separate.png" alt="Separate windows: the player, the equalizer, the chords and the playlist snapped together" width="743" />
+</p>
+
+<p align="center">
+  <img src="docs/radio.png" alt="Radio: the station's current track and saved track titles" width="400" />
   <img src="docs/settings.png" alt="Settings" width="373" />
 </p>
 
@@ -63,8 +69,9 @@ Runs on macOS, Windows and Linux.
 - **Tray icon** with an optional close-to-tray mode
 - **Chords of the playing song** — analyses a track on request and shows the
   previous, current and next chord with guitar fingerings as it plays, with
-  capo and a simpler mode; the chords can pop out into their own window and
-  stretch up to the whole screen; all on your computer. On the radio the
+  capo and a simpler mode; tracks of CUE albums too. The chords can pop out
+  into their own window and stretch up to the whole screen; all on your
+  computer. On the radio the
   chords are detected live as the station plays: they come about a second
   late and are less accurate than for files, since there is no look ahead and
   speech or adverts get in the way
@@ -72,6 +79,7 @@ Runs on macOS, Windows and Linux.
   live in their own windows that snap to each other and to the screen edges,
   move with the player and remember where they were (on a Linux Wayland
   desktop the player then runs through XWayland)
+- **Moving the player** — by any empty spot, not only by the title bar
 - **HTTP / SOCKS5 proxy** for the radio
 - **Update check** — tells you when a new version is out, with a link to its
   download page
@@ -161,6 +169,10 @@ see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
   (MIT)
 - [projectM](https://github.com/projectM-visualizer/projectm) — the visualizer
   presets engine, compiled to WebAssembly (LGPL-2.1)
+- [@wasm-audio-decoders/flac](https://github.com/eshaz/wasm-audio-decoders) —
+  FLAC decoding for chord analysis, built on
+  [libFLAC](https://github.com/xiph/flac) (MIT; libFLAC under BSD-3-Clause),
+  with [codec-parser](https://github.com/eshaz/codec-parser) (LGPL-3.0)
 
 The full list with license texts is generated into `THIRD_PARTY_LICENSES.txt`
 before every run and build (`npm run licenses`), shipped next to the app and

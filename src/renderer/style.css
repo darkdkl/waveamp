@@ -1534,7 +1534,7 @@ input[type="range"].eq__slider {
 .radio__tab-count {
   position: absolute;
   top: -6px;
-  right: -4px;
+  right: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
