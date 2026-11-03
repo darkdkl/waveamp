@@ -55,9 +55,16 @@ function isRadioSearchOpen(): boolean {
   return !radioSearchForm.hidden;
 }
 
+function renderSearchTab(): void {
+  const active = state.radioView === "search" && isRadioSearchOpen();
+  radioTabSearch.classList.toggle("is-active", active);
+  radioTabSearch.setAttribute("aria-pressed", String(active));
+}
+
 function setRadioSearchOpen(open: boolean): void {
   radioSearchForm.hidden = !open;
   radio.classList.toggle("is-searching", open);
+  renderSearchTab();
   if (open) return;
   clearTimeout(radioSearchTimer);
   radioSearchInput.value = "";
@@ -74,8 +81,7 @@ export function openRadioSearch(): void {
 export function setRadioView(view: RadioView): void {
   if (view !== "search" && isRadioSearchOpen()) setRadioSearchOpen(false);
   state.radioView = view;
-  radioTabSearch.classList.toggle("is-active", view === "search");
-  radioTabSearch.setAttribute("aria-pressed", String(view === "search"));
+  renderSearchTab();
   radioTabFavorites.classList.toggle("is-active", view === "favorites");
   radioTabFavorites.setAttribute("aria-pressed", String(view === "favorites"));
   radioTabAdd.classList.toggle("is-active", view === "add");
@@ -341,6 +347,14 @@ export function refreshRadioEmptyText(): void {
 
 async function runRadioSearch(): Promise<void> {
   if (!window.electronAPI?.searchStations) return;
+  if (!radioSearchInput.value.trim() && !radioCountry && !radioState && !radioTag) {
+    radioSearchToken += 1;
+    state.radioResults = [];
+    renderRadioResults();
+    radioEmpty.hidden = false;
+    setRadioEmptyText("enterNameOrFilter");
+    return;
+  }
   const token = ++radioSearchToken;
   radioEmpty.hidden = false;
   setRadioEmptyText("searching");

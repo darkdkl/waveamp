@@ -23,7 +23,8 @@ export function countryName(code: string | undefined, fallback: string, lang: st
 }
 
 export function countryEntries(countries: CountryOption[], lang: string): CountryEntry[] {
+  const collator = new Intl.Collator(lang);
   return countries
     .map((country) => ({ code: country.code, name: country.name, label: countryName(country.code, country.name, lang) }))
-    .sort((a, b) => a.label.localeCompare(b.label, lang));
+    .sort((a, b) => collator.compare(a.label, b.label));
 }

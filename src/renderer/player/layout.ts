@@ -5,15 +5,10 @@ import {
   player,
   playlist,
   playlistBtn,
-  playlistListFrame,
   playlistResizeHandle,
   radio,
-  radioAddFrame,
   radioBtn,
-  radioFavoritesFrame,
   radioResizeHandle,
-  radioResultsFrame,
-  radioSavedFrame,
   windowEdgeResize,
   windowGripResize,
 } from "./dom";
@@ -30,14 +25,12 @@ export const SCALE_MAX = 150;
 export const SCALE_STEP = 10;
 
 const LIST_MIN_HEIGHT = 240;
-const FRAME_MIN_HEIGHT = 60;
 const LIST_MAX_HEIGHT = 1920;
 
 let basePlayerHeight = 0;
 let displayExtraHeight = 0;
 let windowSizeFrozen = false;
-let radioChromeOffset = 72;
-let radioSavedOffset = 38;
+let listHeight = 0;
 
 export function syncElectronWindowSize(instant = false): void {
   if (!window.electronAPI || windowSizeFrozen) return;
@@ -106,24 +99,10 @@ export function setScale(percent: number): void {
   persistConfig();
 }
 
-function activeRadioFrame(): HTMLElement {
-  if (state.radioView === "add") return radioAddFrame;
-  if (state.radioView === "saved") return radioSavedFrame;
-  return state.radioView === "favorites" ? radioFavoritesFrame : radioResultsFrame;
-}
-
-function activeRadioOffset(): number {
-  if (state.radioView === "search") return radioChromeOffset;
-  return state.radioView === "saved" ? radioSavedOffset : 0;
-}
-
 function applyListHeight(px: number): void {
-  const searchPx = Math.max(FRAME_MIN_HEIGHT, px - radioChromeOffset);
-  playlistListFrame.style.height = px + "px";
-  radioResultsFrame.style.height = searchPx + "px";
-  radioFavoritesFrame.style.height = px + "px";
-  radioAddFrame.style.height = px + "px";
-  radioSavedFrame.style.height = Math.max(FRAME_MIN_HEIGHT, px - radioSavedOffset) + "px";
+  listHeight = px;
+  playlist.style.setProperty("--list-height", px + "px");
+  radio.style.setProperty("--list-height", px + "px");
   if (state.playlistOpen) playlist.style.maxHeight = sectionMaxHeight(playlist, true);
   if (state.radioOpen) radio.style.maxHeight = sectionMaxHeight(radio, true);
 }
@@ -174,25 +153,15 @@ function closeDockWindow(name: DockName): void {
 }
 
 export function initListResize(): void {
-  const rootStyle = getComputedStyle(document.documentElement);
-  radioChromeOffset = parseFloat(rootStyle.getPropertyValue("--radio-chrome-offset")) || 72;
-  radioSavedOffset = parseFloat(rootStyle.getPropertyValue("--radio-saved-offset")) || 38;
+  listHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--list-height"));
 
-  const startPlaylistResize = (e: MouseEvent, handle: HTMLElement, cursor?: string) => {
-    const playlistHeight = playlistListFrame.getBoundingClientRect().height / cssZoomFactor();
-    startListResize(e, handle, playlist, playlistHeight, cursor);
-  };
-  const startRadioResize = (e: MouseEvent, handle: HTMLElement, cursor?: string) => {
-    const radioHeight = activeRadioFrame().getBoundingClientRect().height / cssZoomFactor();
-    startListResize(e, handle, radio, radioHeight + activeRadioOffset(), cursor);
-  };
   const startOpenListResize = (e: MouseEvent, handle: HTMLElement, cursor: string) => {
-    if (state.radioOpen) startRadioResize(e, handle, cursor);
-    else if (state.playlistOpen) startPlaylistResize(e, handle, cursor);
+    if (state.radioOpen) startListResize(e, handle, radio, listHeight, cursor);
+    else if (state.playlistOpen) startListResize(e, handle, playlist, listHeight, cursor);
   };
 
-  playlistResizeHandle.addEventListener("mousedown", (e) => startPlaylistResize(e, playlistResizeHandle));
-  radioResizeHandle.addEventListener("mousedown", (e) => startRadioResize(e, radioResizeHandle));
+  playlistResizeHandle.addEventListener("mousedown", (e) => startListResize(e, playlistResizeHandle, playlist, listHeight));
+  radioResizeHandle.addEventListener("mousedown", (e) => startListResize(e, radioResizeHandle, radio, listHeight));
   windowEdgeResize.addEventListener("mousedown", (e) => startOpenListResize(e, windowEdgeResize, "ns-resize"));
   windowGripResize.addEventListener("mousedown", (e) => startOpenListResize(e, windowGripResize, "nwse-resize"));
 
