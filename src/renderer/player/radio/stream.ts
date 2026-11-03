@@ -8,7 +8,7 @@ import { persistConfig } from "../config";
 import { playAudio, updateTrackTitleText } from "../playback";
 import { renderRadioFavorites, renderRadioResults } from "./panel";
 import { refreshCoverArt } from "../coverArt";
-import { clearNowPlaying } from "./nowPlaying";
+import { clearNowPlaying, markStreamLive } from "./nowPlaying";
 import { syncTimeDisplay } from "../clock";
 import type { Station } from "../../../shared/types";
 import { refreshChords } from "../chords";
@@ -33,8 +33,19 @@ function playStream(station: Station): void {
     setTrackTitleText(station.name + i18n.t("noConnection"));
     return;
   }
+  markStreamLive();
   audio.src = url;
   playAudio();
+}
+
+export function resumeStation(): void {
+  if (state.currentStation) playStream(state.currentStation);
+}
+
+export function disconnectStation(): void {
+  cancelRadioReconnect();
+  audio.removeAttribute("src");
+  audio.load();
 }
 
 export function tuneStation(station: Station): void {

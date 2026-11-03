@@ -15,6 +15,7 @@ let showingStation = false;
 let phaseTimer: ReturnType<typeof setTimeout> | undefined;
 let fadeTimer: ReturnType<typeof setTimeout> | undefined;
 let pollingUrl: string | null = null;
+let behindLive = false;
 
 function stopCycle(): void {
   clearTimeout(phaseTimer);
@@ -66,7 +67,9 @@ function setNowPlayingTitle(title: string | null): void {
 
 function currentStreamUrl(): string | null {
   const station = state.currentStation;
-  if (!state.radioTrackTitleEnabled || state.playbackMode !== "radio" || !station || audio.paused) return null;
+  if (!state.radioTrackTitleEnabled || state.playbackMode !== "radio" || !station || audio.paused || behindLive) {
+    return null;
+  }
   return safeStreamUrl(station.url);
 }
 
@@ -76,6 +79,10 @@ export function syncNowPlayingPolling(): void {
   pollingUrl = url;
   if (url) window.electronAPI?.startNowPlaying?.(url);
   else window.electronAPI?.stopNowPlaying?.();
+}
+
+export function markStreamLive(): void {
+  behindLive = false;
 }
 
 export function clearNowPlaying(): void {
@@ -103,6 +110,7 @@ export function initNowPlaying(): void {
   trackTitle.style.transitionDuration = `${CROSSFADE_MS / 2}ms`;
   audio.addEventListener("playing", syncNowPlayingPolling);
   audio.addEventListener("pause", () => {
+    if (state.playbackMode === "radio") behindLive = true;
     syncNowPlayingPolling();
     if (state.playbackMode === "radio") setNowPlayingTitle(null);
   });

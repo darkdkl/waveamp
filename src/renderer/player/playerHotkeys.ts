@@ -33,7 +33,7 @@ function runHotkeyAction(action: string): void {
       playPause();
       break;
     case "play":
-      if (audio.paused && audio.src) playAudio();
+      if (audio.paused && (audio.src || state.currentStation)) playAudio();
       break;
     case "pause":
       audio.pause();

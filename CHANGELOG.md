@@ -4,6 +4,15 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.34.2] — 2026-11-03
+
+### Fixed
+- After a pause the radio plays on from where it was paused, so the track
+  title from the live air no longer matches what you hear: until the station
+  reconnects, the display now shows the station name instead. Stop now
+  disconnects from the station, and Play after it tunes in to the live air
+  again, with the track titles
+
 ## [1.34.1] — 2026-10-28
 
 ### Fixed

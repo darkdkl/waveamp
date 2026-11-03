@@ -21,7 +21,13 @@ import { persistConfig } from "./config";
 import { updateMediaSessionMetadata } from "./mediaSession";
 import { getTrackSrc, releaseObjectUrl, renderPlaylist, scheduleTagRender } from "./playlist";
 import { renderRadioFavorites, renderRadioResults } from "./radio/panel";
-import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./radio/stream";
+import {
+  attemptRadioReconnect,
+  cancelRadioReconnect,
+  cycleFavorite,
+  disconnectStation,
+  resumeStation,
+} from "./radio/stream";
 import { refreshCoverArt } from "./coverArt";
 import { setTrackTitleText } from "./titleScroll";
 import { clearNowPlaying, renderRadioTitle, resetRadioTitle } from "./radio/nowPlaying";
@@ -46,6 +52,10 @@ function renderDuration(): void {
 export function playAudio(): void {
   if (state.playbackMode === "local" && audio.error && state.queue[state.currentIndex]?.unplayable) {
     skipUnplayableTrack();
+    return;
+  }
+  if (state.playbackMode === "radio" && state.currentStation && !audio.getAttribute("src")) {
+    resumeStation();
     return;
   }
   state.localPlayRequested = state.playbackMode === "local";
@@ -152,6 +162,8 @@ export function stop(): void {
   markStopped();
   if (state.playbackMode === "local") {
     audio.currentTime = trackStart();
+  } else {
+    disconnectStation();
   }
 }
 
