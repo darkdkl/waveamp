@@ -18,7 +18,7 @@ import { refreshPresetsText, setPresetAutoSwitch, setPresetFolder, setPresetHard
 import { renderSavedTracks } from "./radio/savedTracks";
 import { renderPlaylist } from "./playlist";
 import { updateTrackTitleText } from "./playback";
-import { refreshRadioEmptyText, renderRadioFavorites, renderRadioResults } from "./radio/panel";
+import { refreshRadioEmptyText, refreshRadioFilterText, renderRadioFavorites, renderRadioResults } from "./radio/panel";
 import { updateStationFormText } from "./radio/stationForm";
 import { tuneStation } from "./radio/stream";
 import { setHotkeys } from "./playerHotkeys";
@@ -77,6 +77,7 @@ export function setLanguage(lang: string): void {
   renderEqToggle();
   updateTrackTitleText();
   refreshRadioEmptyText();
+  refreshRadioFilterText();
   renderPlaylist();
   renderRadioResults();
   renderRadioFavorites();

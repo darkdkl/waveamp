@@ -216,6 +216,39 @@
           <button class="window-controls__btn window-controls__btn--close section-close" type="button" data-dock-close="panel" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
           <span class="section-title" data-i18n="radio">Радио</span>
           <div class="radio__view-toggle">
+            <form class="radio__search" id="radioSearchForm" hidden>
+              <input type="text" id="radioSearchInput" data-i18n-placeholder="searchStationPlaceholder" placeholder="Поиск станции..." autocomplete="off" />
+              <div class="radio__filter" id="radioFilterWrap">
+                <button class="btn btn--icon radio__filter-btn" id="radioFilterBtn" type="button" data-i18n-title="radioFilters" data-i18n-aria="radioFilters" title="Фильтры" aria-label="Фильтры" aria-haspopup="true" aria-expanded="false">
+                  <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
+                  <span class="radio__filter-label" id="radioFilterLabel" hidden></span>
+                </button>
+                <div class="radio__filter-menu" id="radioFilterMenu" hidden>
+                  <label class="radio__filter-row">
+                    <span data-i18n="filterCountry">Страна</span>
+                    <select class="radio__select" id="radioCountrySelect">
+                      <button><selectedcontent></selectedcontent></button>
+                      <option value="" data-i18n="countryAny">любая</option>
+                    </select>
+                  </label>
+                  <label class="radio__filter-row" id="radioStateRow" hidden>
+                    <span data-i18n="filterState">Регион</span>
+                    <select class="radio__select" id="radioStateSelect">
+                      <button><selectedcontent></selectedcontent></button>
+                      <option value="" data-i18n="stateAny">любой</option>
+                    </select>
+                  </label>
+                  <label class="radio__filter-row">
+                    <span data-i18n="filterTag">Жанр</span>
+                    <select class="radio__select" id="radioTagSelect">
+                      <button><selectedcontent></selectedcontent></button>
+                      <option value="" data-i18n="tagAny">любой</option>
+                    </select>
+                  </label>
+                  <button type="button" class="radio__form-btn radio__filter-reset" id="radioFilterReset" data-i18n="resetFilters">Сбросить</button>
+                </div>
+              </div>
+            </form>
             <button class="btn btn--icon is-active" id="radioTabSearch" type="button" data-i18n-title="search" data-i18n-aria="search" title="Поиск" aria-label="Поиск" aria-pressed="true">
               <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
             </button>
@@ -234,24 +267,6 @@
         </div>
 
         <div class="radio__view" id="radioSearchView">
-          <div class="radio__filters">
-            <select class="radio__select" id="radioCountrySelect">
-              <option value="" data-i18n="countryAny">Страна: любая</option>
-            </select>
-            <select class="radio__select" id="radioStateSelect" hidden>
-              <option value="" data-i18n="stateAny">Регион: любой</option>
-            </select>
-            <select class="radio__select" id="radioTagSelect">
-              <option value="" data-i18n="tagAny">Жанр: любой</option>
-            </select>
-          </div>
-
-          <form class="radio__search" id="radioSearchForm">
-            <input type="text" id="radioSearchInput" data-i18n-placeholder="searchStationPlaceholder" placeholder="Поиск станции..." autocomplete="off" />
-            <button type="submit" data-i18n-title="searchAction" data-i18n-aria="searchAction" title="Искать" aria-label="Искать">
-              <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
-            </button>
-          </form>
 
           <div class="radio__list-frame" id="radioResultsFrame">
             <ul class="radio__list" id="radioResultsList"></ul>

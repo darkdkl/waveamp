@@ -9,6 +9,7 @@ import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
 import { seekTrack, trackLength, trackPosition } from "./trackTime";
 import { openStationForm } from "./radio/stationForm";
 import { openPlaylistSearch } from "./playlistSearch";
+import { openRadioSearch } from "./radio/panel";
 import { toggleCurrentTrackSaved } from "./radio/savedTracks";
 import { nextPreset, previousPreset, togglePresetLock, togglePresetsFullscreen } from "./presets/mode";
 import { pushSettingsState } from "./settingsBridge";
@@ -76,9 +77,13 @@ function runHotkeyAction(action: string): void {
     case "togglePlaylist":
       setPlaylistOpen(!state.playlistOpen);
       break;
-    case "playlistSearch":
-      if (!state.playlistOpen) setPlaylistOpen(true);
-      openPlaylistSearch();
+    case "search":
+      if (state.radioOpen) {
+        openRadioSearch();
+      } else {
+        if (!state.playlistOpen) setPlaylistOpen(true);
+        openPlaylistSearch();
+      }
       break;
     case "toggleRadio":
       setRadioOpen(!state.radioOpen);
