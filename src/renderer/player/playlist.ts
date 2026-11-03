@@ -21,6 +21,7 @@ import { persistConfig } from "./config";
 import { syncElectronWindowSize } from "./layout";
 import { createDropdown } from "./dropdown";
 import { loadTrack, resetToNoTrackState, stop, updateTrackTitleText } from "./playback";
+import { refreshPlaylistSearch, selectPlaylistMatch } from "./playlistSearch";
 
 const TAG_READ_CONCURRENCY = 4;
 
@@ -112,9 +113,13 @@ export function renderPlaylist(): void {
     });
 
     item.append(idx, name, duration, remove);
-    item.addEventListener("click", () => loadTrack(index));
+    item.addEventListener("click", () => {
+      selectPlaylistMatch(index);
+      loadTrack(index);
+    });
     playlistList.appendChild(item);
   });
+  refreshPlaylistSearch();
 
   if (state.playlistOpen) {
     playlist.style.maxHeight = playlist.scrollHeight + "px";

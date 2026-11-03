@@ -50,6 +50,12 @@ export const playlistResizeHandle = byId("playlistResizeHandle");
 export const playlistAddWrap = byId("playlistAddWrap");
 export const playlistAddBtn = byId<HTMLButtonElement>("playlistAddBtn");
 export const playlistAddMenu = byId("playlistAddMenu");
+export const playlistSearchBtn = byId<HTMLButtonElement>("playlistSearchBtn");
+export const playlistSearch = byId<HTMLFormElement>("playlistSearch");
+export const playlistSearchInput = byId<HTMLInputElement>("playlistSearchInput");
+export const playlistSearchCount = byId("playlistSearchCount");
+export const playlistSearchPrev = byId<HTMLButtonElement>("playlistSearchPrev");
+export const playlistSearchNext = byId<HTMLButtonElement>("playlistSearchNext");
 export const addFilesMenuItem = byId<HTMLButtonElement>("addFilesMenuItem");
 export const addFolderMenuItem = byId<HTMLButtonElement>("addFolderMenuItem");
 

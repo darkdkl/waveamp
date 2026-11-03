@@ -165,24 +165,39 @@
         <div class="playlist__header">
           <button class="window-controls__btn window-controls__btn--close section-close" type="button" data-dock-close="panel" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
           <span class="section-title" data-i18n="playlist">Плейлист</span>
-          <div class="playlist__add" id="playlistAddWrap">
-            <button class="btn btn--icon" id="playlistAddBtn" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
-              <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
+          <div class="playlist__actions">
+            <form class="playlist__search" id="playlistSearch" hidden>
+              <input type="text" id="playlistSearchInput" data-i18n-placeholder="playlistSearchPlaceholder" placeholder="Поиск в плейлисте…" autocomplete="off" />
+              <span class="playlist__search-count" id="playlistSearchCount"></span>
+              <button type="button" id="playlistSearchPrev" data-i18n-title="searchPrevious" data-i18n-aria="searchPrevious" title="Предыдущее совпадение" aria-label="Предыдущее совпадение">
+                <svg viewBox="0 0 24 24"><path d="M12 8l-6 6 1.4 1.4 4.6-4.6 4.6 4.6L18 14z"/></svg>
+              </button>
+              <button type="button" id="playlistSearchNext" data-i18n-title="searchNext" data-i18n-aria="searchNext" title="Следующее совпадение" aria-label="Следующее совпадение">
+                <svg viewBox="0 0 24 24"><path d="M12 16l6-6-1.4-1.4-4.6 4.6-4.6-4.6L6 10z"/></svg>
+              </button>
+            </form>
+            <button class="btn btn--icon" id="playlistSearchBtn" type="button" data-i18n-title="playlistSearch" data-i18n-aria="playlistSearch" title="Поиск в плейлисте" aria-label="Поиск в плейлисте" aria-pressed="false">
+              <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
             </button>
-            <div class="playlist__add-menu" id="playlistAddMenu" hidden>
-              <button type="button" id="addFilesMenuItem">
-                <svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm8 1.5V8h4.5L14 3.5z"/></svg>
-                <span data-i18n="openFile">Открыть файл…</span>
-              </button>
-              <button type="button" id="addFolderMenuItem">
+            <div class="playlist__add" id="playlistAddWrap">
+              <button class="btn btn--icon" id="playlistAddBtn" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
                 <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
-                <span data-i18n="openFolder">Открыть каталог…</span>
               </button>
-              <div class="playlist__add-menu-sep"></div>
-              <button type="button" id="playlistClearBtn">
-                <svg viewBox="0 0 24 24"><path d="M7 4V2h10v2h5v2h-2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6H2V4h5zm2 4v10h2V8H9zm4 0v10h2V8h-2z"/></svg>
-                <span data-i18n="clearPlaylist">Очистить плейлист</span>
-              </button>
+              <div class="playlist__add-menu" id="playlistAddMenu" hidden>
+                <button type="button" id="addFilesMenuItem">
+                  <svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm8 1.5V8h4.5L14 3.5z"/></svg>
+                  <span data-i18n="openFile">Открыть файл…</span>
+                </button>
+                <button type="button" id="addFolderMenuItem">
+                  <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
+                  <span data-i18n="openFolder">Открыть каталог…</span>
+                </button>
+                <div class="playlist__add-menu-sep"></div>
+                <button type="button" id="playlistClearBtn">
+                  <svg viewBox="0 0 24 24"><path d="M7 4V2h10v2h5v2h-2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6H2V4h5zm2 4v10h2V8H9zm4 0v10h2V8h-2z"/></svg>
+                  <span data-i18n="clearPlaylist">Очистить плейлист</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

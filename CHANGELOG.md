@@ -4,6 +4,16 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.35.0] — 2026-11-03
+
+### Added
+- Search in the playlist: the magnifier button or Ctrl+F (⌘F on macOS, can
+  be changed in the hotkey settings) puts a search field into the playlist
+  header. Tracks that match every word you type stay bright, the others are
+  dimmed, and the list scrolls to the match; Enter and Shift+Enter or the
+  arrows move between matches. The search never starts a track: a click plays
+  it as before. Esc or the magnifier button closes the search
+
 ## [1.34.2] — 2026-11-03
 
 ### Fixed
