@@ -88,15 +88,19 @@ export function cycleFavorite(direction: number): void {
   tuneStation(favorites[nextIdx]);
 }
 
-export function attemptRadioReconnect(): void {
+export function attemptRadioReconnect(streamEnded = false): void {
   const station = state.currentStation;
   if (!station) return;
   clearTimeout(radioReconnectTimer);
   clearNowPlaying();
-  const errorInfo = audio.error ? `code ${audio.error.code}: ${audio.error.message}` : "unknown error";
+  const errorInfo = streamEnded
+    ? "stream ended"
+    : audio.error
+      ? `code ${audio.error.code}: ${audio.error.message}`
+      : "unknown error";
 
   // A missing-CORS failure looks like a network error — retry once without crossOrigin.
-  if (!radioCrossOriginFallbackTried) {
+  if (!streamEnded && !radioCrossOriginFallbackTried) {
     radioCrossOriginFallbackTried = true;
     logEvent("info", "radio", `"${station.name}" failed with CORS (${errorInfo}), retrying without it`);
     audio.removeAttribute("crossorigin");

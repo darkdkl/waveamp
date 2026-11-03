@@ -12,6 +12,8 @@ version, fixes bump the patch version.
   reconnects, the display now shows the station name instead. Stop now
   disconnects from the station, and Play after it tunes in to the live air
   again, with the track titles
+- When a station closes the stream, for example after a long pause, the radio
+  reconnects to the same station instead of switching to the next favorite
 
 ## [1.34.1] — 2026-10-28
 

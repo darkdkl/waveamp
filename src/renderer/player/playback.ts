@@ -54,10 +54,11 @@ export function playAudio(): void {
     skipUnplayableTrack();
     return;
   }
-  if (state.playbackMode === "radio" && state.currentStation && !audio.getAttribute("src")) {
+  if (state.playbackMode === "radio" && state.currentStation && (!audio.getAttribute("src") || audio.ended)) {
     resumeStation();
     return;
   }
+  if (!audio.getAttribute("src")) return;
   state.localPlayRequested = state.playbackMode === "local";
   resumeAudioContext();
   audio.play().catch(() => {});
@@ -164,6 +165,7 @@ export function stop(): void {
     audio.currentTime = trackStart();
   } else {
     disconnectStation();
+    updateTrackTitleText();
   }
 }
 
@@ -260,7 +262,10 @@ export function initAudioEvents(): void {
     }
   });
 
-  audio.addEventListener("ended", playNext);
+  audio.addEventListener("ended", () => {
+    if (state.playbackMode === "radio") attemptRadioReconnect(true);
+    else playNext();
+  });
 }
 
 const MP4_AUDIO_RE = /\.(m4a|m4b|mp4)$/i;
