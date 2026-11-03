@@ -9,16 +9,18 @@ import {
   radioAddUrl,
   radioTabAdd,
 } from "../dom";
-import { state, type RadioView } from "../state";
+import { state } from "../state";
 import { isHttpUrl } from "../format";
 import { persistConfig } from "../config";
 import { updateTrackTitleText } from "../playback";
 import { renderRadioFavorites, renderRadioResults, setRadioView } from "./panel";
 import { tuneStation } from "./stream";
+import { onEveryDocument } from "../documents";
 import type { ResolveStreamResult, Station } from "../../../shared/types";
 
-let radioViewBeforeAdd: RadioView = "favorites";
 let editingStationId: string | null = null;
+let addDraft = { name: "", url: "" };
+let formRequest = 0;
 let stationFormErrorKey = "";
 let stationFormBusy = false;
 
@@ -41,21 +43,39 @@ function setStationFormBusy(busy: boolean): void {
   updateStationFormText();
 }
 
+function isStationFormOpen(): boolean {
+  return !radioAddFrame.hidden;
+}
+
+function setStationFormOpen(open: boolean): void {
+  radioAddFrame.hidden = !open;
+  radioTabAdd.classList.toggle("is-active", open);
+  radioTabAdd.setAttribute("aria-pressed", String(open));
+}
+
 export function openStationForm(station: Station | null = null): void {
-  if (state.radioView !== "add") radioViewBeforeAdd = state.radioView;
+  if (isStationFormOpen() && !editingStationId) addDraft = { name: radioAddName.value, url: radioAddUrl.value };
+  formRequest += 1;
   editingStationId = station ? station.stationuuid : null;
-  radioAddName.value = station ? station.name : "";
-  radioAddUrl.value = station ? station.sourceUrl || station.url : "";
+  radioAddName.value = station ? station.name : addDraft.name;
+  radioAddUrl.value = station ? station.sourceUrl || station.url : addDraft.url;
   setStationFormBusy(false);
   setStationFormError("");
-  setRadioView("add");
+  setStationFormOpen(true);
+  radioAddName.ownerDocument.defaultView?.focus();
   radioAddName.focus();
 }
 
-function closeStationForm(nextView?: RadioView): void {
+function closeStationForm(keepDraft = false): void {
+  if (!editingStationId) addDraft = keepDraft ? { name: radioAddName.value, url: radioAddUrl.value } : { name: "", url: "" };
+  formRequest += 1;
   editingStationId = null;
   setStationFormError("");
-  setRadioView(nextView || radioViewBeforeAdd);
+  setStationFormOpen(false);
+}
+
+function dismissStationForm(): void {
+  if (!stationFormBusy) closeStationForm(true);
 }
 
 async function submitStationForm(): Promise<void> {
@@ -85,11 +105,12 @@ async function submitStationForm(): Promise<void> {
   if (window.electronAPI?.resolveStreamUrl) {
     setStationFormError("");
     setStationFormBusy(true);
+    const request = formRequest;
     const result = await window.electronAPI
       .resolveStreamUrl(sourceUrl)
       .catch((): ResolveStreamResult => ({ ok: false, error: "playlist" }));
+    if (request !== formRequest) return;
     setStationFormBusy(false);
-    if (state.radioView !== "add") return;
     if (result.ok === false) {
       setStationFormError(result.error === "invalid" ? "stationUrlInvalid" : "stationPlaylistFailed");
       radioAddUrl.focus();
@@ -103,7 +124,8 @@ async function submitStationForm(): Promise<void> {
     const urlChanged = existing.url !== url;
     Object.assign(existing, { name, url, sourceUrl });
     persistConfig();
-    closeStationForm("favorites");
+    closeStationForm();
+    setRadioView("favorites");
     if (state.currentStation?.stationuuid === existing.stationuuid) {
       state.currentStation = existing;
       if (urlChanged) tuneStation(existing);
@@ -131,13 +153,14 @@ async function submitStationForm(): Promise<void> {
   state.favoriteStations.push(station);
   renderRadioFavorites();
   persistConfig();
-  closeStationForm("favorites");
+  closeStationForm();
+  setRadioView("favorites");
   tuneStation(station);
 }
 
 export function initStationForm(): void {
   radioTabAdd.addEventListener("click", () => {
-    if (state.radioView === "add") closeStationForm();
+    if (isStationFormOpen()) dismissStationForm();
     else openStationForm();
   });
   radioAddFrame.addEventListener("submit", (e) => {
@@ -145,10 +168,16 @@ export function initStationForm(): void {
     submitStationForm();
   });
   radioAddCancel.addEventListener("click", () => closeStationForm());
-  radioAddFrame.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      closeStationForm();
-    }
+  onEveryDocument("keydown", (e) => {
+    if (e.key !== "Escape" || !isStationFormOpen()) return;
+    const target = e.target as HTMLElement;
+    if (!radioAddFrame.contains(target) && target.closest?.("input, select, textarea")) return;
+    e.preventDefault();
+    dismissStationForm();
+  });
+  onEveryDocument("click", (e) => {
+    const target = e.target as Node;
+    if (!isStationFormOpen() || radioAddFrame.contains(target) || radioTabAdd.contains(target)) return;
+    dismissStationForm();
   });
 }

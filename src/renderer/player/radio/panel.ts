@@ -1,7 +1,6 @@
 import { i18n } from "../../i18n";
 import {
   radio,
-  radioAddView,
   radioCountrySelect,
   radioEmpty,
   radioFavCount,
@@ -20,7 +19,6 @@ import {
   radioSearchView,
   radioStateRow,
   radioStateSelect,
-  radioTabAdd,
   radioTabFavorites,
   radioSavedView,
   radioTabSaved,
@@ -84,14 +82,11 @@ export function setRadioView(view: RadioView): void {
   renderSearchTab();
   radioTabFavorites.classList.toggle("is-active", view === "favorites");
   radioTabFavorites.setAttribute("aria-pressed", String(view === "favorites"));
-  radioTabAdd.classList.toggle("is-active", view === "add");
-  radioTabAdd.setAttribute("aria-pressed", String(view === "add"));
   radioTabSaved.classList.toggle("is-active", view === "saved");
   radioTabSaved.setAttribute("aria-pressed", String(view === "saved"));
   radioSearchView.hidden = view !== "search";
   radioSavedView.hidden = view !== "saved";
   radioFavoritesView.hidden = view !== "favorites";
-  radioAddView.hidden = view !== "add";
   if (state.radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
   syncElectronWindowSize();
 }

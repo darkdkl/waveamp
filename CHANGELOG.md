@@ -13,13 +13,18 @@ version, fixes bump the patch version.
   Esc or the magnifier button closes the search. The list of stations gets
   the space of the old filter and search lines
 - The country, region and genre filters moved into a menu behind the filter
-  button, which shows the chosen country code and genre; Reset clears them.
-  The filters work as before
+  button in front of the search field, which shows the chosen country code
+  and genre; Reset clears them. The filters work as before
+- Adding and editing a station opens a small form under the radio header
+  instead of a separate page. A click elsewhere or Esc closes it and keeps
+  what you typed for a new station; Cancel clears it
 - Countries are named in the interface language, in the filters and under
   station names, and the filters no longer show station counts
 
 ### Fixed
 - A long country name no longer breaks the radio filter into several lines
+- Moving the player by an empty spot no longer counts as a click, so open
+  menus and forms stay open
 
 ## [1.35.0] — 2026-11-03
 

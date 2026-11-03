@@ -87,7 +87,6 @@ export const savedCopyAllBtn = byId<HTMLButtonElement>("savedCopyAllBtn");
 export const savedClearBtn = byId<HTMLButtonElement>("savedClearBtn");
 export const radioSearchView = byId("radioSearchView");
 export const radioFavoritesView = byId("radioFavoritesView");
-export const radioAddView = byId("radioAddView");
 export const radioAddFrame = byId<HTMLFormElement>("radioAddFrame");
 export const radioAddTitle = byId("radioAddTitle");
 export const radioAddName = byId<HTMLInputElement>("radioAddName");

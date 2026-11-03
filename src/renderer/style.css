@@ -1404,7 +1404,7 @@ input[type="range"]:disabled {
 .radio__filter-menu {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
   z-index: 5;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1535,6 +1535,7 @@ input[type="range"]:disabled {
 .chords-section__header,
 .playlist__header,
 .radio__header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1804,8 +1805,7 @@ input[type="range"].eq__slider {
 }
 
 #radioResultsFrame,
-#radioFavoritesFrame,
-#radioAddFrame {
+#radioFavoritesFrame {
   height: var(--list-height);
 }
 
@@ -1838,12 +1838,31 @@ input[type="range"].eq__slider {
 }
 
 .radio__station-form {
-  gap: 8px;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 8px;
   margin: 0;
-  overflow-y: auto;
+  padding: 8px;
+  background: var(--chrome-2);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.radio__station-form[hidden] {
+  display: none;
 }
 
 .radio__station-form-title {
+  grid-column: 1 / -1;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1851,11 +1870,14 @@ input[type="range"].eq__slider {
 }
 
 .radio__field {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: contents;
   font-size: 10px;
   color: var(--text-muted);
+}
+
+.radio__field span {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .radio__field input {
@@ -1879,13 +1901,18 @@ input[type="range"].eq__slider {
 }
 
 .radio__station-form-error {
-  min-height: 13px;
+  grid-column: 1 / -1;
   margin: 0;
   font-size: 10px;
   color: hsl(0 70% 68%);
 }
 
+.radio__station-form-error:empty {
+  display: none;
+}
+
 .radio__station-form-actions {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   gap: 6px;
