@@ -1,6 +1,6 @@
 {
   "name": "waveamp",
-  "version": "1.36.0",
+  "version": "1.36.1",
   "private": true,
   "description": "Retro-style desktop audio player with internet radio, built on Electron",
   "author": "Dark.Dmake",
@@ -55,7 +55,8 @@
       "provider": "github",
       "owner": "darkdkl",
       "repo": "waveamp",
-      "releaseType": "release"
+      "releaseType": "release",
+      "publishAutoUpdate": false
     },
     "files": [
       "out/**/*",
@@ -71,11 +72,13 @@
     ],
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ],
       "category": "public.app-category.music",
       "icon": "assets/icon.icns"
+    },
+    "dmg": {
+      "writeUpdateInfo": false
     },
     "linux": {
       "target": [
@@ -100,6 +103,9 @@
         }
       ],
       "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "differentialPackage": false
     }
   },
   "dependencies": {
