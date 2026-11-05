@@ -1,4 +1,5 @@
-import { audio, saveTrackBtn, trackTitle } from "../dom";
+import { i18n } from "../../i18n";
+import { audio, liveTag, saveTrackBtn, trackTitle } from "../dom";
 import { state } from "../state";
 import { safeStreamUrl } from "../format";
 import { persistConfig } from "../config";
@@ -16,6 +17,7 @@ let phaseTimer: ReturnType<typeof setTimeout> | undefined;
 let fadeTimer: ReturnType<typeof setTimeout> | undefined;
 let pollingUrl: string | null = null;
 let behindLive = false;
+let delayedShown = false;
 
 function stopCycle(): void {
   clearTimeout(phaseTimer);
@@ -45,10 +47,24 @@ export function resetRadioTitle(): void {
   saveTrackBtn.hidden = true;
 }
 
+function isDelayed(): boolean {
+  return behindLive && state.playbackMode === "radio" && !audio.paused;
+}
+
+function renderDelay(): void {
+  const delayed = isDelayed();
+  liveTag.textContent = delayed ? "DELAY" : "LIVE";
+  if (delayed === delayedShown) return;
+  delayedShown = delayed;
+  stopCycle();
+  if (state.playbackMode === "radio") renderRadioTitle();
+  if (delayed) schedulePhase();
+}
+
 export function renderRadioTitle(): void {
   const station = state.currentStation;
   if (!station) return;
-  const track = state.nowPlayingTitle;
+  const track = isDelayed() ? i18n.t("radioDelayed") : state.nowPlayingTitle;
   const showStation = !track || showingStation;
   setTrackTitleText(showStation ? station.name : track, showStation ? "station" : "track");
   trackTitle.classList.toggle("is-station", !!track && showingStation);
@@ -83,6 +99,7 @@ export function syncNowPlayingPolling(): void {
 
 export function markStreamLive(): void {
   behindLive = false;
+  renderDelay();
 }
 
 export function clearNowPlaying(): void {
@@ -108,12 +125,17 @@ export function setRadioTrackTitleEnabled(enabled: boolean): void {
 
 export function initNowPlaying(): void {
   trackTitle.style.transitionDuration = `${CROSSFADE_MS / 2}ms`;
-  audio.addEventListener("playing", syncNowPlayingPolling);
+  audio.addEventListener("playing", () => {
+    syncNowPlayingPolling();
+    renderDelay();
+  });
   audio.addEventListener("pause", () => {
     if (state.playbackMode === "radio") behindLive = true;
     syncNowPlayingPolling();
     if (state.playbackMode === "radio") setNowPlayingTitle(null);
+    renderDelay();
   });
+  audio.addEventListener("emptied", renderDelay);
   saveTrackBtn.addEventListener("click", toggleCurrentTrackSaved);
   window.electronAPI?.onNowPlaying?.((update) => {
     if (update.url !== pollingUrl) return;

@@ -41,7 +41,8 @@ version, fixes bump the patch version.
 ### Fixed
 - After a pause the radio plays on from where it was paused, so the track
   title from the live air no longer matches what you hear: until the station
-  reconnects, the display now shows the station name instead. Stop now
+  reconnects, the display now says «Delayed broadcast, resumed from pause»
+  in turn with the station name, and DELAY in place of LIVE. Stop now
   disconnects from the station, and Play after it tunes in to the live air
   again, with the track titles
 - When a station closes the stream, for example after a long pause, the radio
