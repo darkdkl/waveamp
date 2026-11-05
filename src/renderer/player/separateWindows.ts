@@ -82,6 +82,12 @@ function pathToRoot(target: EventTarget | null, root: HTMLElement): Element[] {
   return [];
 }
 
+function swallowNextClick(doc: Document): void {
+  const swallow = (e: Event) => e.stopPropagation();
+  doc.addEventListener("click", swallow, { capture: true, once: true });
+  setTimeout(() => doc.removeEventListener("click", swallow, { capture: true }), 0);
+}
+
 function enableDrag(root: HTMLElement, name: "main" | DockName): void {
   let pressed: { id: number; x: number; y: number } | null = null;
   let dragging = false;
@@ -106,6 +112,7 @@ function enableDrag(root: HTMLElement, name: "main" | DockName): void {
     pressed = null;
     if (!dragging) return;
     dragging = false;
+    swallowNextClick(root.ownerDocument);
     window.electronAPI?.dockDragEnd?.();
   };
   root.addEventListener("pointerup", end);

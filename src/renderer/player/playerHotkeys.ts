@@ -8,6 +8,8 @@ import { cycleVizMode } from "./visualizer";
 import { playAudio, playNext, playPause, playPrev, stop } from "./playback";
 import { seekTrack, trackLength, trackPosition } from "./trackTime";
 import { openStationForm } from "./radio/stationForm";
+import { openPlaylistSearch } from "./playlistSearch";
+import { openRadioSearch } from "./radio/panel";
 import { toggleCurrentTrackSaved } from "./radio/savedTracks";
 import { nextPreset, previousPreset, togglePresetLock, togglePresetsFullscreen } from "./presets/mode";
 import { pushSettingsState } from "./settingsBridge";
@@ -33,7 +35,7 @@ function runHotkeyAction(action: string): void {
       playPause();
       break;
     case "play":
-      if (audio.paused && audio.src) playAudio();
+      if (audio.paused) playAudio();
       break;
     case "pause":
       audio.pause();
@@ -74,6 +76,14 @@ function runHotkeyAction(action: string): void {
       break;
     case "togglePlaylist":
       setPlaylistOpen(!state.playlistOpen);
+      break;
+    case "search":
+      if (state.radioOpen) {
+        openRadioSearch();
+      } else {
+        if (!state.playlistOpen) setPlaylistOpen(true);
+        openPlaylistSearch();
+      }
       break;
     case "toggleRadio":
       setRadioOpen(!state.radioOpen);

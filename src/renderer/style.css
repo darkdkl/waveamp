@@ -27,7 +27,6 @@
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
   --player-padding: 14px;
   --list-height: 309px;
-  --radio-chrome-offset: 72px;
   --radio-saved-offset: 38px;
   color-scheme: dark;
 }
@@ -881,7 +880,7 @@ input[type="range"]:disabled {
 .playlist__header .btn--icon,
 .radio__header .btn--icon,
 .radio__subheader .btn--icon,
-.radio__search button {
+.playlist__search button {
   width: var(--control-width);
   height: var(--control-height);
   border-radius: var(--control-radius);
@@ -893,7 +892,7 @@ input[type="range"]:disabled {
 .playlist__header .btn--icon:hover,
 .radio__header .btn--icon:hover,
 .radio__subheader .btn--icon:hover,
-.radio__search button:hover {
+.playlist__search button:hover {
   color: var(--text);
 }
 
@@ -902,7 +901,7 @@ input[type="range"]:disabled {
 .playlist__header .btn--icon svg,
 .radio__header .btn--icon svg,
 .radio__subheader .btn--icon svg,
-.radio__search button svg {
+.playlist__search button svg {
   width: var(--control-icon-size);
   height: var(--control-icon-size);
 }
@@ -1252,6 +1251,14 @@ input[type="range"]:disabled {
   color: var(--accent);
 }
 
+.playlist__item.is-dimmed {
+  opacity: 0.4;
+}
+
+.playlist__item.is-current-match {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
 .playlist__item.is-unplayable .playlist__item-name {
   color: var(--text-muted);
   text-decoration: line-through;
@@ -1314,6 +1321,144 @@ input[type="range"]:disabled {
 
 .playlist__add {
   position: relative;
+}
+
+.playlist__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.playlist__search[hidden] {
+  display: none;
+}
+
+.playlist.is-searching .playlist__actions {
+  flex: 1;
+  min-width: 0;
+}
+
+.playlist__search {
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  margin: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.playlist.is-searching .playlist__header .section-title {
+  display: none;
+}
+
+.playlist__search input:focus-visible,
+.radio__search input:focus-visible {
+  outline-offset: -1px;
+}
+
+.radio__search[hidden] {
+  display: none;
+}
+
+.radio.is-searching .radio__header .section-title {
+  display: none;
+}
+
+.radio.is-searching .radio__view-toggle {
+  flex: 1;
+  min-width: 0;
+}
+
+.radio__header .radio__search {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  align-items: center;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.radio__filter {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.radio__header .radio__filter-btn {
+  width: auto;
+  min-width: var(--control-width);
+  gap: 4px;
+  padding: 0 8px;
+  font-size: var(--control-font-size);
+}
+
+.radio__filter-label {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio__filter-label[hidden] {
+  display: none;
+}
+
+.radio__filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 8px;
+  width: 230px;
+  padding: 8px;
+  background: var(--chrome-2);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.radio__filter-menu[hidden] {
+  display: none;
+}
+
+.radio__filter-row {
+  display: contents;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.radio__filter-row[hidden] {
+  display: none;
+}
+
+.radio__filter-menu .radio__select {
+  width: 100%;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.radio__filter-reset {
+  grid-column: 2;
+  justify-self: end;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.playlist__search-count {
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: "DejaVu Sans Mono", "Courier New", monospace;
+  font-size: 11px;
+}
+
+.playlist__search button:disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .playlist__add-menu[hidden] {
@@ -1390,6 +1535,7 @@ input[type="range"]:disabled {
 .chords-section__header,
 .playlist__header,
 .radio__header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1559,11 +1705,6 @@ input[type="range"].eq__slider {
   gap: 8px;
 }
 
-.radio__filters {
-  display: flex;
-  gap: 6px;
-}
-
 .radio__select {
   flex: 1;
   min-width: 0;
@@ -1581,6 +1722,26 @@ input[type="range"].eq__slider {
   cursor: pointer;
 }
 
+.radio__select > button {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.radio__select selectedcontent {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Linux draws <select> popups without the gradient (white); options need a solid background. */
 .radio__select option,
 .settings-panel__select option,
@@ -1589,12 +1750,14 @@ input[type="range"].eq__slider {
   color: var(--text);
 }
 
-.radio__search {
+.radio__search,
+.playlist__search {
   display: flex;
   gap: 6px;
 }
 
-.radio__search input {
+.radio__search input,
+.playlist__search input {
   flex: 1;
   min-width: 0;
   background: var(--lcd-bg);
@@ -1607,11 +1770,12 @@ input[type="range"].eq__slider {
   padding: 0 10px;
 }
 
-.radio__search input::placeholder {
+.radio__search input::placeholder,
+.playlist__search input::placeholder {
   color: var(--lcd-fg-dim);
 }
 
-.radio__search button {
+.playlist__search button {
   flex-shrink: 0;
   border: 1px solid #000;
   border-radius: 6px;
@@ -1622,11 +1786,11 @@ input[type="range"].eq__slider {
   justify-content: center;
 }
 
-.radio__search button:hover {
+.playlist__search button:hover {
   background: linear-gradient(180deg, var(--btn-bg-hover), var(--btn-bg));
 }
 
-.radio__search button svg {
+.playlist__search button svg {
   fill: currentColor;
 }
 
@@ -1640,12 +1804,8 @@ input[type="range"].eq__slider {
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
-#radioResultsFrame {
-  height: calc(var(--list-height) - var(--radio-chrome-offset));
-}
-
-#radioFavoritesFrame,
-#radioAddFrame {
+#radioResultsFrame,
+#radioFavoritesFrame {
   height: var(--list-height);
 }
 
@@ -1678,12 +1838,31 @@ input[type="range"].eq__slider {
 }
 
 .radio__station-form {
-  gap: 8px;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 8px;
   margin: 0;
-  overflow-y: auto;
+  padding: 8px;
+  background: var(--chrome-2);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.radio__station-form[hidden] {
+  display: none;
 }
 
 .radio__station-form-title {
+  grid-column: 1 / -1;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1691,11 +1870,14 @@ input[type="range"].eq__slider {
 }
 
 .radio__field {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: contents;
   font-size: 10px;
   color: var(--text-muted);
+}
+
+.radio__field span {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .radio__field input {
@@ -1719,13 +1901,18 @@ input[type="range"].eq__slider {
 }
 
 .radio__station-form-error {
-  min-height: 13px;
+  grid-column: 1 / -1;
   margin: 0;
   font-size: 10px;
   color: hsl(0 70% 68%);
 }
 
+.radio__station-form-error:empty {
+  display: none;
+}
+
 .radio__station-form-actions {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   gap: 6px;

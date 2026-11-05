@@ -13,6 +13,7 @@ import {
   updateTrackTitleText,
 } from "./playback";
 import { initDragAndDrop, initFileInputs, initPlaylistAddMenu, renderPlaylist } from "./playlist";
+import { initPlaylistSearch } from "./playlistSearch";
 import { initListResize, initPanelToggles, measurePlayerHeight, setScale } from "./layout";
 import { initRadioSearch, initRadioTabs, refreshRadioEmptyText } from "./radio/panel";
 import { initStationForm } from "./radio/stationForm";
@@ -35,6 +36,7 @@ initEqualizerControls();
 loadMediaSessionArtwork();
 initTransportControls();
 initPlaylistAddMenu();
+initPlaylistSearch();
 initSettingsButton();
 initSettingsBridge();
 initPanelToggles();

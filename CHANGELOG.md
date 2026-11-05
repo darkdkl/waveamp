@@ -4,6 +4,50 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.36.0] — 2026-11-03
+
+### Changed
+- The radio search works like the playlist search: the magnifier button or
+  Ctrl+F (⌘F on macOS) puts the search field into the radio header in place
+  of its title, stations are found as you type, Enter searches at once, and
+  Esc or the magnifier button closes the search. The list of stations gets
+  the space of the old filter and search lines
+- The country, region and genre filters moved into a menu behind the filter
+  button in front of the search field, which shows the chosen country code
+  and genre; Reset clears them. The filters work as before
+- Adding and editing a station opens a small form under the radio header
+  instead of a separate page. A click elsewhere or Esc closes it and keeps
+  what you typed for a new station; Cancel clears it
+- Countries are named in the interface language, in the filters and under
+  station names, and the filters no longer show station counts
+
+### Fixed
+- A long country name no longer breaks the radio filter into several lines
+- Moving the player by an empty spot no longer counts as a click, so open
+  menus and forms stay open
+
+## [1.35.0] — 2026-11-03
+
+### Added
+- Search in the playlist: the magnifier button or Ctrl+F (⌘F on macOS, can
+  be changed in the hotkey settings) puts a search field into the playlist
+  header. Tracks that match every word you type stay bright, the others are
+  dimmed, and the list scrolls to the match; Enter and Shift+Enter or the
+  arrows move between matches. The search never starts a track: a click plays
+  it as before. Esc or the magnifier button closes the search
+
+## [1.34.2] — 2026-11-03
+
+### Fixed
+- After a pause the radio plays on from where it was paused, so the track
+  title from the live air no longer matches what you hear: until the station
+  reconnects, the display now says «Delayed broadcast, resumed from pause»
+  in turn with the station name, and DELAY in place of LIVE. Stop now
+  disconnects from the station, and Play after it tunes in to the live air
+  again, with the track titles
+- When a station closes the stream, for example after a long pause, the radio
+  reconnects to the same station instead of switching to the next favorite
+
 ## [1.34.1] — 2026-10-28
 
 ### Fixed

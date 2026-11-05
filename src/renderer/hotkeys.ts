@@ -19,6 +19,7 @@ const ACTIONS = [
   ["mute", "hotkeyMute", "KeyM", "", ""],
   ["toggleEq", "hotkeyToggleEq", "Alt+KeyG", "", ""],
   ["togglePlaylist", "hotkeyTogglePlaylist", "Alt+KeyE", "", ""],
+  ["search", "hotkeySearch", isMac ? "Meta+KeyF" : "Ctrl+KeyF", "", ""],
   ["toggleRadio", "hotkeyToggleRadio", "Alt+KeyR", "", ""],
   ["openSettings", "hotkeyOpenSettings", isMac ? "Meta+Comma" : "Ctrl+KeyP", "", ""],
   ["addFiles", "hotkeyAddFiles", "KeyL", "", ""],

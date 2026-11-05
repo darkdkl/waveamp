@@ -1,10 +1,14 @@
 import { i18n } from "../../i18n";
 import {
   radio,
-  radioAddView,
   radioCountrySelect,
   radioEmpty,
   radioFavCount,
+  radioFilterBtn,
+  radioFilterLabel,
+  radioFilterMenu,
+  radioFilterReset,
+  radioFilterWrap,
   radioFavEmpty,
   radioFavoritesList,
   radioFavoritesView,
@@ -13,8 +17,8 @@ import {
   radioSearchForm,
   radioSearchInput,
   radioSearchView,
+  radioStateRow,
   radioStateSelect,
-  radioTabAdd,
   radioTabFavorites,
   radioSavedView,
   radioTabSaved,
@@ -28,7 +32,9 @@ import { persistConfig } from "../config";
 import { syncElectronWindowSize } from "../layout";
 import { openStationForm } from "./stationForm";
 import { tuneStation } from "./stream";
-import type { CountedOption, Station, StationSearchResult } from "../../../shared/types";
+import type { CountedOption, CountryOption, Station, StationSearchResult } from "../../../shared/types";
+import { countryEntries, countryName } from "./countryNames";
+import { createDropdown } from "../dropdown";
 import { errorMessage } from "../../../shared/errors";
 
 let radioCountry = "";
@@ -38,21 +44,49 @@ let radioFiltersLoaded = false;
 let radioFiltersLoading = false;
 let radioEmptyKey = "enterNameOrFilter";
 let radioSearchToken = 0;
+let radioSearchTimer: ReturnType<typeof setTimeout> | undefined;
+let setFilterMenuOpen: (open: boolean) => void = () => {};
+
+const RADIO_SEARCH_DELAY_MS = 400;
+
+function isRadioSearchOpen(): boolean {
+  return !radioSearchForm.hidden;
+}
+
+function renderSearchTab(): void {
+  const active = state.radioView === "search" && isRadioSearchOpen();
+  radioTabSearch.classList.toggle("is-active", active);
+  radioTabSearch.setAttribute("aria-pressed", String(active));
+}
+
+function setRadioSearchOpen(open: boolean): void {
+  radioSearchForm.hidden = !open;
+  radio.classList.toggle("is-searching", open);
+  renderSearchTab();
+  if (open) return;
+  clearTimeout(radioSearchTimer);
+  radioSearchInput.value = "";
+  setFilterMenuOpen(false);
+}
+
+export function openRadioSearch(): void {
+  if (state.radioView !== "search") setRadioView("search");
+  setRadioSearchOpen(true);
+  radioSearchInput.ownerDocument.defaultView?.focus();
+  radioSearchInput.focus();
+}
 
 export function setRadioView(view: RadioView): void {
+  if (view !== "search" && isRadioSearchOpen()) setRadioSearchOpen(false);
   state.radioView = view;
-  radioTabSearch.classList.toggle("is-active", view === "search");
-  radioTabSearch.setAttribute("aria-pressed", String(view === "search"));
+  renderSearchTab();
   radioTabFavorites.classList.toggle("is-active", view === "favorites");
   radioTabFavorites.setAttribute("aria-pressed", String(view === "favorites"));
-  radioTabAdd.classList.toggle("is-active", view === "add");
-  radioTabAdd.setAttribute("aria-pressed", String(view === "add"));
   radioTabSaved.classList.toggle("is-active", view === "saved");
   radioTabSaved.setAttribute("aria-pressed", String(view === "saved"));
   radioSearchView.hidden = view !== "search";
   radioSavedView.hidden = view !== "saved";
   radioFavoritesView.hidden = view !== "favorites";
-  radioAddView.hidden = view !== "add";
   if (state.radioOpen) radio.style.maxHeight = radio.scrollHeight + "px";
   syncElectronWindowSize();
 }
@@ -90,7 +124,13 @@ function createStationRow(station: Station): HTMLLIElement {
   sub.className = "radio__sub";
   sub.textContent = station.custom
     ? stationHost(station.url)
-    : [station.country, station.tags, station.bitrate ? station.bitrate + "kbps" : ""].filter(Boolean).join(" · ");
+    : [
+        countryName(station.countrycode, station.country, i18n.getLanguage()),
+        station.tags,
+        station.bitrate ? station.bitrate + "kbps" : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
   meta.append(name, sub);
 
   const isFav = isFavoriteStation(station.stationuuid);
@@ -156,8 +196,57 @@ function toggleFavoriteStation(station: Station): void {
   persistConfig();
 }
 
+let radioCountries: CountryOption[] = [];
+
+function syncSelectTitle(select: HTMLSelectElement): void {
+  select.title = select.selectedOptions[0]?.textContent ?? "";
+}
+
+function resetOptions(select: HTMLSelectElement, anyKey: string): void {
+  select.querySelectorAll("option").forEach((option) => option.remove());
+  const any = document.createElement("option");
+  any.value = "";
+  any.dataset.i18n = anyKey;
+  any.textContent = i18n.t(anyKey);
+  select.append(any);
+}
+
+function renderFilterButton(): void {
+  const label = [radioCountry, radioTag].filter(Boolean).join(" · ");
+  radioFilterLabel.textContent = label;
+  radioFilterLabel.hidden = !label;
+  radioFilterBtn.classList.toggle("is-current", !!(radioCountry || radioState || radioTag));
+  const chosen = [
+    radioCountry ? radioCountrySelect.selectedOptions[0]?.textContent : "",
+    radioState,
+    radioTag,
+  ].filter(Boolean);
+  const title = chosen.length ? `${i18n.t("radioFilters")}: ${chosen.join(" · ")}` : i18n.t("radioFilters");
+  radioFilterBtn.title = title;
+  radioFilterBtn.setAttribute("aria-label", title);
+}
+
+function renderCountryOptions(): void {
+  resetOptions(radioCountrySelect, "countryAny");
+  for (const country of countryEntries(radioCountries, i18n.getLanguage())) {
+    const opt = document.createElement("option");
+    opt.value = country.code;
+    opt.dataset.name = country.name;
+    opt.textContent = country.label;
+    radioCountrySelect.appendChild(opt);
+  }
+  radioCountrySelect.value = radioCountry;
+  syncSelectTitle(radioCountrySelect);
+  renderFilterButton();
+}
+
+export function refreshRadioFilterText(): void {
+  if (radioCountries.length) renderCountryOptions();
+  else renderFilterButton();
+}
+
 function renderTagOptions(tags: CountedOption[]): void {
-  radioTagSelect.innerHTML = `<option value="" data-i18n="tagAny">${i18n.t("tagAny")}</option>`;
+  resetOptions(radioTagSelect, "tagAny");
   tags.forEach((t) => {
     const opt = document.createElement("option");
     opt.value = t.name;
@@ -167,6 +256,8 @@ function renderTagOptions(tags: CountedOption[]): void {
   const stillValid = radioTag && tags.some((t) => t.name === radioTag);
   radioTagSelect.value = stillValid ? radioTag : "";
   if (!stillValid) radioTag = "";
+  syncSelectTitle(radioTagSelect);
+  renderFilterButton();
 }
 
 async function refreshRadioTags(): Promise<void> {
@@ -189,13 +280,8 @@ async function loadRadioFilters(): Promise<void> {
       window.electronAPI.loadCountries(),
       window.electronAPI.loadTags(),
     ]);
-    countries.forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c.code;
-      opt.dataset.name = c.name;
-      opt.textContent = `${c.name} (${c.count})`;
-      radioCountrySelect.appendChild(opt);
-    });
+    radioCountries = countries;
+    renderCountryOptions();
     renderTagOptions(tags);
     radioFiltersLoaded = true;
   } catch (err) {
@@ -215,8 +301,9 @@ let radioStatesToken = 0;
 
 async function loadRadioStates(countryName: string): Promise<void> {
   const token = ++radioStatesToken;
-  radioStateSelect.innerHTML = `<option value="" data-i18n="stateAny">${i18n.t("stateAny")}</option>`;
-  radioStateSelect.hidden = true;
+  resetOptions(radioStateSelect, "stateAny");
+  radioStateRow.hidden = true;
+  syncSelectTitle(radioStateSelect);
   if (!countryName || !window.electronAPI?.loadStates) return;
   try {
     const states = await window.electronAPI.loadStates(countryName);
@@ -225,14 +312,10 @@ async function loadRadioStates(countryName: string): Promise<void> {
     states.forEach((s) => {
       const opt = document.createElement("option");
       opt.value = s.name;
-      opt.textContent = `${s.name} (${s.count})`;
+      opt.textContent = s.name;
       radioStateSelect.appendChild(opt);
     });
-    radioStateSelect.hidden = false;
-    if (state.radioOpen) {
-      radio.style.maxHeight = radio.scrollHeight + "px";
-      syncElectronWindowSize();
-    }
+    radioStateRow.hidden = false;
   } catch (err) {
     console.error("Failed to load radio states:", err);
     logEvent("error", "radio", `Failed to load states for "${countryName}": ${errorMessage(err)}`);
@@ -259,6 +342,14 @@ export function refreshRadioEmptyText(): void {
 
 async function runRadioSearch(): Promise<void> {
   if (!window.electronAPI?.searchStations) return;
+  if (!radioSearchInput.value.trim() && !radioCountry && !radioState && !radioTag) {
+    radioSearchToken += 1;
+    state.radioResults = [];
+    renderRadioResults();
+    radioEmpty.hidden = false;
+    setRadioEmptyText("enterNameOrFilter");
+    return;
+  }
   const token = ++radioSearchToken;
   radioEmpty.hidden = false;
   setRadioEmptyText("searching");
@@ -283,7 +374,10 @@ async function runRadioSearch(): Promise<void> {
 }
 
 export function initRadioTabs(): void {
-  radioTabSearch.addEventListener("click", () => setRadioView("search"));
+  radioTabSearch.addEventListener("click", () => {
+    if (state.radioView === "search" && isRadioSearchOpen()) setRadioSearchOpen(false);
+    else openRadioSearch();
+  });
   radioTabFavorites.addEventListener("click", () => setRadioView("favorites"));
   radioTabSaved.addEventListener("click", () => setRadioView("saved"));
 }
@@ -303,6 +397,8 @@ export function initRadioSearch(): void {
 
   radioCountrySelect.addEventListener("change", async () => {
     radioCountry = radioCountrySelect.value;
+    syncSelectTitle(radioCountrySelect);
+    renderFilterButton();
     radioState = "";
     const countryName = radioCountrySelect.selectedOptions[0]?.dataset.name || "";
     loadRadioStates(countryName);
@@ -312,17 +408,42 @@ export function initRadioSearch(): void {
 
   radioStateSelect.addEventListener("change", async () => {
     radioState = radioStateSelect.value;
+    syncSelectTitle(radioStateSelect);
+    renderFilterButton();
     await refreshRadioTags();
     runRadioSearch();
   });
 
   radioTagSelect.addEventListener("change", () => {
     radioTag = radioTagSelect.value;
+    syncSelectTitle(radioTagSelect);
+    renderFilterButton();
     runRadioSearch();
   });
 
   radioSearchForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    clearTimeout(radioSearchTimer);
     runRadioSearch();
+  });
+
+  radioSearchInput.addEventListener("input", () => {
+    clearTimeout(radioSearchTimer);
+    radioSearchTimer = setTimeout(runRadioSearch, RADIO_SEARCH_DELAY_MS);
+  });
+
+  radioSearchInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !radioFilterMenu.hidden) return;
+    e.preventDefault();
+    setRadioSearchOpen(false);
+  });
+
+  setFilterMenuOpen = createDropdown(radioFilterBtn, radioFilterMenu, radioFilterWrap);
+
+  radioFilterReset.addEventListener("click", () => {
+    radioTag = "";
+    radioTagSelect.value = "";
+    radioCountrySelect.value = "";
+    radioCountrySelect.dispatchEvent(new Event("change"));
   });
 }

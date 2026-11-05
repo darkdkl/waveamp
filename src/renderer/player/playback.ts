@@ -21,7 +21,13 @@ import { persistConfig } from "./config";
 import { updateMediaSessionMetadata } from "./mediaSession";
 import { getTrackSrc, releaseObjectUrl, renderPlaylist, scheduleTagRender } from "./playlist";
 import { renderRadioFavorites, renderRadioResults } from "./radio/panel";
-import { attemptRadioReconnect, cancelRadioReconnect, cycleFavorite } from "./radio/stream";
+import {
+  attemptRadioReconnect,
+  cancelRadioReconnect,
+  cycleFavorite,
+  disconnectStation,
+  resumeStation,
+} from "./radio/stream";
 import { refreshCoverArt } from "./coverArt";
 import { setTrackTitleText } from "./titleScroll";
 import { clearNowPlaying, renderRadioTitle, resetRadioTitle } from "./radio/nowPlaying";
@@ -48,6 +54,11 @@ export function playAudio(): void {
     skipUnplayableTrack();
     return;
   }
+  if (state.playbackMode === "radio" && state.currentStation && (!audio.getAttribute("src") || audio.ended)) {
+    resumeStation();
+    return;
+  }
+  if (!audio.getAttribute("src")) return;
   state.localPlayRequested = state.playbackMode === "local";
   resumeAudioContext();
   audio.play().catch(() => {});
@@ -152,6 +163,9 @@ export function stop(): void {
   markStopped();
   if (state.playbackMode === "local") {
     audio.currentTime = trackStart();
+  } else {
+    disconnectStation();
+    updateTrackTitleText();
   }
 }
 
@@ -248,7 +262,10 @@ export function initAudioEvents(): void {
     }
   });
 
-  audio.addEventListener("ended", playNext);
+  audio.addEventListener("ended", () => {
+    if (state.playbackMode === "radio") attemptRadioReconnect(true);
+    else playNext();
+  });
 }
 
 const MP4_AUDIO_RE = /\.(m4a|m4b|mp4)$/i;

@@ -14,7 +14,9 @@ export function createDropdown(btn: HTMLButtonElement, menu: HTMLElement, wrap: 
     if (!menu.hidden && !wrap.contains(e.target as Node)) setOpen(false);
   });
   onEveryDocument("keydown", (e) => {
-    if (e.key === "Escape" && !menu.hidden) setOpen(false);
+    if (e.key !== "Escape" || menu.hidden) return;
+    if ((e.target as Element).closest?.("select")?.matches(":open")) return;
+    setOpen(false);
   });
   return setOpen;
 }

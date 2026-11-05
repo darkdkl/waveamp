@@ -32,7 +32,8 @@ Runs on macOS, Windows and Linux.
 
 - **Player** — play, pause, stop, seeking and volume; add local files with a
   button or drag & drop
-- **Playlist** — resizable, plays through to the next track automatically
+- **Playlist** — resizable, plays through to the next track automatically,
+  with search that dims the tracks that don't match
 - **Tags** — "Artist — Title" and duration from file tags (ID3, FLAC/Vorbis,
   MP4 and more); legacy Cyrillic (cp1251) and mis-decoded UTF-8 tags are
   repaired. Long titles scroll on the display — back and forth, in a loop or

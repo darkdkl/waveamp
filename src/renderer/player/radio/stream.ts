@@ -8,7 +8,7 @@ import { persistConfig } from "../config";
 import { playAudio, updateTrackTitleText } from "../playback";
 import { renderRadioFavorites, renderRadioResults } from "./panel";
 import { refreshCoverArt } from "../coverArt";
-import { clearNowPlaying } from "./nowPlaying";
+import { clearNowPlaying, markStreamLive } from "./nowPlaying";
 import { syncTimeDisplay } from "../clock";
 import type { Station } from "../../../shared/types";
 import { refreshChords } from "../chords";
@@ -33,8 +33,19 @@ function playStream(station: Station): void {
     setTrackTitleText(station.name + i18n.t("noConnection"));
     return;
   }
+  markStreamLive();
   audio.src = url;
   playAudio();
+}
+
+export function resumeStation(): void {
+  if (state.currentStation) playStream(state.currentStation);
+}
+
+export function disconnectStation(): void {
+  cancelRadioReconnect();
+  audio.removeAttribute("src");
+  audio.load();
 }
 
 export function tuneStation(station: Station): void {
@@ -77,15 +88,19 @@ export function cycleFavorite(direction: number): void {
   tuneStation(favorites[nextIdx]);
 }
 
-export function attemptRadioReconnect(): void {
+export function attemptRadioReconnect(streamEnded = false): void {
   const station = state.currentStation;
   if (!station) return;
   clearTimeout(radioReconnectTimer);
   clearNowPlaying();
-  const errorInfo = audio.error ? `code ${audio.error.code}: ${audio.error.message}` : "unknown error";
+  const errorInfo = streamEnded
+    ? "stream ended"
+    : audio.error
+      ? `code ${audio.error.code}: ${audio.error.message}`
+      : "unknown error";
 
   // A missing-CORS failure looks like a network error — retry once without crossOrigin.
-  if (!radioCrossOriginFallbackTried) {
+  if (!streamEnded && !radioCrossOriginFallbackTried) {
     radioCrossOriginFallbackTried = true;
     logEvent("info", "radio", `"${station.name}" failed with CORS (${errorInfo}), retrying without it`);
     audio.removeAttribute("crossorigin");

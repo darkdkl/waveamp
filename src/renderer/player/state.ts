@@ -18,7 +18,7 @@ import type {
 } from "../../shared/types";
 
 export type PlaybackMode = "local" | "radio";
-export type RadioView = "search" | "favorites" | "add" | "saved";
+export type RadioView = "search" | "favorites" | "saved";
 
 export interface Track {
   name: string;
