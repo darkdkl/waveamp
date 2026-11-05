@@ -93,6 +93,9 @@
       "category": "Audio",
       "icon": "assets/icon.png"
     },
+    "appImage": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
     "win": {
       "target": [
         {
