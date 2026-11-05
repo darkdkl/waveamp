@@ -4,6 +4,15 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.36.1] — 2026-11-05
+
+### Changed
+- Releases carry only the installers: the macOS zip and the auto-update
+  files (latest*.yml, .blockmap) are no longer built, since the update check
+  only reads the latest release on GitHub and links to its page
+- The Linux x64 AppImage is named with its architecture:
+  `WaveAMP-<version>-x86_64.AppImage`
+
 ## [1.36.0] — 2026-11-03
 
 ### Changed

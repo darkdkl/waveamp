@@ -108,7 +108,7 @@ page; every update of `main` is built and published automatically.
 |---|---|
 | macOS 13+ (Apple Silicon) | `WaveAMP-<version>-arm64.dmg` |
 | Windows 10/11 (x64) | `WaveAMP-Setup-<version>.exe` |
-| Linux (x64) | `WaveAMP-<version>.AppImage` |
+| Linux (x64) | `WaveAMP-<version>-x86_64.AppImage` |
 | Linux (ARM64) | `WaveAMP-<version>-arm64.AppImage` |
 
 The builds aren't signed with a developer certificate, so the system warns

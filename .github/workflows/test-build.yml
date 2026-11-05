@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           cd dist
-          for file in *.dmg *-mac.zip *.AppImage *.exe; do
+          for file in *.dmg *.AppImage *.exe; do
             [ -e "$file" ] || continue
             renamed="${file// /-}"
             [ "$file" = "$renamed" ] || mv "$file" "$renamed"

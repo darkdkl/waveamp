@@ -107,7 +107,7 @@
 |---|---|
 | macOS 13+ (Apple Silicon) | `WaveAMP-<версия>-arm64.dmg` |
 | Windows 10/11 (x64) | `WaveAMP-Setup-<версия>.exe` |
-| Linux (x64) | `WaveAMP-<версия>.AppImage` |
+| Linux (x64) | `WaveAMP-<версия>-x86_64.AppImage` |
 | Linux (ARM64) | `WaveAMP-<версия>-arm64.AppImage` |
 
 Сборки не подписаны сертификатом разработчика, поэтому при первом запуске
