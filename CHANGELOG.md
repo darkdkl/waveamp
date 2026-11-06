@@ -4,6 +4,27 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.37.0] — 2026-11-06
+
+### Added
+- Skins: Settings → Interface → Skin picks the look of the player from the
+  built-in skin or from skins put into the skins folder (the button below
+  opens the folder). A skin sets the colors of the body, buttons, text,
+  lists, menus and the visualizer and suggests a color scheme; the color
+  sliders still fine-tune it, and Reset goes back to the skin's colors. A skin
+  that can't be read is skipped, and a removed one falls back to the built-in
+  skin
+- Skins can bring images: a texture for the body and for the display,
+  button faces for the normal, hovered, pressed and switched-on states
+  (stretched by their edges), slider knobs, their own icons for the transport
+  and panel buttons, which take the color scheme's color, and a font for the
+  display
+- A `.waveskin` file (a zip with `skin.json` and its files, at the top or in
+  one folder) works as it is when put into the skins folder, next to skins
+  kept as plain folders. The list follows the folder by itself, and changes to
+  the selected skin show up at once
+- The skin format is described for skin authors in docs/skins.md
+
 ## [1.36.1] — 2026-11-05
 
 ### Changed

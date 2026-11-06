@@ -2,6 +2,7 @@ import { i18n } from "./i18n";
 import { hotkeys } from "./hotkeys";
 import { renderSwitch } from "./switchControl";
 import { accentColor as accentColorTheme } from "./theme";
+import { applySkinTokens } from "./skin";
 import { snapStereoStrength, STEREO_STRENGTH_DEFAULT } from "../shared/stereo";
 import { normalizeTitleScrollMode, normalizeTitleScrollSpeed, type TitleScrollMode } from "../shared/titleScroll";
 import type {
@@ -10,6 +11,7 @@ import type {
   ProxyType,
   SettingsAction,
   SettingsActionValue,
+  SettingsState,
   VizResponse,
   WindowControlsSide,
 } from "../shared/types";
@@ -64,6 +66,8 @@ const accentHueInput = byId<HTMLInputElement>("accentHueInput");
 const accentSaturationInput = byId<HTMLInputElement>("accentSaturationInput");
 const accentTintInput = byId<HTMLInputElement>("accentTintInput");
 const accentResetBtn = byId<HTMLButtonElement>("accentResetBtn");
+const skinSelect = byId<HTMLSelectElement>("skinSelect");
+const skinFolderBtn = byId<HTMLButtonElement>("skinFolderBtn");
 
 const settingsTabHotkeys = byId<HTMLButtonElement>("settingsTabHotkeys");
 const settingsHotkeysView = byId("settingsHotkeysView");
@@ -408,7 +412,27 @@ accentSaturationInput.addEventListener("input", () =>
   setAccentColor({ ...accentColor, saturation: Number(accentSaturationInput.value) })
 );
 accentTintInput.addEventListener("input", () => setAccentColor({ ...accentColor, tint: Number(accentTintInput.value) }));
-accentResetBtn.addEventListener("click", () => setAccentColor(accentColorTheme.DEFAULT));
+let skinAccent: AccentColor | null = null;
+let skinState: Pick<SettingsState, "skin" | "skins"> = { skin: "", skins: [] };
+
+accentResetBtn.addEventListener("click", () => setAccentColor(skinAccent ?? accentColorTheme.DEFAULT));
+
+function renderSkins(): void {
+  skinSelect.replaceChildren(
+    ...skinState.skins.map((skin) => {
+      const option = document.createElement("option");
+      option.value = skin.id;
+      const note = skin.builtIn ? i18n.t("skinBuiltIn") : skin.author;
+      option.textContent = note ? `${skin.name} (${note})` : skin.name;
+      return option;
+    })
+  );
+  skinSelect.value = skinState.skin;
+}
+
+skinSelect.addEventListener("change", () => sendAction("setSkin", skinSelect.value));
+skinFolderBtn.addEventListener("click", () => window.electronAPI?.openSkinsFolder?.());
+
 showAccentColor();
 
 const hotkeysList = byId("hotkeysList");
@@ -560,6 +584,7 @@ renderHotkeys();
 
 function refreshTextForLanguage() {
   renderHotkeys();
+  renderSkins();
   accentColorTheme.PRESETS.forEach((preset, i) => {
     presetButtons[i].title = i18n.t(preset.nameKey);
     presetButtons[i].setAttribute("aria-label", i18n.t(preset.nameKey));
@@ -633,6 +658,12 @@ window.electronAPI?.onSettingsState?.((state) => {
   }
   // Skip echoes of earlier values while a slider is dragged, or the thumb jitters back.
   const draggingAccent = [accentHueInput, accentSaturationInput, accentTintInput].includes(document.activeElement as HTMLInputElement);
+  if (Array.isArray(state.skins)) {
+    skinState = { skin: state.skin, skins: state.skins };
+    skinAccent = state.skinAccent;
+    renderSkins();
+    applySkinTokens(state.skinTokens ?? []);
+  }
   if (state.accentColor && !draggingAccent) {
     accentColor = accentColorTheme.normalize(state.accentColor);
     showAccentColor();

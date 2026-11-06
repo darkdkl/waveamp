@@ -15,7 +15,7 @@
         <button class="window-controls__btn window-controls__btn--close" id="closeBtn" data-i18n-title="close" data-i18n-aria="close" title="Закрыть" aria-label="Закрыть">&#x2715;</button>
         <button class="window-controls__btn" id="minimizeBtn" data-i18n-title="minimize" data-i18n-aria="minimize" title="Свернуть" aria-label="Свернуть">&#x2212;</button>
       </div>
-      <button class="window-controls__btn player__settings" id="settingsBtn" type="button" data-i18n-title="settings" data-i18n-aria="settings" title="Настройки" aria-label="Настройки">
+      <button class="window-controls__btn player__settings" id="settingsBtn" data-icon="settings" type="button" data-i18n-title="settings" data-i18n-aria="settings" title="Настройки" aria-label="Настройки">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c0.04-0.3 0.06-0.61 0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14 0.23-0.41 0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39 0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4 2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24 0-0.43 0.17-0.47 0.41L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33c-0.22-0.08-0.47 0-0.59 0.22L2.74 8.87c-0.12 0.21-0.08 0.47 0.12 0.61l2.03 1.58C4.84 11.36 4.8 11.69 4.8 12s0.02 0.64 0.07 0.94l-2.03 1.58c-0.18 0.14-0.23 0.41-0.12 0.61l1.92 3.32c0.12 0.22 0.37 0.29 0.59 0.22l2.39-0.96c0.5 0.38 1.03 0.7 1.62 0.94l0.36 2.54c0.05 0.24 0.24 0.41 0.48 0.41h3.84c0.24 0 0.44-0.17 0.47-0.41l0.36-2.54c0.59-0.24 1.13-0.56 1.62-0.94l2.39 0.96c0.22 0.08 0.47 0 0.59-0.22l1.92-3.32c0.12-0.22 0.07-0.47-0.12-0.61L19.14 12.94zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6S13.98 15.6 12 15.6z"/></svg>
       </button>
     </header>
@@ -62,42 +62,42 @@
 
     <section class="player__controls">
       <div class="transport">
-        <button class="btn btn--icon" id="prevBtn" data-i18n-title="prevTrack" data-i18n-aria="prevTrack" title="Предыдущий трек" aria-label="Предыдущий трек">
+        <button class="btn btn--icon" id="prevBtn" data-icon="previous" data-i18n-title="prevTrack" data-i18n-aria="prevTrack" title="Предыдущий трек" aria-label="Предыдущий трек">
           <svg viewBox="0 0 24 24"><path d="M6 4h2v16H6V4zm3.5 8L20 4v16L9.5 12z"/></svg>
         </button>
-        <button class="btn btn--icon" id="playBtn" data-i18n-title="play" data-i18n-aria="play" title="Воспроизвести" aria-label="Воспроизвести">
+        <button class="btn btn--icon" id="playBtn" data-icon="play" data-i18n-title="play" data-i18n-aria="play" title="Воспроизвести" aria-label="Воспроизвести">
           <svg viewBox="0 0 24 24"><path d="M7 4l14 8-14 8V4z"/></svg>
         </button>
-        <button class="btn btn--icon" id="pauseBtn" data-i18n-title="pause" data-i18n-aria="pause" title="Пауза" aria-label="Пауза">
+        <button class="btn btn--icon" id="pauseBtn" data-icon="pause" data-i18n-title="pause" data-i18n-aria="pause" title="Пауза" aria-label="Пауза">
           <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
         </button>
-        <button class="btn btn--icon" id="stopBtn" data-i18n-title="stop" data-i18n-aria="stop" title="Стоп" aria-label="Стоп">
+        <button class="btn btn--icon" id="stopBtn" data-icon="stop" data-i18n-title="stop" data-i18n-aria="stop" title="Стоп" aria-label="Стоп">
           <svg viewBox="0 0 24 24"><path d="M5 5h14v14H5V5z"/></svg>
         </button>
-        <button class="btn btn--icon" id="nextBtn" data-i18n-title="nextTrack" data-i18n-aria="nextTrack" title="Следующий трек" aria-label="Следующий трек">
+        <button class="btn btn--icon" id="nextBtn" data-icon="next" data-i18n-title="nextTrack" data-i18n-aria="nextTrack" title="Следующий трек" aria-label="Следующий трек">
           <svg viewBox="0 0 24 24"><path d="M16 4h2v16h-2V4zM4.5 4L15 12 4.5 20V4z"/></svg>
         </button>
       </div>
 
-      <div class="volume">
+      <div class="volume" data-icon="volume">
         <svg class="volume__icon" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4zm11.5 3a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4z"/></svg>
         <input type="range" id="volume" min="0" max="100" value="80" />
       </div>
 
       <div class="panel-toggles">
-        <button class="btn btn--icon" id="eqBtn" data-i18n-title="eq" data-i18n-aria="showEq" title="Эквалайзер" aria-label="Показать эквалайзер">
+        <button class="btn btn--icon" id="eqBtn" data-icon="eq" data-i18n-title="eq" data-i18n-aria="showEq" title="Эквалайзер" aria-label="Показать эквалайзер">
           <svg viewBox="0 0 24 24"><path d="M5 20V10h2v10H5zm0-12V4h2v4H5zm6 12V13h2v7h-2zm0-9V4h2v6h-2zm6 9v-4h2v4h-2zm0-6V4h2v9h-2z"/></svg>
         </button>
 
-        <button class="btn btn--icon" id="radioBtn" data-i18n-title="radio" data-i18n-aria="showRadio" title="Радио" aria-label="Показать радио">
+        <button class="btn btn--icon" id="radioBtn" data-icon="radio" data-i18n-title="radio" data-i18n-aria="showRadio" title="Радио" aria-label="Показать радио">
           <svg viewBox="0 0 24 24"><path d="M12 10.2a1.8 1.8 0 100 3.6 1.8 1.8 0 000-3.6zm0-3.6a5.4 5.4 0 00-3.8 9.2l1.3-1.3a3.6 3.6 0 115 0l1.3 1.3A5.4 5.4 0 0012 6.6zm0-3.6a9 9 0 00-6.4 15.4l1.3-1.3a7.2 7.2 0 1110.2 0l1.3 1.3A9 9 0 0012 3z"/></svg>
         </button>
 
-        <button class="btn btn--icon" id="playlistBtn" data-i18n-title="playlist" data-i18n-aria="showPlaylist" title="Плейлист" aria-label="Показать плейлист">
+        <button class="btn btn--icon" id="playlistBtn" data-icon="playlist" data-i18n-title="playlist" data-i18n-aria="showPlaylist" title="Плейлист" aria-label="Показать плейлист">
           <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h10v2H4v-2z"/></svg>
         </button>
 
-        <button class="btn btn--icon" id="chordsBtn" type="button" data-i18n-title="chords" data-i18n-aria="showChords" title="Аккорды" aria-label="Показать аккорды" aria-pressed="false">
+        <button class="btn btn--icon" id="chordsBtn" data-icon="chords" type="button" data-i18n-title="chords" data-i18n-aria="showChords" title="Аккорды" aria-label="Показать аккорды" aria-pressed="false">
           <svg viewBox="0 0 24 24"><path transform="rotate(40 12 12) translate(12 12) scale(.88) translate(-12 -15.15)" d="M12.7 19.6C13.6 19.6 14.3 18.6 14.8 17.6C15.2 16.8 16.2 16.9 16.3 17.9C16.4 19.2 16 20.2 16.6 21.2C17.6 22.6 18.2 24.4 17.8 26.4C17.3 28.8 14.8 30 12 30C9.2 30 6.7 29 6.1 26.6C5.6 24.6 6.3 22.6 7.2 21.4C7.7 20.6 7.1 19.2 7.2 17.6C7.3 15.8 8.6 15.2 9.2 16.2C9.8 17.4 10.3 19.6 11.3 19.6ZM11.3 20V5H12.7V20ZM11.3 5.6C11 4.6 10.5 3.9 10.5 2.5C10.5 1.1 11.3 .2 12.5 .2C13.5 .2 14.2 .7 14.1 1.4C14 2 13.3 2.1 13 2.6C12.7 3.2 12.7 4.4 12.7 5.6Z"/></svg>
         </button>
       </div>
@@ -111,7 +111,7 @@
           <div class="eq__header-actions">
             <select class="eq__preset-select" id="eqPresetSelect" data-i18n-title="eqPreset"></select>
             <button class="switch is-active" id="eqToggleBtn" type="button" role="switch" aria-checked="true" aria-labelledby="eqTitle"></button>
-            <button class="btn btn--icon" id="eqResetBtn" type="button" data-i18n-title="reset" data-i18n-aria="reset" title="Сброс" aria-label="Сброс">
+            <button class="btn btn--icon" id="eqResetBtn" data-icon="reset" type="button" data-i18n-title="reset" data-i18n-aria="reset" title="Сброс" aria-label="Сброс">
               <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
             </button>
           </div>
@@ -135,7 +135,7 @@
             <label class="chords__capo"><span data-i18n="chordsCapo">Капо</span>
               <select class="chords__select" id="chordsCapoSelect"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select>
             </label>
-            <button class="btn btn--icon chords__popout" id="chordsPopoutBtn" type="button" data-i18n-title="chordsPopOut" data-i18n-aria="chordsPopOut" title="Отделить окно" aria-label="Отделить окно">
+            <button class="btn btn--icon chords__popout" id="chordsPopoutBtn" data-icon="popout" type="button" data-i18n-title="chordsPopOut" data-i18n-aria="chordsPopOut" title="Отделить окно" aria-label="Отделить окно">
               <svg class="chords__popout-out" viewBox="0 0 24 24"><path d="M4 5h9v2H6v11h11v-7h2v9H4V5zm11-1h5v5h-2V7.4l-6.3 6.3-1.4-1.4L16.6 6H15V4z"/></svg>
               <svg class="chords__popout-in" viewBox="0 0 24 24"><path d="M4 5h9v2H6v11h11v-7h2v9H4V5zm15.7-.3l1.4 1.4-5.1 5.1H18v2h-5V8.2h2V9.8l4.7-5.1z"/></svg>
             </button>
@@ -169,18 +169,18 @@
             <form class="playlist__search" id="playlistSearch" hidden>
               <input type="text" id="playlistSearchInput" data-i18n-placeholder="playlistSearchPlaceholder" placeholder="Поиск в плейлисте…" autocomplete="off" />
               <span class="playlist__search-count" id="playlistSearchCount"></span>
-              <button type="button" id="playlistSearchPrev" data-i18n-title="searchPrevious" data-i18n-aria="searchPrevious" title="Предыдущее совпадение" aria-label="Предыдущее совпадение">
+              <button type="button" id="playlistSearchPrev" data-icon="up" data-i18n-title="searchPrevious" data-i18n-aria="searchPrevious" title="Предыдущее совпадение" aria-label="Предыдущее совпадение">
                 <svg viewBox="0 0 24 24"><path d="M12 8l-6 6 1.4 1.4 4.6-4.6 4.6 4.6L18 14z"/></svg>
               </button>
-              <button type="button" id="playlistSearchNext" data-i18n-title="searchNext" data-i18n-aria="searchNext" title="Следующее совпадение" aria-label="Следующее совпадение">
+              <button type="button" id="playlistSearchNext" data-icon="down" data-i18n-title="searchNext" data-i18n-aria="searchNext" title="Следующее совпадение" aria-label="Следующее совпадение">
                 <svg viewBox="0 0 24 24"><path d="M12 16l6-6-1.4-1.4-4.6 4.6-4.6-4.6L6 10z"/></svg>
               </button>
             </form>
-            <button class="btn btn--icon" id="playlistSearchBtn" type="button" data-i18n-title="playlistSearch" data-i18n-aria="playlistSearch" title="Поиск в плейлисте" aria-label="Поиск в плейлисте" aria-pressed="false">
+            <button class="btn btn--icon" id="playlistSearchBtn" data-icon="search" type="button" data-i18n-title="playlistSearch" data-i18n-aria="playlistSearch" title="Поиск в плейлисте" aria-label="Поиск в плейлисте" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
             </button>
             <div class="playlist__add" id="playlistAddWrap">
-              <button class="btn btn--icon" id="playlistAddBtn" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
+              <button class="btn btn--icon" id="playlistAddBtn" data-icon="folder" type="button" data-i18n-title="addToPlaylist" data-i18n-aria="addToPlaylist" title="Добавить в плейлист" aria-label="Добавить в плейлист" aria-haspopup="true" aria-expanded="false">
                 <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H4V6zm0 3h18l-1.6 8.2A2 2 0 0118.4 19H5.6a2 2 0 01-2-1.8L4 9z"/></svg>
               </button>
               <div class="playlist__add-menu" id="playlistAddMenu" hidden>
@@ -218,7 +218,7 @@
           <div class="radio__view-toggle">
             <form class="radio__search" id="radioSearchForm" hidden>
               <div class="radio__filter" id="radioFilterWrap">
-                <button class="btn btn--icon radio__filter-btn" id="radioFilterBtn" type="button" data-i18n-title="radioFilters" data-i18n-aria="radioFilters" title="Фильтры" aria-label="Фильтры" aria-haspopup="true" aria-expanded="false">
+                <button class="btn btn--icon radio__filter-btn" id="radioFilterBtn" data-icon="filter" type="button" data-i18n-title="radioFilters" data-i18n-aria="radioFilters" title="Фильтры" aria-label="Фильтры" aria-haspopup="true" aria-expanded="false">
                   <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
                   <span class="radio__filter-label" id="radioFilterLabel" hidden></span>
                 </button>
@@ -249,17 +249,17 @@
               </div>
               <input type="text" id="radioSearchInput" data-i18n-placeholder="searchStationPlaceholder" placeholder="Поиск станции..." autocomplete="off" />
             </form>
-            <button class="btn btn--icon" id="radioTabSearch" type="button" data-i18n-title="search" data-i18n-aria="search" title="Поиск" aria-label="Поиск" aria-pressed="false">
+            <button class="btn btn--icon" id="radioTabSearch" data-icon="search" type="button" data-i18n-title="search" data-i18n-aria="search" title="Поиск" aria-label="Поиск" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.47 10.03l4.75 4.74 1.42-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
             </button>
-            <button class="btn btn--icon" id="radioTabAdd" type="button" data-i18n-title="addStation" data-i18n-aria="addStation" title="Добавить станцию" aria-label="Добавить станцию" aria-pressed="false">
+            <button class="btn btn--icon" id="radioTabAdd" data-icon="add" type="button" data-i18n-title="addStation" data-i18n-aria="addStation" title="Добавить станцию" aria-label="Добавить станцию" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
             </button>
-            <button class="btn btn--icon" id="radioTabFavorites" type="button" data-i18n-title="favorites" data-i18n-aria="favorites" title="Избранное" aria-label="Избранное" aria-pressed="false">
+            <button class="btn btn--icon" id="radioTabFavorites" data-icon="favorites" type="button" data-i18n-title="favorites" data-i18n-aria="favorites" title="Избранное" aria-label="Избранное" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
               <span class="radio__tab-count" id="radioFavCount" hidden>0</span>
             </button>
-            <button class="btn btn--icon" id="radioTabSaved" type="button" data-i18n-title="savedTracks" data-i18n-aria="savedTracks" title="Сохранённые названия треков" aria-label="Сохранённые названия треков" aria-pressed="false">
+            <button class="btn btn--icon" id="radioTabSaved" data-icon="saved" type="button" data-i18n-title="savedTracks" data-i18n-aria="savedTracks" title="Сохранённые названия треков" aria-label="Сохранённые названия треков" aria-pressed="false">
               <svg viewBox="0 0 24 24"><path d="M6 2.5h12v19l-6-4.8-6 4.8z"/></svg>
               <span class="radio__tab-count" id="radioSavedCount" hidden>0</span>
             </button>
@@ -301,7 +301,7 @@
           <div class="radio__subheader">
             <span data-i18n="trackTitles">Названия треков</span>
             <div class="playlist__add" id="radioSavedMenuWrap">
-              <button class="btn btn--icon" id="radioSavedMenuBtn" type="button" data-i18n-title="actions" data-i18n-aria="actions" title="Действия" aria-label="Действия" aria-haspopup="true" aria-expanded="false">
+              <button class="btn btn--icon" id="radioSavedMenuBtn" data-icon="more" type="button" data-i18n-title="actions" data-i18n-aria="actions" title="Действия" aria-label="Действия" aria-haspopup="true" aria-expanded="false">
                 <svg viewBox="0 0 24 24"><path d="M5 10a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4zm7 0a2 2 0 110 4 2 2 0 010-4z"/></svg>
               </button>
               <div class="playlist__add-menu" id="radioSavedMenu" hidden>

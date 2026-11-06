@@ -7,6 +7,7 @@ import { initMenuPreferences, setAppMenu, setDockIcon, syncDockMenu, syncTray } 
 import { registerMediaKeys } from "./shortcuts";
 import { checkForUpdatesOnLaunch, setAutoUpdateEnabled } from "./updates";
 import { registerIpcHandlers } from "./ipc";
+import { watchSkins } from "./skins";
 import { preferX11ForDocking } from "./dock";
 import { handleAlacProtocol, registerAlacScheme } from "./alac/protocol";
 
@@ -33,6 +34,7 @@ app.whenReady().then(async () => {
   setDockIcon();
 
   const windowShown = createWindow();
+  void watchSkins();
   windowShown.then(() => checkForUpdatesOnLaunch());
   registerMediaKeys();
   syncTray();
