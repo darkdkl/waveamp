@@ -63,6 +63,10 @@ Runs on macOS, Windows and Linux.
 - **Clock** on the display for radio, and optionally alternating with the track
   time during playback
 - **Color scheme** — presets plus hue, saturation and body color sliders
+- **Skins** — the look of the player from the skins folder: colors, textures,
+  button images, knobs, icons and the display font, as a folder or a
+  `.waveskin` file; the color sliders fine-tune any skin. The format is
+  described in [docs/skins.md](docs/skins.md)
 - **Hotkeys** — configurable shortcuts that work on any keyboard layout, with
   optional global hotkeys
 - **Media keys and system Now Playing** (macOS Control Center, Windows media

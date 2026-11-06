@@ -23,6 +23,7 @@ version, fixes bump the patch version.
   one folder) works as it is when put into the skins folder, next to skins
   kept as plain folders. The list follows the folder by itself, and changes to
   the selected skin show up at once
+- The skin format is described for skin authors in docs/skins.md
 
 ## [1.36.1] — 2026-11-05
 
