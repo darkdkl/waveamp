@@ -13,7 +13,6 @@ import {
   SKIN_FILE,
   SKIN_FILE_MAX_BYTES,
   SKIN_FONT_MAX_BYTES,
-  SKIN_FONT_TYPES,
   SKIN_ICON_MAX_BYTES,
   SKIN_IMAGE_MAX_BYTES,
   SKIN_IMAGE_TYPES,
@@ -39,24 +38,31 @@ function isArchiveName(name: string): boolean {
   return name.toLowerCase().endsWith(`.${SKIN_ARCHIVE_EXTENSION}`);
 }
 
-function folderSource(dir: string): SkinSource {
+function folderSource(dir: string, confined: boolean): SkinSource {
   const root = path.resolve(dir);
   return {
     async read(relative, maxBytes) {
       const file = path.resolve(root, relative);
       if (!file.startsWith(root + path.sep)) return null;
-      const stat = await fs.stat(file).catch(() => null);
+      const base = confined ? await fs.realpath(root) : root;
+      const real = confined ? await fs.realpath(file).catch(() => null) : file;
+      if (!real?.startsWith(base + path.sep)) return null;
+      const stat = await fs.stat(real).catch(() => null);
       if (!stat?.isFile() || stat.size > maxBytes) return null;
-      return new Uint8Array(await fs.readFile(file));
+      return new Uint8Array(await fs.readFile(real));
     },
   };
+}
+
+function entryName(name: string): string {
+  return name.replace(/\\/g, "/");
 }
 
 function listArchive(data: Uint8Array): ArchiveEntry[] {
   const entries: ArchiveEntry[] = [];
   unzipSync(data, {
     filter: (file) => {
-      entries.push({ name: file.name, size: file.originalSize });
+      entries.push({ name: entryName(file.name), size: file.originalSize });
       return false;
     },
   });
@@ -82,7 +88,7 @@ async function archiveSource(file: string, id: string): Promise<SkinSource | nul
     async read(relative, maxBytes) {
       const name = plan.root + relative;
       if (!files.has(relative) || (sizes.get(name) ?? Infinity) > maxBytes) return null;
-      const content = unzipSync(data, { filter: (entry) => entry.name === name })[name];
+      const [content] = Object.values(unzipSync(data, { filter: (entry) => entryName(entry.name) === name }));
       return content && content.length <= maxBytes ? content : null;
     },
   };
@@ -98,7 +104,8 @@ function skinPath(id: string): string | null {
 async function openSource(id: string): Promise<SkinSource | null> {
   const target = skinPath(id);
   if (!target) return null;
-  return isArchiveName(id) && id !== DEFAULT_SKIN_ID ? archiveSource(target, id) : folderSource(target);
+  if (id === DEFAULT_SKIN_ID) return folderSource(target, false);
+  return isArchiveName(id) ? archiveSource(target, id) : folderSource(target, true);
 }
 
 async function parseFrom(id: string, source: SkinSource): Promise<SkinData | null> {
@@ -182,7 +189,7 @@ async function loadAssets(skin: SkinData, source: SkinSource): Promise<SkinAsset
   }
   for (const [slot, relative] of skinEntries(skin.assets.fonts)) {
     const data = await readAsset(skin.id, source, relative, SKIN_FONT_MAX_BYTES, budget);
-    if (data) loaded.fonts[slot] = { data: data.toString("base64"), type: SKIN_FONT_TYPES[skinAssetExtension(relative)] };
+    if (data) loaded.fonts[slot] = new Uint8Array(data);
   }
   return loaded;
 }
@@ -193,22 +200,32 @@ export async function readSkin(id: string): Promise<LoadedSkin | null> {
 }
 
 export async function openSkinsFolder(): Promise<void> {
-  await fs.mkdir(SKINS_DIR, { recursive: true });
+  await watchSkins();
   const error = await shell.openPath(SKINS_DIR);
   if (error) writeLog("warn", "skins", `Cannot open ${SKINS_DIR}: ${error}`);
 }
 
 let watcher: FSWatcher | null = null;
 let watchTimer: ReturnType<typeof setTimeout> | undefined;
+let changedSkins: Set<string> | null = new Set();
+
+function noteChange(filename: string | null): void {
+  const name = filename?.split(/[\\/]/)[0];
+  if (!name) changedSkins = null;
+  else changedSkins?.add(name);
+  clearTimeout(watchTimer);
+  watchTimer = setTimeout(() => {
+    sendToMainWindow("skins-changed", changedSkins && [...changedSkins]);
+    changedSkins = new Set();
+  }, WATCH_DELAY_MS);
+}
 
 export async function watchSkins(): Promise<void> {
-  if (watcher) return;
+  watcher?.close();
+  watcher = null;
   try {
     await fs.mkdir(SKINS_DIR, { recursive: true });
-    watcher = watch(SKINS_DIR, { recursive: true }, () => {
-      clearTimeout(watchTimer);
-      watchTimer = setTimeout(() => sendToMainWindow("skins-changed"), WATCH_DELAY_MS);
-    });
+    watcher = watch(SKINS_DIR, { recursive: true }, (_event, filename) => noteChange(filename));
     watcher.on("error", (err) => {
       writeLog("warn", "skins", `Stopped watching skins: ${errorMessage(err)}`);
       watcher?.close();

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { SKIN_FONT_TYPES, SKIN_IMAGE_TYPES, isSafeSkinValue, isSkinAssetPath, isSkinId, parseSkin } from "../../src/shared/skin";
+import { SKIN_FONT_TYPES, SKIN_IMAGE_TYPES, isSkinAssetPath, isSkinColor, isSkinId, parseSkin } from "../../src/shared/skin";
 
 const base = { format: 1, name: "Carbon", author: "Someone", version: "1.0" };
 
 describe("parseSkin", () => {
   it("maps known keys to their CSS properties", () => {
-    const result = parseSkin("carbon", { ...base, colors: { button: "#123456" }, visualizer: { peak: "red" } }, false);
+    const result = parseSkin("carbon", { ...base, colors: { button: "#123456" }, visualizer: { peak: "#E06060" } }, false);
     expect(result).toMatchObject({
       ok: true,
       skin: {
@@ -14,34 +14,67 @@ describe("parseSkin", () => {
         author: "Someone",
         builtIn: false,
         tokens: [
-          { property: "--skin-button", value: "#123456", kind: "color" },
-          { property: "--viz-hot", value: "red", kind: "color" },
+          { property: "--skin-button", value: "#123456" },
+          { property: "--viz-hot", value: "#e06060" },
         ],
+        skipped: [],
       },
     });
   });
 
-  it("drops unknown keys and unsafe values", () => {
+  it("takes only hex colors and reports the rest", () => {
     const result = parseSkin(
       "carbon",
-      { ...base, colors: { nope: "#fff", button: "url(https://example.com/x.png)", chrome: "red; color: blue" } },
+      { ...base, colors: { nope: "#fff", button: "url(https://example.com/x.png)", chrome: "red", text: "rgb(1, 2, 3)", textMuted: "var(--accent)" } },
       false
     );
     expect(result.ok && result.skin.tokens).toEqual([]);
+    expect(result.ok && result.skin.skipped).toEqual(["colors.button", "colors.chrome", "colors.text", "colors.textMuted"]);
   });
 
-  it("keeps shadows and gradients with their kinds", () => {
-    const result = parseSkin("carbon", { ...base, effects: { popupShadow: "0 1px 2px #000", coverShade: "linear-gradient(red, blue)" } }, false);
-    expect(result.ok && result.skin.tokens.map((t) => t.kind)).toEqual(["shadow", "image"]);
+  it("ignores keys inherited from Object", () => {
+    const json = JSON.parse('{"format":1,"name":"X","colors":{"constructor":"#fff","__proto__":"#fff","toString":"#fff"}}');
+    const result = parseSkin("x", json, false);
+    expect(result.ok && result.skin.tokens).toEqual([]);
+    expect(result.ok && result.skin.skipped).toEqual([]);
+  });
+
+  it("builds shadows from numbers and a color", () => {
+    const effects = {
+      popupShadow: { x: 0, y: 6, blur: 16, color: "#00000066" },
+      listInset: { y: 2, blur: 6, color: "#000" },
+      displayInset: { x: 100, blur: -5, spread: 1, color: "#000" },
+      knobShadow: false,
+      pickerShadow: { y: "6", color: "#000" },
+    };
+    const result = parseSkin("carbon", { ...base, effects }, false);
+    expect(result.ok && result.skin.tokens).toEqual([
+      { property: "--skin-popup-shadow", value: "0px 6px 16px 0px #00000066" },
+      { property: "--skin-list-inset", value: "inset 0px 2px 6px 0px #000" },
+      { property: "--skin-display-inset", value: "inset 32px 0px 0px 1px #000" },
+      { property: "--skin-knob-shadow", value: "none" },
+    ]);
+    expect(result.ok && result.skin.skipped).toEqual(["effects.pickerShadow"]);
+  });
+
+  it("builds the cover shade from color stops", () => {
+    const shade = (coverShade: unknown) => parseSkin("x", { ...base, effects: { coverShade } }, false);
+    expect(shade([{ color: "#060A08D9", at: 0 }, { color: "#060a0873", at: 100 }])).toMatchObject({
+      skin: { tokens: [{ property: "--skin-cover-shade", value: "linear-gradient(90deg, #060a08d9 0%, #060a0873 100%)" }] },
+    });
+    for (const bad of [[{ color: "#000", at: 0 }], [{ color: "red", at: 0 }, { color: "#000", at: 100 }], [{ color: "#000" }, { color: "#000", at: 100 }], "linear-gradient(red, blue)"]) {
+      expect(shade(bad)).toMatchObject({ skin: { tokens: [], skipped: ["effects.coverShade"] } });
+    }
   });
 
   it("normalizes the accent", () => {
-    const result = parseSkin("carbon", { ...base, accent: { hue: 400, saturation: 120 } }, false);
-    expect(result.ok && result.skin.accent).toEqual({ hue: 40, saturation: 100, tint: 0 });
+    expect(parseSkin("carbon", { ...base, accent: { hue: 400, saturation: 120 } }, false)).toMatchObject({ skin: { accent: { hue: 40, saturation: 100, tint: 0 } } });
+    expect(parseSkin("carbon", { ...base, accent: { hue: "134", saturation: 96 } }, false)).toMatchObject({ skin: { accent: null } });
   });
 
   it("rejects a wrong format or a missing name", () => {
     expect(parseSkin("x", { ...base, format: 2 }, false).ok).toBe(false);
+    expect(parseSkin("x", { ...base, format: "1" }, false).ok).toBe(false);
     expect(parseSkin("x", { ...base, name: "" }, false).ok).toBe(false);
     expect(parseSkin("x", [], false).ok).toBe(false);
   });
@@ -60,14 +93,10 @@ describe("isSkinId", () => {
   });
 });
 
-describe("isSafeSkinValue", () => {
-  it("refuses external resources and CSS breakouts", () => {
-    expect(isSafeSkinValue("#fff")).toBe(true);
-    expect(isSafeSkinValue("var(--accent)")).toBe(true);
-    expect(isSafeSkinValue("URL(x)")).toBe(false);
-    expect(isSafeSkinValue("image-set(a 1x)")).toBe(false);
-    expect(isSafeSkinValue("red}body{")).toBe(false);
-    expect(isSafeSkinValue(42)).toBe(false);
+describe("isSkinColor", () => {
+  it("accepts only hex colors", () => {
+    for (const ok of ["#fff", "#ffff", "#a0B1c2", "#a0b1c2ff"]) expect(isSkinColor(ok)).toBe(true);
+    for (const bad of ["fff", "#ff", "#fffff", "#ggg", "red", "rgb(0, 0, 0)", "var(--accent)", "#fff;", 42, null]) expect(isSkinColor(bad)).toBe(false);
   });
 });
 
@@ -106,6 +135,7 @@ describe("skin assets", () => {
       false
     );
     expect(result.ok && result.skin.assets).toEqual({ images: {}, icons: {}, fonts: {} });
+    expect(result.ok && result.skin.skipped).toEqual(["images.body", "images.display", "images.button", "images.knob", "icons.play", "icons.pause", "icons.stop", "fonts.display"]);
   });
 
   it("bounds the nine-slice numbers", () => {
@@ -120,5 +150,12 @@ describe("isSkinAssetPath", () => {
     expect(isSkinAssetPath("a.png", SKIN_FONT_TYPES)).toBe(false);
     expect(isSkinAssetPath("img/..hidden.png", SKIN_IMAGE_TYPES)).toBe(true);
     expect(isSkinAssetPath("img/../a.png", SKIN_IMAGE_TYPES)).toBe(false);
+  });
+
+  it("refuses extensions named after Object members", () => {
+    for (const name of ["f.constructor", "f.toString", "f.__proto__", "f.hasOwnProperty"]) {
+      expect(isSkinAssetPath(name, SKIN_FONT_TYPES)).toBe(false);
+      expect(isSkinAssetPath(name, SKIN_IMAGE_TYPES)).toBe(false);
+    }
   });
 });

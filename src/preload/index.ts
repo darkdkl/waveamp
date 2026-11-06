@@ -101,7 +101,7 @@ const api = {
   listSkins: (): Promise<SkinInfo[]> => ipcRenderer.invoke("skins-list"),
   readSkin: (id: string): Promise<LoadedSkin | null> => ipcRenderer.invoke("skins-read", id),
   openSkinsFolder: (): void => ipcRenderer.send("skins-open-folder"),
-  onSkinsChanged: (callback: () => void) => ipcRenderer.on("skins-changed", () => callback()),
+  onSkinsChanged: (callback: (changed: string[] | null) => void) => ipcRenderer.on("skins-changed", (_event, changed) => callback(changed)),
   confirm: (message: string, yes: string, cancel: string): Promise<boolean> => ipcRenderer.invoke("confirm", message, yes, cancel),
   applyProxyConfig: (config: ProxyConfig): void => ipcRenderer.send("apply-proxy-config", config),
   setLoggingEnabled: (enabled: boolean): void => ipcRenderer.send("set-logging-enabled", enabled),

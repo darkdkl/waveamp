@@ -12,8 +12,8 @@ version, fixes bump the patch version.
   opens the folder). A skin sets the colors of the body, buttons, text,
   lists, menus and the visualizer and suggests a color scheme; the color
   sliders still fine-tune it, and Reset goes back to the skin's colors. A skin
-  that can't be read is skipped, and a removed one falls back to the built-in
-  skin
+  that can't be read is left out of the list, and when the selected skin is
+  removed or breaks, the player switches to the built-in one
 - Skins can bring images: a texture for the body and for the display,
   button faces for the normal, hovered, pressed and switched-on states
   (stretched by their edges), slider knobs, their own icons for the transport

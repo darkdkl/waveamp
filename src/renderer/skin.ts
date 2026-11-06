@@ -1,28 +1,4 @@
-import {
-  SKIN_ICON_SLOTS,
-  SKIN_TOKEN_PROPERTIES,
-  skinEntries,
-  type SkinAssets,
-  type SkinFont,
-  type SkinImageSlot,
-  type SkinToken,
-  type SkinTokenKind,
-} from "../shared/skin";
-
-const CHECKED_PROPERTY: Record<SkinTokenKind, string> = {
-  color: "color",
-  shadow: "box-shadow",
-  image: "background-image",
-};
-
-export function splitSkinTokens(tokens: SkinToken[]): { valid: SkinToken[]; invalid: SkinToken[] } {
-  const valid: SkinToken[] = [];
-  const invalid: SkinToken[] = [];
-  for (const token of tokens) {
-    (CSS.supports(CHECKED_PROPERTY[token.kind], token.value) ? valid : invalid).push(token);
-  }
-  return { valid, invalid };
-}
+import { SKIN_TOKEN_PROPERTIES, skinEntries, type SkinAssets, type SkinImageSlot, type SkinToken } from "../shared/skin";
 
 export function applySkinTokens(tokens: SkinToken[], doc: Document = document): void {
   const style = doc.documentElement.style;
@@ -46,25 +22,21 @@ const ASSET_PROPERTIES = [
   "--skin-button-slice",
   "--skin-button-width",
   "--skin-knob-image",
-  "--skin-display-font",
-  ...SKIN_ICON_SLOTS.map((slot) => `--skin-icon-${slot}`),
 ] as string[];
-const ASSET_CLASS_RE = /^skin-(button-image|knob-image|icon-.+)$/;
+const ASSET_CLASSES = ["skin-button-image", "skin-knob-image"];
 
 export const SKIN_FONT_FAMILY = "WaveAMP Skin Display";
-const DISPLAY_FONT_FALLBACK = '"DejaVu Sans Mono", "Courier New", monospace';
 
 function cssUrl(url: string): string {
   return `url("${url}")`;
 }
 
-export function applySkinAssets(assets: SkinAssets, hasFont: boolean, doc: Document = document): void {
+export function applySkinAssets(assets: SkinAssets, docs: Document[]): void {
+  const [doc] = docs;
   const style = doc.documentElement.style;
   for (const property of ASSET_PROPERTIES) style.removeProperty(property);
   const classes = doc.body.classList;
-  Array.from(classes)
-    .filter((name) => ASSET_CLASS_RE.test(name))
-    .forEach((name) => classes.remove(name));
+  classes.remove(...ASSET_CLASSES);
 
   for (const [slot, image] of skinEntries(assets.images)) {
     const layer = LAYER_PROPERTIES[slot];
@@ -82,22 +54,23 @@ export function applySkinAssets(assets: SkinAssets, hasFont: boolean, doc: Docum
     style.setProperty("--skin-knob-image", cssUrl(assets.images.knob.url));
     classes.add("skin-knob-image");
   }
-  for (const [slot, url] of skinEntries(assets.icons)) {
-    style.setProperty(`--skin-icon-${slot}`, cssUrl(url));
-    classes.add(`skin-icon-${slot}`);
+  for (const element of docs.flatMap((each) => Array.from(each.querySelectorAll<HTMLElement>("[data-icon]")))) {
+    const url = assets.icons[element.dataset.icon as keyof SkinAssets["icons"]];
+    if (url) element.style.setProperty("--skin-icon", cssUrl(url));
+    else element.style.removeProperty("--skin-icon");
+    element.classList.toggle("has-skin-icon", !!url);
   }
-  if (hasFont) style.setProperty("--skin-display-font", `"${SKIN_FONT_FAMILY}", ${DISPLAY_FONT_FALLBACK}`);
 }
 
-export function installSkinFont(doc: Document, font: SkinFont | null): Promise<void> {
-  doc.fonts.forEach((face) => {
-    if (face.family.replace(/"/g, "") === SKIN_FONT_FAMILY) doc.fonts.delete(face);
-  });
-  if (!font) return Promise.resolve();
-  const bytes = Uint8Array.from(atob(font.data), (char) => char.charCodeAt(0));
+export async function installSkinFont(doc: Document, font: Uint8Array<ArrayBuffer> | null): Promise<void> {
   const view = doc.defaultView as (Window & typeof globalThis) | null;
-  if (!view) return Promise.resolve();
-  const face = new view.FontFace(SKIN_FONT_FAMILY, bytes.buffer);
-  doc.fonts.add(face);
-  return face.load().then(() => undefined);
+  const face = font && view ? new view.FontFace(SKIN_FONT_FAMILY, font) : null;
+  try {
+    await face?.load();
+  } finally {
+    doc.fonts.forEach((old) => {
+      if (old !== face && old.family.replace(/"/g, "") === SKIN_FONT_FAMILY) doc.fonts.delete(old);
+    });
+    if (face?.status === "loaded") doc.fonts.add(face);
+  }
 }
