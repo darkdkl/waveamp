@@ -39,6 +39,7 @@ export function persistConfig(): void {
         lang: i18n.getLanguage(),
         scale: Math.round((state.uiScale / BASE_ZOOM) * 100),
         accentColor: state.accentColor,
+        skin: state.skinId,
         vizResponse: state.vizResponse,
         coverArtEnabled: state.coverArtEnabled,
         titleScroll: state.titleScroll,

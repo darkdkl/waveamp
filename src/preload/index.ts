@@ -25,6 +25,7 @@ import type {
   UpdateCheckResult,
 } from "../shared/types";
 import type { AudioFormat } from "../shared/audioFormat";
+import type { SkinData, SkinInfo } from "../shared/skin";
 
 // Sandboxed preload has no node:url; the drive-letter colon must stay unencoded.
 function pathToFileUrl(filePath: string): string {
@@ -97,6 +98,9 @@ const api = {
   listPresets: (folder: string): Promise<PresetInfo[]> => ipcRenderer.invoke("presets-list", folder),
   readPreset: (index: number): Promise<string | null> => ipcRenderer.invoke("presets-read", index),
   choosePresetFolder: (): Promise<string | null> => ipcRenderer.invoke("presets-choose-folder"),
+  listSkins: (): Promise<SkinInfo[]> => ipcRenderer.invoke("skins-list"),
+  readSkin: (id: string): Promise<SkinData | null> => ipcRenderer.invoke("skins-read", id),
+  openSkinsFolder: (): void => ipcRenderer.send("skins-open-folder"),
   confirm: (message: string, yes: string, cancel: string): Promise<boolean> => ipcRenderer.invoke("confirm", message, yes, cancel),
   applyProxyConfig: (config: ProxyConfig): void => ipcRenderer.send("apply-proxy-config", config),
   setLoggingEnabled: (enabled: boolean): void => ipcRenderer.send("set-logging-enabled", enabled),

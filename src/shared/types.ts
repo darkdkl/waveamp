@@ -1,3 +1,4 @@
+import type { SkinInfo, SkinToken } from "./skin";
 import type { TitleScrollMode } from "./titleScroll";
 import type { StreamInfo } from "./audioFormat";
 
@@ -151,6 +152,7 @@ export interface AppConfig {
     lang: Lang;
     scale: number;
     accentColor: AccentColor;
+    skin: string;
     vizResponse: VizResponse;
     coverArtEnabled: boolean;
     titleScroll: TitleScrollMode;
@@ -197,6 +199,10 @@ export interface SettingsState {
   scale: number;
   zoomFactor: number;
   accentColor: AccentColor;
+  skin: string;
+  skins: SkinInfo[];
+  skinAccent: AccentColor | null;
+  skinTokens: SkinToken[];
   vizResponse: VizResponse;
   coverArtEnabled: boolean;
   titleScroll: TitleScrollMode;
@@ -228,6 +234,8 @@ export type SettingsAction =
   | { type: "setLanguage"; value: Lang }
   | { type: "setScale"; value: number }
   | { type: "setAccentColor"; value: AccentColor }
+  | { type: "setSkin"; value: string }
+  | { type: "refreshSkins"; value: null }
   | { type: "setVizResponse"; value: VizResponse }
   | { type: "setCoverArtEnabled"; value: boolean }
   | { type: "setTitleScroll"; value: TitleScrollMode }

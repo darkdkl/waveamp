@@ -1,5 +1,6 @@
 import { i18n } from "../i18n";
 import { accentColor as accentColorTheme } from "../theme";
+import { refreshSkins, setSkin } from "./skins";
 import { settingsBtn } from "./dom";
 import { state } from "./state";
 import { persistConfig } from "./config";
@@ -138,6 +139,10 @@ export function pushSettingsState(): void {
     scale: Math.round((state.uiScale / BASE_ZOOM) * 100),
     zoomFactor: state.uiScale,
     accentColor: state.accentColor,
+    skin: state.skinId,
+    skins: state.skins,
+    skinAccent: state.skinAccent,
+    skinTokens: state.skinTokens,
     vizResponse: state.vizResponse,
     coverArtEnabled: state.coverArtEnabled,
     titleScroll: state.titleScroll,
@@ -189,6 +194,12 @@ export function initSettingsBridge(): void {
         break;
       case "setAccentColor":
         setAccentColor(action.value);
+        break;
+      case "setSkin":
+        void setSkin(action.value, true);
+        break;
+      case "refreshSkins":
+        void refreshSkins().then(() => setSkin(state.skinId, false));
         break;
       case "setVizResponse":
         setVizResponse(action.value);

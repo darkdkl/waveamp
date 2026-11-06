@@ -1,6 +1,7 @@
 import { hotkeys } from "../hotkeys";
 import { accentColor as accentColorTheme } from "../theme";
 import { TITLE_SCROLL_DEFAULT, TITLE_SCROLL_SPEED_DEFAULT, type TitleScrollMode } from "../../shared/titleScroll";
+import { DEFAULT_SKIN_ID, type SkinInfo, type SkinToken } from "../../shared/skin";
 import type {
   AccentColor,
   DockLayout,
@@ -93,6 +94,10 @@ export const state = {
   trayIconEnabled: false,
   closeMinimizesToTrayEnabled: false,
   accentColor: { ...accentColorTheme.DEFAULT } as AccentColor,
+  skinId: DEFAULT_SKIN_ID,
+  skins: [] as SkinInfo[],
+  skinAccent: null as AccentColor | null,
+  skinTokens: [] as SkinToken[],
 
   hotkeyConfig: hotkeys.defaults() as HotkeyConfig,
   globalHotkeyFailures: [] as string[],
