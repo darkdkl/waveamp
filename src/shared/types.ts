@@ -235,7 +235,6 @@ export type SettingsAction =
   | { type: "setScale"; value: number }
   | { type: "setAccentColor"; value: AccentColor }
   | { type: "setSkin"; value: string }
-  | { type: "refreshSkins"; value: null }
   | { type: "setVizResponse"; value: VizResponse }
   | { type: "setCoverArtEnabled"; value: boolean }
   | { type: "setTitleScroll"; value: TitleScrollMode }

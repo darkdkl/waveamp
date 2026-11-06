@@ -174,6 +174,8 @@ see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
   FLAC decoding for chord analysis, built on
   [libFLAC](https://github.com/xiph/flac) (MIT; libFLAC under BSD-3-Clause),
   with [codec-parser](https://github.com/eshaz/codec-parser) (LGPL-3.0)
+- [fflate](https://github.com/101arrowz/fflate) — reading `.waveskin` skin
+  archives (MIT)
 
 The full list with license texts is generated into `THIRD_PARTY_LICENSES.txt`
 before every run and build (`npm run licenses`), shipped next to the app and

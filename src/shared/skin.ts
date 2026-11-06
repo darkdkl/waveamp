@@ -7,7 +7,6 @@ export const SKIN_FILE_MAX_BYTES = 64 * 1024;
 
 const TEXT_MAX_LENGTH = 60;
 const VALUE_MAX_LENGTH = 300;
-const SKIN_ID_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
 const FORBIDDEN_VALUE_RE = /url\s*\(|image-set\s*\(|image\s*\(|element\s*\(|[;{}<>\\]/i;
 
 export type SkinTokenKind = "color" | "shadow" | "image";
@@ -232,8 +231,8 @@ function assets(json: Record<string, unknown>): SkinAssetRefs {
   return result;
 }
 
-export function isSkinId(id: string): boolean {
-  return SKIN_ID_RE.test(id);
+export function isSkinId(id: unknown): id is string {
+  return typeof id === "string" && id.length > 0 && id.length <= 255 && !id.startsWith(".") && !/[\\/\0]/.test(id);
 }
 
 export function isSafeSkinValue(value: unknown): value is string {

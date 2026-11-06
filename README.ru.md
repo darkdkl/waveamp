@@ -174,6 +174,8 @@ npm run build:win
   декодирование FLAC для распознавания аккордов, на основе
   [libFLAC](https://github.com/xiph/flac) (MIT; libFLAC — BSD-3-Clause),
   вместе с [codec-parser](https://github.com/eshaz/codec-parser) (LGPL-3.0)
+- [fflate](https://github.com/101arrowz/fflate) — чтение архивов скинов
+  `.waveskin` (MIT)
 
 Полный список со всеми зависимостями и текстами лицензий собирается в
 `THIRD_PARTY_LICENSES.txt` перед каждым запуском и сборкой (`npm run licenses`),

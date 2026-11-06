@@ -68,7 +68,6 @@ const accentTintInput = byId<HTMLInputElement>("accentTintInput");
 const accentResetBtn = byId<HTMLButtonElement>("accentResetBtn");
 const skinSelect = byId<HTMLSelectElement>("skinSelect");
 const skinFolderBtn = byId<HTMLButtonElement>("skinFolderBtn");
-const skinRefreshBtn = byId<HTMLButtonElement>("skinRefreshBtn");
 
 const settingsTabHotkeys = byId<HTMLButtonElement>("settingsTabHotkeys");
 const settingsHotkeysView = byId("settingsHotkeysView");
@@ -433,7 +432,7 @@ function renderSkins(): void {
 
 skinSelect.addEventListener("change", () => sendAction("setSkin", skinSelect.value));
 skinFolderBtn.addEventListener("click", () => window.electronAPI?.openSkinsFolder?.());
-skinRefreshBtn.addEventListener("click", () => sendAction("refreshSkins", null));
+
 showAccentColor();
 
 const hotkeysList = byId("hotkeysList");

@@ -48,11 +48,15 @@ describe("parseSkin", () => {
 });
 
 describe("isSkinId", () => {
-  it("accepts folder-like names only", () => {
+  it("accepts names of entries in the skins folder", () => {
     expect(isSkinId("carbon-dark_2")).toBe(true);
+    expect(isSkinId("Flat Walnut.waveskin")).toBe(true);
+    expect(isSkinId("Ёлка")).toBe(true);
     expect(isSkinId("../etc")).toBe(false);
+    expect(isSkinId("a\\b")).toBe(false);
     expect(isSkinId(".hidden")).toBe(false);
     expect(isSkinId("")).toBe(false);
+    expect(isSkinId(7)).toBe(false);
   });
 });
 

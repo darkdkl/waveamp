@@ -8,8 +8,8 @@ version, fixes bump the patch version.
 
 ### Added
 - Skins: Settings → Interface → Skin picks the look of the player from the
-  built-in skin or from skins put into the skins folder (the button next to
-  it opens the folder). A skin sets the colors of the body, buttons, text,
+  built-in skin or from skins put into the skins folder (the button below
+  opens the folder). A skin sets the colors of the body, buttons, text,
   lists, menus and the visualizer and suggests a color scheme; the color
   sliders still fine-tune it, and Reset goes back to the skin's colors. A skin
   that can't be read is skipped, and a removed one falls back to the built-in
@@ -19,6 +19,10 @@ version, fixes bump the patch version.
   (stretched by their edges), slider knobs, their own icons for the transport
   and panel buttons, which take the color scheme's color, and a font for the
   display
+- A `.waveskin` file (a zip with `skin.json` and its files, at the top or in
+  one folder) works as it is when put into the skins folder, next to skins
+  kept as plain folders. The list follows the folder by itself, and changes to
+  the selected skin show up at once
 
 ## [1.36.1] — 2026-11-05
 

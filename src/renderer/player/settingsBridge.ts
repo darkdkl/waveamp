@@ -198,9 +198,6 @@ export function initSettingsBridge(): void {
       case "setSkin":
         void setSkin(action.value, true);
         break;
-      case "refreshSkins":
-        void refreshSkins().then(() => setSkin(state.skinId, false));
-        break;
       case "setVizResponse":
         setVizResponse(action.value);
         break;
@@ -276,7 +273,7 @@ export function initSettingsBridge(): void {
     pushSettingsState();
   });
 
-  window.electronAPI?.onSettingsStateRequested?.(() => pushSettingsState());
+  window.electronAPI?.onSettingsStateRequested?.(() => void refreshSkins());
 }
 
 export function initSkipUpdateVersion(): void {
