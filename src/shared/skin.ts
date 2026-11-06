@@ -26,9 +26,99 @@ export interface SkinInfo {
   builtIn: boolean;
 }
 
+export const SKIN_IMAGE_SLOTS = ["body", "display", "button", "buttonHover", "buttonPressed", "buttonOn", "knob"] as const;
+export const SKIN_ICON_SLOTS = [
+  "previous",
+  "play",
+  "pause",
+  "stop",
+  "next",
+  "volume",
+  "eq",
+  "radio",
+  "playlist",
+  "chords",
+  "settings",
+  "reset",
+  "search",
+  "folder",
+  "add",
+  "favorites",
+  "saved",
+  "filter",
+  "up",
+  "down",
+  "popout",
+  "more",
+] as const;
+export const SKIN_FONT_SLOTS = ["display"] as const;
+
+export type SkinImageSlot = (typeof SKIN_IMAGE_SLOTS)[number];
+export type SkinIconSlot = (typeof SKIN_ICON_SLOTS)[number];
+export type SkinFontSlot = (typeof SKIN_FONT_SLOTS)[number];
+
+export const SKIN_IMAGE_TYPES: Record<string, string> = {
+  png: "image/png",
+  webp: "image/webp",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  svg: "image/svg+xml",
+};
+export const SKIN_FONT_TYPES: Record<string, string> = {
+  woff2: "font/woff2",
+  woff: "font/woff",
+  ttf: "font/ttf",
+  otf: "font/otf",
+};
+
+export const SKIN_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+export const SKIN_ICON_MAX_BYTES = 256 * 1024;
+export const SKIN_FONT_MAX_BYTES = 2 * 1024 * 1024;
+export const SKIN_ASSETS_MAX_BYTES = 8 * 1024 * 1024;
+
+const SLICE_MAX = 256;
+const WIDTH_MAX = 64;
+
+export interface SkinImageRef {
+  path: string;
+  slice: number;
+  width: number;
+  repeat: boolean;
+}
+
+export interface SkinImage extends Omit<SkinImageRef, "path"> {
+  url: string;
+}
+
+export interface SkinFont {
+  data: string;
+  type: string;
+}
+
+export interface SkinAssetRefs {
+  images: Partial<Record<SkinImageSlot, SkinImageRef>>;
+  icons: Partial<Record<SkinIconSlot, string>>;
+  fonts: Partial<Record<SkinFontSlot, string>>;
+}
+
+export interface SkinAssets {
+  images: Partial<Record<SkinImageSlot, SkinImage>>;
+  icons: Partial<Record<SkinIconSlot, string>>;
+  fonts: Partial<Record<SkinFontSlot, SkinFont>>;
+}
+
 export interface SkinData extends SkinInfo {
   accent: AccentColor | null;
   tokens: SkinToken[];
+  assets: SkinAssetRefs;
+}
+
+export interface LoadedSkin extends Omit<SkinData, "assets"> {
+  assets: SkinAssets;
+}
+
+export function skinEntries<K extends string, V>(record: Partial<Record<K, V>>): [K, V][] {
+  return Object.entries(record) as [K, V][];
 }
 
 export type SkinParseResult = { ok: true; skin: SkinData } | { ok: false; error: string };
@@ -96,6 +186,52 @@ export const SKIN_TOKEN_PROPERTIES: string[] = Object.values(SKIN_KEYS).flatMap(
   Object.values(section).map((entry) => entry.property)
 );
 
+export function skinAssetExtension(path: string): string {
+  return path.slice(path.lastIndexOf(".") + 1).toLowerCase();
+}
+
+export function isSkinAssetPath(value: unknown, types: Record<string, string>): value is string {
+  if (typeof value !== "string" || value.length === 0 || value.length > 200) return false;
+  if (value.startsWith("/") || /[\\:]/.test(value)) return false;
+  if (value.split("/").some((part) => part === "" || part === "." || part === "..")) return false;
+  return skinAssetExtension(value) in types;
+}
+
+function bounded(value: unknown, max: number, fallback: number): number {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? Math.min(max, Math.max(0, n)) : fallback;
+}
+
+function imageRef(value: unknown, slot: SkinImageSlot): SkinImageRef | null {
+  const entry = typeof value === "string" ? { src: value } : value;
+  if (!isRecord(entry) || !isSkinAssetPath(entry.src, SKIN_IMAGE_TYPES)) return null;
+  const slice = bounded(entry.slice, SLICE_MAX, 0);
+  return {
+    path: entry.src,
+    slice,
+    width: bounded(entry.width, WIDTH_MAX, Math.min(slice, WIDTH_MAX)),
+    repeat: typeof entry.repeat === "boolean" ? entry.repeat : slot === "body" || slot === "display",
+  };
+}
+
+function assets(json: Record<string, unknown>): SkinAssetRefs {
+  const result: SkinAssetRefs = { images: {}, icons: {}, fonts: {} };
+  const images = isRecord(json.images) ? json.images : {};
+  for (const slot of SKIN_IMAGE_SLOTS) {
+    const ref = imageRef(images[slot], slot);
+    if (ref) result.images[slot] = ref;
+  }
+  const icons = isRecord(json.icons) ? json.icons : {};
+  for (const slot of SKIN_ICON_SLOTS) {
+    if (isSkinAssetPath(icons[slot], SKIN_IMAGE_TYPES)) result.icons[slot] = icons[slot] as string;
+  }
+  const fonts = isRecord(json.fonts) ? json.fonts : {};
+  for (const slot of SKIN_FONT_SLOTS) {
+    if (isSkinAssetPath(fonts[slot], SKIN_FONT_TYPES)) result.fonts[slot] = fonts[slot] as string;
+  }
+  return result;
+}
+
 export function isSkinId(id: string): boolean {
   return SKIN_ID_RE.test(id);
 }
@@ -141,6 +277,15 @@ export function parseSkin(id: string, json: unknown, builtIn: boolean): SkinPars
   }
   return {
     ok: true,
-    skin: { id, name, author: text(json.author), version: text(json.version), builtIn, accent: accent(json.accent), tokens },
+    skin: {
+      id,
+      name,
+      author: text(json.author),
+      version: text(json.version),
+      builtIn,
+      accent: accent(json.accent),
+      tokens,
+      assets: assets(json),
+    },
   };
 }

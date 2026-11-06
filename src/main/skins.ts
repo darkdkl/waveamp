@@ -5,10 +5,20 @@ import { writeLog } from "./logging";
 import { errorMessage } from "../shared/errors";
 import {
   DEFAULT_SKIN_ID,
+  SKIN_ASSETS_MAX_BYTES,
   SKIN_FILE,
   SKIN_FILE_MAX_BYTES,
+  SKIN_FONT_MAX_BYTES,
+  SKIN_FONT_TYPES,
+  SKIN_ICON_MAX_BYTES,
+  SKIN_IMAGE_MAX_BYTES,
+  SKIN_IMAGE_TYPES,
   isSkinId,
   parseSkin,
+  skinAssetExtension,
+  skinEntries,
+  type LoadedSkin,
+  type SkinAssets,
   type SkinData,
   type SkinInfo,
 } from "../shared/skin";
@@ -57,8 +67,58 @@ export async function listSkins(): Promise<SkinInfo[]> {
   return [...(builtIn ? [builtIn] : []), ...skins].map(info);
 }
 
-export function readSkin(id: string): Promise<SkinData | null> {
-  return loadSkin(id);
+class AssetBudget {
+  private used = 0;
+
+  take(bytes: number): boolean {
+    if (this.used + bytes > SKIN_ASSETS_MAX_BYTES) return false;
+    this.used += bytes;
+    return true;
+  }
+}
+
+async function readAsset(skin: SkinData, relative: string, maxBytes: number, budget: AssetBudget): Promise<Buffer | null> {
+  const dir = path.resolve(skinDir(skin.id));
+  const file = path.resolve(dir, relative);
+  if (!file.startsWith(dir + path.sep)) return null;
+  try {
+    const stat = await fs.stat(file);
+    if (!stat.isFile() || stat.size > maxBytes || !budget.take(stat.size)) {
+      writeLog("warn", "skins", `"${skin.id}": ${relative} is missing or too large`);
+      return null;
+    }
+    return await fs.readFile(file);
+  } catch (err) {
+    writeLog("warn", "skins", `"${skin.id}": ${relative}: ${errorMessage(err)}`);
+    return null;
+  }
+}
+
+function dataUrl(relative: string, data: Buffer): string {
+  return `data:${SKIN_IMAGE_TYPES[skinAssetExtension(relative)]};base64,${data.toString("base64")}`;
+}
+
+async function loadAssets(skin: SkinData): Promise<SkinAssets> {
+  const budget = new AssetBudget();
+  const loaded: SkinAssets = { images: {}, icons: {}, fonts: {} };
+  for (const [slot, ref] of skinEntries(skin.assets.images)) {
+    const data = await readAsset(skin, ref.path, SKIN_IMAGE_MAX_BYTES, budget);
+    if (data) loaded.images[slot] = { url: dataUrl(ref.path, data), slice: ref.slice, width: ref.width, repeat: ref.repeat };
+  }
+  for (const [slot, relative] of skinEntries(skin.assets.icons)) {
+    const data = await readAsset(skin, relative, SKIN_ICON_MAX_BYTES, budget);
+    if (data) loaded.icons[slot] = dataUrl(relative, data);
+  }
+  for (const [slot, relative] of skinEntries(skin.assets.fonts)) {
+    const data = await readAsset(skin, relative, SKIN_FONT_MAX_BYTES, budget);
+    if (data) loaded.fonts[slot] = { data: data.toString("base64"), type: SKIN_FONT_TYPES[skinAssetExtension(relative)] };
+  }
+  return loaded;
+}
+
+export async function readSkin(id: string): Promise<LoadedSkin | null> {
+  const skin = await loadSkin(id);
+  return skin ? { ...skin, assets: await loadAssets(skin) } : null;
 }
 
 export async function openSkinsFolder(): Promise<void> {

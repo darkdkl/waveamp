@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSafeSkinValue, isSkinId, parseSkin } from "../../src/shared/skin";
+import { SKIN_FONT_TYPES, SKIN_IMAGE_TYPES, isSafeSkinValue, isSkinAssetPath, isSkinId, parseSkin } from "../../src/shared/skin";
 
 const base = { format: 1, name: "Carbon", author: "Someone", version: "1.0" };
 
@@ -64,5 +64,57 @@ describe("isSafeSkinValue", () => {
     expect(isSafeSkinValue("image-set(a 1x)")).toBe(false);
     expect(isSafeSkinValue("red}body{")).toBe(false);
     expect(isSafeSkinValue(42)).toBe(false);
+  });
+});
+
+describe("skin assets", () => {
+  it("reads image, icon and font slots", () => {
+    const result = parseSkin(
+      "brass",
+      {
+        ...base,
+        images: { body: "img/body.png", button: { src: "img/button.png", slice: 12, width: 6 }, knob: { src: "img/knob.webp" } },
+        icons: { play: "icons/play.svg", unknown: "icons/x.svg" },
+        fonts: { display: "fonts/lcd.woff2" },
+      },
+      false
+    );
+    expect(result.ok && result.skin.assets).toEqual({
+      images: {
+        body: { path: "img/body.png", slice: 0, width: 0, repeat: true },
+        button: { path: "img/button.png", slice: 12, width: 6, repeat: false },
+        knob: { path: "img/knob.webp", slice: 0, width: 0, repeat: false },
+      },
+      icons: { play: "icons/play.svg" },
+      fonts: { display: "fonts/lcd.woff2" },
+    });
+  });
+
+  it("refuses paths outside the skin folder and unknown file types", () => {
+    const result = parseSkin(
+      "x",
+      {
+        ...base,
+        images: { body: "../secret.png", display: "/etc/a.png", button: "C:/a.png", knob: "img/knob.gif" },
+        icons: { play: "icons/./play.svg", pause: "icons//pause.svg", stop: "icons\\stop.svg" },
+        fonts: { display: "fonts/lcd.exe" },
+      },
+      false
+    );
+    expect(result.ok && result.skin.assets).toEqual({ images: {}, icons: {}, fonts: {} });
+  });
+
+  it("bounds the nine-slice numbers", () => {
+    const result = parseSkin("x", { ...base, images: { button: { src: "b.png", slice: 999, width: -3 } } }, false);
+    expect(result.ok && result.skin.assets.images.button).toEqual({ path: "b.png", slice: 256, width: 0, repeat: false });
+  });
+});
+
+describe("isSkinAssetPath", () => {
+  it("accepts plain relative paths with a known extension", () => {
+    expect(isSkinAssetPath("img/a.PNG", SKIN_IMAGE_TYPES)).toBe(true);
+    expect(isSkinAssetPath("a.png", SKIN_FONT_TYPES)).toBe(false);
+    expect(isSkinAssetPath("img/..hidden.png", SKIN_IMAGE_TYPES)).toBe(true);
+    expect(isSkinAssetPath("img/../a.png", SKIN_IMAGE_TYPES)).toBe(false);
   });
 });

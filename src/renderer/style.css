@@ -39,6 +39,7 @@
   --skin-stage-text: #e3ebe3;
   --skin-stage-button: rgba(20, 24, 28, 0.7);
   --skin-stage-button-text: #dfe6df;
+  --skin-display-font: "DejaVu Sans Mono", "Courier New", monospace;
   --accent-h: 134;
   --accent-s: 96%;
   --accent: hsl(var(--accent-h) var(--accent-s) 74%);
@@ -131,7 +132,7 @@ body.is-electron .player {
   position: relative;
   width: 480px;
   max-width: 100%;
-  background: linear-gradient(180deg, var(--chrome-1) 0%, var(--chrome-2) 100%);
+  background: var(--skin-body-layer, none), linear-gradient(180deg, var(--chrome-1) 0%, var(--chrome-2) 100%);
   border: 1px solid var(--chrome-edge);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -342,7 +343,7 @@ body.is-detached :is(.eq, .chords-section, .playlist, .radio) {
 }
 
 .player__display {
-  --display-font: "DejaVu Sans Mono", "Courier New", monospace;
+  --display-font: var(--skin-display-font);
   --display-pad-y: 10px;
   --display-pad-x: 12px;
   --display-gap: 10px;
@@ -358,7 +359,7 @@ body.is-detached :is(.eq, .chords-section, .playlist, .radio) {
   --display-viz-height: 26px;
   position: relative;
   isolation: isolate;
-  background: var(--lcd-bg);
+  background: var(--skin-display-layer, none), var(--lcd-bg);
   border: 1px solid var(--skin-outline);
   border-radius: 6px;
   padding: var(--display-pad-y) var(--display-pad-x);
@@ -1034,7 +1035,7 @@ input[type="range"]:disabled {
 }
 
 .chords {
-  --chords-font: "DejaVu Sans Mono", "Courier New", monospace;
+  --chords-font: var(--skin-display-font);
   --chords-lcd-height: 111px;
   display: flex;
   flex-direction: column;
@@ -1080,7 +1081,7 @@ input[type="range"]:disabled {
   display: flex;
   align-items: center;
   padding: 0 12px;
-  background: var(--lcd-bg);
+  background: var(--skin-display-layer, none), var(--lcd-bg);
   border: 1px solid var(--skin-outline);
   border-radius: 6px;
   box-shadow: var(--skin-display-inset);
@@ -1656,7 +1657,7 @@ input[type="range"]:disabled {
 
 .eq__value {
   font-size: 9px;
-  font-family: "DejaVu Sans Mono", "Courier New", monospace;
+  font-family: var(--skin-display-font);
   color: var(--lcd-fg-dim);
   min-width: 18px;
   text-align: center;
@@ -1809,7 +1810,7 @@ input[type="range"].eq__slider {
   border: 1px solid var(--skin-outline);
   border-radius: var(--control-radius);
   color: var(--lcd-fg);
-  font-family: "DejaVu Sans Mono", "Courier New", monospace;
+  font-family: var(--skin-display-font);
   font-size: 12px;
   height: var(--control-height);
   padding: 0 10px;
@@ -1931,7 +1932,7 @@ input[type="range"].eq__slider {
   border: 1px solid var(--skin-outline);
   border-radius: var(--control-radius);
   color: var(--lcd-fg);
-  font-family: "DejaVu Sans Mono", "Courier New", monospace;
+  font-family: var(--skin-display-font);
   font-size: 12px;
   height: var(--control-height);
   padding: 0 10px;
@@ -2710,4 +2711,168 @@ body.cannot-position .window-grip--chords-left {
 body:has(.playlist.is-open, .radio.is-open) .window-edge,
 body:has(.playlist.is-open, .radio.is-open) .window-grip--player {
   display: block;
+}
+
+body.skin-button-image .btn {
+  background: none;
+  border-color: transparent;
+  border-image: var(--skin-button-image) var(--skin-button-slice) fill / var(--skin-button-width) stretch;
+}
+
+body.skin-button-image .btn:hover {
+  border-image-source: var(--skin-button-hover-image, var(--skin-button-image));
+}
+
+body.skin-button-image .btn:active {
+  border-image-source: var(--skin-button-pressed-image, var(--skin-button-image));
+}
+
+body.skin-button-image .btn.is-active {
+  border-image-source: var(--skin-button-on-image, var(--skin-button-image));
+}
+
+body.skin-knob-image input[type="range"]::-webkit-slider-thumb {
+  background: var(--skin-knob-image) center / 100% 100% no-repeat;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+body.skin-icon-previous [data-icon="previous"] > svg {
+  --skin-icon: var(--skin-icon-previous);
+}
+
+body.skin-icon-play [data-icon="play"] > svg {
+  --skin-icon: var(--skin-icon-play);
+}
+
+body.skin-icon-pause [data-icon="pause"] > svg {
+  --skin-icon: var(--skin-icon-pause);
+}
+
+body.skin-icon-stop [data-icon="stop"] > svg {
+  --skin-icon: var(--skin-icon-stop);
+}
+
+body.skin-icon-next [data-icon="next"] > svg {
+  --skin-icon: var(--skin-icon-next);
+}
+
+body.skin-icon-volume [data-icon="volume"] > svg {
+  --skin-icon: var(--skin-icon-volume);
+}
+
+body.skin-icon-eq [data-icon="eq"] > svg {
+  --skin-icon: var(--skin-icon-eq);
+}
+
+body.skin-icon-radio [data-icon="radio"] > svg {
+  --skin-icon: var(--skin-icon-radio);
+}
+
+body.skin-icon-playlist [data-icon="playlist"] > svg {
+  --skin-icon: var(--skin-icon-playlist);
+}
+
+body.skin-icon-chords [data-icon="chords"] > svg {
+  --skin-icon: var(--skin-icon-chords);
+}
+
+body.skin-icon-settings [data-icon="settings"] > svg {
+  --skin-icon: var(--skin-icon-settings);
+}
+
+body.skin-icon-reset [data-icon="reset"] > svg {
+  --skin-icon: var(--skin-icon-reset);
+}
+
+body.skin-icon-search [data-icon="search"] > svg {
+  --skin-icon: var(--skin-icon-search);
+}
+
+body.skin-icon-folder [data-icon="folder"] > svg {
+  --skin-icon: var(--skin-icon-folder);
+}
+
+body.skin-icon-add [data-icon="add"] > svg {
+  --skin-icon: var(--skin-icon-add);
+}
+
+body.skin-icon-favorites [data-icon="favorites"] > svg {
+  --skin-icon: var(--skin-icon-favorites);
+}
+
+body.skin-icon-saved [data-icon="saved"] > svg {
+  --skin-icon: var(--skin-icon-saved);
+}
+
+body.skin-icon-filter [data-icon="filter"] > svg {
+  --skin-icon: var(--skin-icon-filter);
+}
+
+body.skin-icon-up [data-icon="up"] > svg {
+  --skin-icon: var(--skin-icon-up);
+}
+
+body.skin-icon-down [data-icon="down"] > svg {
+  --skin-icon: var(--skin-icon-down);
+}
+
+body.skin-icon-popout [data-icon="popout"] > svg {
+  --skin-icon: var(--skin-icon-popout);
+}
+
+body.skin-icon-more [data-icon="more"] > svg {
+  --skin-icon: var(--skin-icon-more);
+}
+
+body.skin-icon-previous [data-icon="previous"] > svg,
+body.skin-icon-play [data-icon="play"] > svg,
+body.skin-icon-pause [data-icon="pause"] > svg,
+body.skin-icon-stop [data-icon="stop"] > svg,
+body.skin-icon-next [data-icon="next"] > svg,
+body.skin-icon-volume [data-icon="volume"] > svg,
+body.skin-icon-eq [data-icon="eq"] > svg,
+body.skin-icon-radio [data-icon="radio"] > svg,
+body.skin-icon-playlist [data-icon="playlist"] > svg,
+body.skin-icon-chords [data-icon="chords"] > svg,
+body.skin-icon-settings [data-icon="settings"] > svg,
+body.skin-icon-reset [data-icon="reset"] > svg,
+body.skin-icon-search [data-icon="search"] > svg,
+body.skin-icon-folder [data-icon="folder"] > svg,
+body.skin-icon-add [data-icon="add"] > svg,
+body.skin-icon-favorites [data-icon="favorites"] > svg,
+body.skin-icon-saved [data-icon="saved"] > svg,
+body.skin-icon-filter [data-icon="filter"] > svg,
+body.skin-icon-up [data-icon="up"] > svg,
+body.skin-icon-down [data-icon="down"] > svg,
+body.skin-icon-popout [data-icon="popout"] > svg,
+body.skin-icon-more [data-icon="more"] > svg {
+  background: currentColor;
+  -webkit-mask: var(--skin-icon) center / contain no-repeat;
+  mask: var(--skin-icon) center / contain no-repeat;
+}
+
+body.skin-icon-previous [data-icon="previous"] > svg > *,
+body.skin-icon-play [data-icon="play"] > svg > *,
+body.skin-icon-pause [data-icon="pause"] > svg > *,
+body.skin-icon-stop [data-icon="stop"] > svg > *,
+body.skin-icon-next [data-icon="next"] > svg > *,
+body.skin-icon-volume [data-icon="volume"] > svg > *,
+body.skin-icon-eq [data-icon="eq"] > svg > *,
+body.skin-icon-radio [data-icon="radio"] > svg > *,
+body.skin-icon-playlist [data-icon="playlist"] > svg > *,
+body.skin-icon-chords [data-icon="chords"] > svg > *,
+body.skin-icon-settings [data-icon="settings"] > svg > *,
+body.skin-icon-reset [data-icon="reset"] > svg > *,
+body.skin-icon-search [data-icon="search"] > svg > *,
+body.skin-icon-folder [data-icon="folder"] > svg > *,
+body.skin-icon-add [data-icon="add"] > svg > *,
+body.skin-icon-favorites [data-icon="favorites"] > svg > *,
+body.skin-icon-saved [data-icon="saved"] > svg > *,
+body.skin-icon-filter [data-icon="filter"] > svg > *,
+body.skin-icon-up [data-icon="up"] > svg > *,
+body.skin-icon-down [data-icon="down"] > svg > *,
+body.skin-icon-popout [data-icon="popout"] > svg > *,
+body.skin-icon-more [data-icon="more"] > svg > * {
+  visibility: hidden;
 }

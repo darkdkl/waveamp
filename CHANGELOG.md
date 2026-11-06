@@ -14,6 +14,11 @@ version, fixes bump the patch version.
   sliders still fine-tune it, and Reset goes back to the skin's colors. A skin
   that can't be read is skipped, and a removed one falls back to the built-in
   skin
+- Skins can bring images: a texture for the body and for the display,
+  button faces for the normal, hovered, pressed and switched-on states
+  (stretched by their edges), slider knobs, their own icons for the transport
+  and panel buttons, which take the color scheme's color, and a font for the
+  display
 
 ## [1.36.1] — 2026-11-05
 
