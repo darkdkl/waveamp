@@ -85,11 +85,11 @@ let vizColorsReadAt = -Infinity;
 function currentVizColors(now: number): VizColors {
   if (!vizColors || now - vizColorsReadAt > 500) {
     vizColors = {
-      fg: resolveCssColor("--lcd-fg"),
-      dim: resolveCssColor("--lcd-fg-dim"),
-      off: resolveCssColor("--lcd-off"),
-      glow: resolveCssColor("--lcd-glow"),
-      hot: "#e06060",
+      fg: resolveCssColor("--viz-fg"),
+      dim: resolveCssColor("--viz-dim"),
+      off: resolveCssColor("--viz-off"),
+      glow: resolveCssColor("--viz-glow"),
+      hot: resolveCssColor("--viz-hot"),
     };
     vizColorsReadAt = now;
   }
