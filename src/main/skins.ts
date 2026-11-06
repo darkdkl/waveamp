@@ -105,6 +105,10 @@ async function openSource(id: string): Promise<SkinSource | null> {
   const target = skinPath(id);
   if (!target) return null;
   if (id === DEFAULT_SKIN_ID) return folderSource(target, false);
+  if ((await fs.lstat(target)).isSymbolicLink()) {
+    writeLog("warn", "skins", `"${id}" is a link; a skin has to be a real folder or file`);
+    return null;
+  }
   return isArchiveName(id) ? archiveSource(target, id) : folderSource(target, true);
 }
 
