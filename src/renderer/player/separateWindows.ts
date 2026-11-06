@@ -41,7 +41,11 @@ function mirrorInto(doc: Document): void {
   Array.from(target).forEach((name) => {
     if (!source.getPropertyValue(name)) target.removeProperty(name);
   });
-  Array.from(source).forEach((name) => target.setProperty(name, source.getPropertyValue(name), source.getPropertyPriority(name)));
+  Array.from(source).forEach((name) => {
+    const value = source.getPropertyValue(name);
+    const priority = source.getPropertyPriority(name);
+    if (target.getPropertyValue(name) !== value || target.getPropertyPriority(name) !== priority) target.setProperty(name, value, priority);
+  });
   doc.documentElement.lang = document.documentElement.lang;
   doc.body.className = document.body.className;
   doc.body.classList.remove("is-separated");

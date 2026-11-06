@@ -6,15 +6,16 @@ export const SKIN_FILE = "skin.json";
 export const SKIN_FILE_MAX_BYTES = 64 * 1024;
 
 const TEXT_MAX_LENGTH = 60;
-const VALUE_MAX_LENGTH = 300;
-const FORBIDDEN_VALUE_RE = /url\s*\(|image-set\s*\(|image\s*\(|element\s*\(|[;{}<>\\]/i;
+const HEX_COLOR_RE = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+const SHADOW_OFFSET_MAX = 32;
+const SHADOW_BLUR_MAX = 64;
+const GRADIENT_STOPS_MAX = 8;
 
-export type SkinTokenKind = "color" | "shadow" | "image";
+type SkinValueKind = "color" | "shadow" | "insetShadow" | "gradient";
 
 export interface SkinToken {
   property: string;
   value: string;
-  kind: SkinTokenKind;
 }
 
 export interface SkinInfo {
@@ -89,11 +90,6 @@ export interface SkinImage extends Omit<SkinImageRef, "path"> {
   url: string;
 }
 
-export interface SkinFont {
-  data: string;
-  type: string;
-}
-
 export interface SkinAssetRefs {
   images: Partial<Record<SkinImageSlot, SkinImageRef>>;
   icons: Partial<Record<SkinIconSlot, string>>;
@@ -103,12 +99,13 @@ export interface SkinAssetRefs {
 export interface SkinAssets {
   images: Partial<Record<SkinImageSlot, SkinImage>>;
   icons: Partial<Record<SkinIconSlot, string>>;
-  fonts: Partial<Record<SkinFontSlot, SkinFont>>;
+  fonts: Partial<Record<SkinFontSlot, Uint8Array<ArrayBuffer>>>;
 }
 
 export interface SkinData extends SkinInfo {
   accent: AccentColor | null;
   tokens: SkinToken[];
+  skipped: string[];
   assets: SkinAssetRefs;
 }
 
@@ -126,9 +123,10 @@ type SkinSection = "colors" | "effects" | "visualizer";
 
 const color = (property: string) => ({ property, kind: "color" as const });
 const shadow = (property: string) => ({ property, kind: "shadow" as const });
-const image = (property: string) => ({ property, kind: "image" as const });
+const insetShadow = (property: string) => ({ property, kind: "insetShadow" as const });
+const gradient = (property: string) => ({ property, kind: "gradient" as const });
 
-export const SKIN_KEYS: Record<SkinSection, Record<string, { property: string; kind: SkinTokenKind }>> = {
+export const SKIN_KEYS: Record<SkinSection, Record<string, { property: string; kind: SkinValueKind }>> = {
   colors: {
     chrome: color("--skin-chrome"),
     chromeDark: color("--skin-chrome-dark"),
@@ -166,11 +164,11 @@ export const SKIN_KEYS: Record<SkinSection, Record<string, { property: string; k
   },
   effects: {
     knobShadow: shadow("--skin-knob-shadow"),
-    listInset: shadow("--skin-list-inset"),
-    displayInset: shadow("--skin-display-inset"),
+    listInset: insetShadow("--skin-list-inset"),
+    displayInset: insetShadow("--skin-display-inset"),
     popupShadow: shadow("--skin-popup-shadow"),
     pickerShadow: shadow("--skin-picker-shadow"),
-    coverShade: image("--skin-cover-shade"),
+    coverShade: gradient("--skin-cover-shade"),
   },
   visualizer: {
     foreground: color("--viz-fg"),
@@ -193,13 +191,50 @@ export function isSkinAssetPath(value: unknown, types: Record<string, string>): 
   if (typeof value !== "string" || value.length === 0 || value.length > 200) return false;
   if (value.startsWith("/") || /[\\:]/.test(value)) return false;
   if (value.split("/").some((part) => part === "" || part === "." || part === "..")) return false;
-  return skinAssetExtension(value) in types;
+  return Object.hasOwn(types, skinAssetExtension(value));
+}
+
+function numberIn(value: unknown, min: number, max: number): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, Math.round(value))) : null;
 }
 
 function bounded(value: unknown, max: number, fallback: number): number {
-  const n = Math.round(Number(value));
-  return Number.isFinite(n) ? Math.min(max, Math.max(0, n)) : fallback;
+  return numberIn(value, 0, max) ?? fallback;
 }
+
+export function isSkinColor(value: unknown): value is string {
+  return typeof value === "string" && HEX_COLOR_RE.test(value);
+}
+
+function shadowValue(value: unknown, inset: boolean): string | null {
+  if (value === false) return "none";
+  if (!isRecord(value) || !isSkinColor(value.color)) return null;
+  const x = numberIn(value.x ?? 0, -SHADOW_OFFSET_MAX, SHADOW_OFFSET_MAX);
+  const y = numberIn(value.y ?? 0, -SHADOW_OFFSET_MAX, SHADOW_OFFSET_MAX);
+  const blur = numberIn(value.blur ?? 0, 0, SHADOW_BLUR_MAX);
+  const spread = numberIn(value.spread ?? 0, -SHADOW_OFFSET_MAX, SHADOW_OFFSET_MAX);
+  if (x === null || y === null || blur === null || spread === null) return null;
+  return `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px ${value.color.toLowerCase()}`;
+}
+
+function gradientStop(stop: unknown): string | null {
+  if (!isRecord(stop) || !isSkinColor(stop.color)) return null;
+  const at = numberIn(stop.at, 0, 100);
+  return at === null ? null : `${stop.color.toLowerCase()} ${at}%`;
+}
+
+function gradientValue(value: unknown): string | null {
+  if (!Array.isArray(value) || value.length < 2 || value.length > GRADIENT_STOPS_MAX) return null;
+  const stops = value.map(gradientStop);
+  return stops.every((stop) => stop !== null) ? `linear-gradient(90deg, ${stops.join(", ")})` : null;
+}
+
+const SKIN_VALUES: Record<SkinValueKind, (value: unknown) => string | null> = {
+  color: (value) => (isSkinColor(value) ? value.toLowerCase() : null),
+  shadow: (value) => shadowValue(value, false),
+  insetShadow: (value) => shadowValue(value, true),
+  gradient: gradientValue,
+};
 
 function imageRef(value: unknown, slot: SkinImageSlot): SkinImageRef | null {
   const entry = typeof value === "string" ? { src: value } : value;
@@ -213,30 +248,32 @@ function imageRef(value: unknown, slot: SkinImageSlot): SkinImageRef | null {
   };
 }
 
-function assets(json: Record<string, unknown>): SkinAssetRefs {
+function assets(json: Record<string, unknown>, skipped: string[]): SkinAssetRefs {
   const result: SkinAssetRefs = { images: {}, icons: {}, fonts: {} };
   const images = isRecord(json.images) ? json.images : {};
   for (const slot of SKIN_IMAGE_SLOTS) {
+    if (!Object.hasOwn(images, slot)) continue;
     const ref = imageRef(images[slot], slot);
     if (ref) result.images[slot] = ref;
+    else skipped.push(`images.${slot}`);
   }
   const icons = isRecord(json.icons) ? json.icons : {};
   for (const slot of SKIN_ICON_SLOTS) {
-    if (isSkinAssetPath(icons[slot], SKIN_IMAGE_TYPES)) result.icons[slot] = icons[slot] as string;
+    if (!Object.hasOwn(icons, slot)) continue;
+    if (isSkinAssetPath(icons[slot], SKIN_IMAGE_TYPES)) result.icons[slot] = icons[slot];
+    else skipped.push(`icons.${slot}`);
   }
   const fonts = isRecord(json.fonts) ? json.fonts : {};
   for (const slot of SKIN_FONT_SLOTS) {
-    if (isSkinAssetPath(fonts[slot], SKIN_FONT_TYPES)) result.fonts[slot] = fonts[slot] as string;
+    if (!Object.hasOwn(fonts, slot)) continue;
+    if (isSkinAssetPath(fonts[slot], SKIN_FONT_TYPES)) result.fonts[slot] = fonts[slot];
+    else skipped.push(`fonts.${slot}`);
   }
   return result;
 }
 
 export function isSkinId(id: unknown): id is string {
   return typeof id === "string" && id.length > 0 && id.length <= 255 && !id.startsWith(".") && !/[\\/\0]/.test(id);
-}
-
-export function isSafeSkinValue(value: unknown): value is string {
-  return typeof value === "string" && value.trim() !== "" && value.length <= VALUE_MAX_LENGTH && !FORBIDDEN_VALUE_RE.test(value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -249,15 +286,11 @@ function text(value: unknown): string {
 
 function accent(value: unknown): AccentColor | null {
   if (!isRecord(value)) return null;
-  const hue = Number(value.hue);
-  const saturation = Number(value.saturation);
-  const tint = value.tint == null ? 0 : Number(value.tint);
-  if (![hue, saturation, tint].every(Number.isFinite)) return null;
-  return {
-    hue: ((Math.round(hue) % 360) + 360) % 360,
-    saturation: Math.min(100, Math.max(0, Math.round(saturation))),
-    tint: Math.min(100, Math.max(0, Math.round(tint))),
-  };
+  const hue = numberIn(value.hue, -Infinity, Infinity);
+  const saturation = numberIn(value.saturation, 0, 100);
+  const tint = numberIn(value.tint ?? 0, 0, 100);
+  if (hue === null || saturation === null || tint === null) return null;
+  return { hue: ((hue % 360) + 360) % 360, saturation, tint };
 }
 
 export function parseSkin(id: string, json: unknown, builtIn: boolean): SkinParseResult {
@@ -266,12 +299,16 @@ export function parseSkin(id: string, json: unknown, builtIn: boolean): SkinPars
   const name = text(json.name);
   if (!name) return { ok: false, error: "skin has no name" };
   const tokens: SkinToken[] = [];
+  const skipped: string[] = [];
   for (const section of Object.keys(SKIN_KEYS) as SkinSection[]) {
     const values = json[section];
     if (!isRecord(values)) continue;
     for (const [key, value] of Object.entries(values)) {
-      const entry = SKIN_KEYS[section][key];
-      if (entry && isSafeSkinValue(value)) tokens.push({ property: entry.property, value: value.trim(), kind: entry.kind });
+      if (!Object.hasOwn(SKIN_KEYS[section], key)) continue;
+      const { property, kind } = SKIN_KEYS[section][key];
+      const css = SKIN_VALUES[kind](value);
+      if (css === null) skipped.push(`${section}.${key}`);
+      else tokens.push({ property, value: css });
     }
   }
   return {
@@ -284,7 +321,8 @@ export function parseSkin(id: string, json: unknown, builtIn: boolean): SkinPars
       builtIn,
       accent: accent(json.accent),
       tokens,
-      assets: assets(json),
+      skipped,
+      assets: assets(json, skipped),
     },
   };
 }

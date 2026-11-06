@@ -20,8 +20,10 @@ skins folder; **Open skins folder** opens it. A skin in that folder is either
 
 The list follows the folder by itself. While a skin is selected, saving any of
 its files applies the change at once, so you can keep the player open next to
-your editor. If a file is broken at that moment, the player keeps the current
-look and writes the reason to the log (Settings → System → Logging).
+your editor. If the selected skin can't be read any more — a broken
+`skin.json` or a removed skin — the player switches to the built-in skin; pick
+the skin again once it is fixed. With logging on (Settings → System → Logging)
+the reason goes to the log.
 
 Every folder and every `.waveskin` is a separate skin, even if two of them
 carry the same name.
@@ -49,7 +51,7 @@ A skin sets the base, the color sliders in Settings fine-tune it on top:
   "version": "1.0",
   "accent": { "hue": 134, "saturation": 96, "tint": 0 },
   "colors": { "chrome": "#2a2e35", "button": "#363b43", "outline": "#000" },
-  "effects": { "popupShadow": "0 6px 16px rgba(0, 0, 0, 0.4)" },
+  "effects": { "popupShadow": { "x": 0, "y": 6, "blur": 16, "color": "#00000066" } },
   "visualizer": { "peak": "#e06060" },
   "images": {
     "body": "img/body.png",
@@ -73,13 +75,22 @@ ignored, so a skin keeps working with newer versions of WaveAMP.
 
 ### Values
 
-Colors take any CSS color: `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`, `hsl()`,
-`color-mix()` and color names. They can refer to the scheme's colors, for
-example `var(--accent)` for the display color or `var(--accent-dim)` for its
-dimmed shade. Effects take a CSS `box-shadow` (and `coverShade` a gradient).
-For safety a value can't load anything: `url()`, `image()`, `image-set()` and
-the characters `; { } < > \` are refused, and a value the player can't read
-is skipped.
+A skin holds plain data, and the player builds the CSS from it itself:
+
+- **a color** is a hex string: `#rgb`, `#rrggbb`, or with transparency `#rgba`
+  and `#rrggbbaa`, where `00` is transparent and `ff` opaque. Anything else,
+  like `rgb()` or color names, is skipped;
+- **a shadow** is an object with `x`, `y`, `blur` and `spread` in pixels and a
+  `color`, for example `{ "x": 0, "y": 6, "blur": 16, "color": "#00000066" }`.
+  A number left out is `0`; `x`, `y` and `spread` stay within ±32, `blur`
+  within 0–64. `false` removes the shadow. Whether a shadow falls inside is
+  up to its key;
+- **a gradient** (only `coverShade`) is a list of 2 to 8 stops from left to
+  right, with `at` in percent:
+  `[{ "color": "#060a08d9", "at": 0 }, { "color": "#060a0873", "at": 100 }]`.
+
+A value that doesn't fit is skipped, and its key goes to the log when logging
+is on; the rest of the skin still works.
 
 ### colors
 
@@ -96,39 +107,39 @@ is skipped.
 | `text` | text | `#dfe3e8` |
 | `text2` | playlist and station names | `#c7ccd2` |
 | `textMuted` | section titles, labels, numbers | `#9aa0a8` |
-| `knob` | slider knobs, light side | `#eef1f4` |
-| `knobShade` | slider knobs, dark side | `#b9bfc7` |
-| `knobHover` | a hovered knob | `#fff` |
+| `knob` | slider knobs, scroll bar thumbs and switches, light side | `#eef1f4` |
+| `knobShade` | the same, dark side | `#b9bfc7` |
+| `knobHover` | a hovered scroll bar thumb | `#fff` |
 | `outline` | thin borders around controls, lists and the display | `#000` |
-| `separator` | lines under the title bar and the controls | `rgba(255, 255, 255, 0.06)` |
-| `rowHover` | a hovered row in the playlist and the radio | `rgba(255, 255, 255, 0.06)` |
-| `menuHover` | a hovered menu item | `rgba(255, 255, 255, 0.08)` |
-| `divider` | menu separators, the line after the preamp | `rgba(255, 255, 255, 0.08)` |
-| `listBackground` | the background of lists and Settings cards | `rgba(0, 0, 0, 0.18)` |
+| `separator` | lines under the title bar and the controls | `#ffffff0f` |
+| `rowHover` | a hovered row in the playlist and the radio | `#ffffff0f` |
+| `menuHover` | a hovered menu item | `#ffffff14` |
+| `divider` | menu separators, the line after the preamp | `#ffffff14` |
+| `listBackground` | the background of lists and Settings cards | `#0000002e` |
 | `selectedText` | the selected item in a drop-down list | `#fff` |
 | `danger` | the hovered ✕ that removes a track | `#e06060` |
-| `dangerBackground` | behind that ✕ | `rgba(224, 96, 96, 0.15)` |
+| `dangerBackground` | behind that ✕ | `#e0606026` |
 | `closeHover` | the hovered close button of a window | `#b03a3a` |
-| `errorText` | error messages in forms | `hsl(0 70% 68%)` |
+| `errorText` | error messages in forms | `#e77474` |
 | `warning` | hotkey conflicts in Settings | `#e8b25c` |
 | `warningEdge` | the border of such a hotkey | `#c98a2e` |
 | `stageBackground` | the full-size visualizer picture | `#000` |
-| `stageEdge` | its edge and button borders | `rgba(0, 0, 0, 0.6)` |
-| `stageBar` | the shade under its button bar | `rgba(0, 0, 0, 0.7)` |
+| `stageEdge` | its edge and button borders | `#00000099` |
+| `stageBar` | the shade under its button bar | `#000000b3` |
 | `stageText` | the preset name and the lock icon on it | `#e3ebe3` |
-| `stageButton` | its buttons | `rgba(20, 24, 28, 0.7)` |
+| `stageButton` | its buttons | `#14181cb3` |
 | `stageButtonText` | the icons on its buttons | `#dfe6df` |
 
 ### effects
 
 | Key | Where it shows | Default |
 |---|---|---|
-| `knobShadow` | under slider knobs and switches | `0 1px 2px rgba(0, 0, 0, 0.5)` |
-| `listInset` | the inner shadow of lists | `inset 0 2px 6px rgba(0, 0, 0, 0.45)` |
-| `displayInset` | the inner shadow of the display and the chords screen | `inset 0 2px 6px rgba(0, 0, 0, 0.6)` |
-| `popupShadow` | menus and the station form | `0 6px 16px rgba(0, 0, 0, 0.4)` |
-| `pickerShadow` | open drop-down lists | `0 10px 28px rgba(0, 0, 0, 0.6)` |
-| `coverShade` | the gradient that dims the album cover on the display | near black, from 85% to 45% |
+| `knobShadow` | under slider knobs and switches | `{ "y": 1, "blur": 2, "color": "#00000080" }` |
+| `listInset` | the inner shadow of lists | `{ "y": 2, "blur": 6, "color": "#00000073" }` |
+| `displayInset` | the inner shadow of the display and the chords screen | `{ "y": 2, "blur": 6, "color": "#00000099" }` |
+| `popupShadow` | menus and the station form | `{ "y": 6, "blur": 16, "color": "#00000066" }` |
+| `pickerShadow` | open drop-down lists | `{ "y": 10, "blur": 28, "color": "#00000099" }` |
+| `coverShade` | the gradient that dims the album cover on the display | `#060a08d9` at 0, `#060a08b3` at 55, `#060a0873` at 100 |
 
 ### visualizer
 
@@ -211,8 +222,8 @@ to share it in a skin.
 - all images, icons and fonts of a skin: up to 8 MB together;
 - a `.waveskin` file: up to 16 MB and 300 files.
 
-Anything over a limit is skipped and written to the log; the rest of the skin
-still works.
+Anything over a limit is skipped (and written to the log, when logging is on);
+the rest of the skin still works.
 
 ## Packing a .waveskin
 
