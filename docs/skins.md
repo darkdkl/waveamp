@@ -180,7 +180,9 @@ An image is a path, or an object:
 
 A button face replaces the button's own background and border, so draw the
 border and the rounded corners into the image; keep the corners transparent
-outside the rounding.
+outside the rounding. `buttonHover`, `buttonPressed` and `buttonOn` are cut
+with the `slice` and `width` of `button` — their own are not used — so draw
+them at the same size.
 
 ### icons
 
