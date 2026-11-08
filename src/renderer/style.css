@@ -2714,21 +2714,25 @@ body:has(.playlist.is-open, .radio.is-open) .window-grip--player {
   display: block;
 }
 
-body.skin-button-image .btn {
+body.skin-button-image .btn,
+.btn.has-skin-button {
   background: none;
   border-color: transparent;
   border-image: var(--skin-button-image) var(--skin-button-slice) fill / var(--skin-button-width) stretch;
 }
 
-body.skin-button-image .btn:hover {
+body.skin-button-image .btn:hover,
+.btn.has-skin-button:hover {
   border-image-source: var(--skin-button-hover-image, var(--skin-button-image));
 }
 
-body.skin-button-image .btn:active {
+body.skin-button-image .btn:active,
+.btn.has-skin-button:active {
   border-image-source: var(--skin-button-pressed-image, var(--skin-button-image));
 }
 
-body.skin-button-image .btn.is-active {
+body.skin-button-image .btn.is-active,
+.btn.has-skin-button.is-active {
   border-image-source: var(--skin-button-on-image, var(--skin-button-image));
 }
 

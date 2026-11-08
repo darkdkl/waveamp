@@ -11,22 +11,24 @@ windows and any interface scale.
 ## Where skins live
 
 Settings → Interface → Skin lists the built-in skin and every skin in the
-skins folder; **Open skins folder** opens it. A skin in that folder is either
+skins folder; **Open skins folder** opens it. A skin is a `.waveskin` file:
+`skin.json` and its files packed into a zip, with `skin.json` at the top of the
+archive or inside one folder. Just put the file into the skins folder, there
+is nothing to unpack. The player doesn't read folders or links in the skins
+folder.
 
-- a **folder** with `skin.json` and its files — handy while you make a skin;
-- a **`.waveskin` file** — the same files packed into a zip, with `skin.json`
-  at the top of the archive or inside one folder. Just put the file into the
-  skins folder, there is nothing to unpack.
+The list follows the folder by itself. While a skin is selected, replacing its
+file applies the change at once, so you can keep the player open next to your
+editor.
 
-The list follows the folder by itself. While a skin is selected, saving any of
-its files applies the change at once, so you can keep the player open next to
-your editor. If the selected skin can't be read any more — a broken
-`skin.json` or a removed skin — the player switches to the built-in skin; pick
+A skin that fails the checks stays in the list with the reason — for example
+"too large: 9.1 MB of 8 MB" or "img/play.png is missing" — and can't be
+picked: the player never shows a skin in parts. If the selected skin can't be
+read any more or is removed, the player switches to the built-in skin; pick
 the skin again once it is fixed. With logging on (Settings → System → Logging)
 the reason goes to the log.
 
-Every folder and every `.waveskin` is a separate skin, even if two of them
-carry the same name.
+Every `.waveskin` is a separate skin, even if two of them carry the same name.
 
 ## The color sliders
 
@@ -156,7 +158,7 @@ the display colors.
 
 ### images
 
-PNG, WebP, JPEG or SVG, up to 2 MB each. A path is relative to `skin.json`
+PNG, WebP, JPEG or SVG, up to 1.4 MB each. A path is relative to `skin.json`
 and has to stay inside the skin: no `..`, no absolute paths, no `\`.
 
 | Slot | What it is |
@@ -183,6 +185,43 @@ border and the rounded corners into the image; keep the corners transparent
 outside the rounding. `buttonHover`, `buttonPressed` and `buttonOn` are cut
 with the `slice` and `width` of `button` — their own are not used — so draw
 them at the same size.
+
+### buttons
+
+A button can have a face of its own instead of the common `images.button`:
+
+```json
+"buttons": {
+  "play": {
+    "normal": { "src": "img/play.png", "slice": 12, "width": 6 },
+    "hover": "img/play-hover.png",
+    "pressed": "img/play-pressed.png",
+    "on": "img/play-on.png"
+  }
+}
+```
+
+`normal` is required and takes the same fields as `images.button`; `hover`,
+`pressed` and `on` are optional, are cut with the `slice` and `width` of
+`normal`, and a state that is left out shows `normal` — not the common face,
+which may have another shape. Buttons without an entry use the common face,
+or the built-in look when there is none. Every button picture is up to 1.4 MB,
+as in `images`.
+
+| Key | Button |
+|---|---|
+| `previous`, `play`, `pause`, `stop`, `next` | the transport |
+| `eq`, `radio`, `playlist`, `chords` | the panel buttons |
+| `reset` | the equalizer reset |
+| `popout` | the chords window button |
+| `search` | search in the playlist and the radio |
+| `folder` | Add to playlist |
+| `filter` | the radio filters |
+| `add` | Add station |
+| `favorites`, `saved` | the radio's favorites and saved titles |
+| `more` | the menu of saved titles |
+
+WaveAMP before 1.38 ignores `buttons` and shows the common face.
 
 ### icons
 
@@ -221,11 +260,14 @@ to share it in a skin.
 ## Limits
 
 - `skin.json`: up to 64 KB;
-- all images, icons and fonts of a skin: up to 8 MB together;
-- a `.waveskin` file: up to 16 MB and 300 files.
+- all other files of the archive: up to 8 MB together, unpacked;
+- a `.waveskin` file: up to 16 MB and 300 files;
+- every file `skin.json` refers to has to be in the archive and fit the limit
+  of its section.
 
-Anything over a limit is skipped (and written to the log, when logging is on);
-the rest of the skin still works.
+The player checks this from the archive's table of contents, without
+unpacking anything. A skin over a limit isn't loaded at all, and the skins
+list shows the reason.
 
 ## Packing a .waveskin
 

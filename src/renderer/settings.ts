@@ -5,6 +5,7 @@ import { accentColor as accentColorTheme } from "./theme";
 import { applySkinTokens } from "./skin";
 import { snapStereoStrength, STEREO_STRENGTH_DEFAULT } from "../shared/stereo";
 import { normalizeTitleScrollMode, normalizeTitleScrollSpeed, type TitleScrollMode } from "../shared/titleScroll";
+import type { SkinProblem } from "../shared/skin";
 import type {
   AccentColor,
   ProxyConfig,
@@ -417,13 +418,42 @@ let skinState: Pick<SettingsState, "skin" | "skins"> = { skin: "", skins: [] };
 
 accentResetBtn.addEventListener("click", () => setAccentColor(skinAccent ?? accentColorTheme.DEFAULT));
 
+function fill(key: string, values: Record<string, string>): string {
+  return i18n.t(key).replace(/\{(\w+)\}/g, (match, name: string) => values[name] ?? match);
+}
+
+function sizeText(bytes: number): string {
+  const small = bytes < 1024 * 1024;
+  const amount = Math.ceil((bytes / (small ? 1024 : 1024 * 1024)) * 10) / 10;
+  return fill(small ? "sizeKb" : "sizeMb", { n: amount.toLocaleString(i18n.getLanguage()) });
+}
+
+function skinProblemText(problem: SkinProblem): string {
+  switch (problem.kind) {
+    case "tooLarge":
+      return fill("skinTooLarge", { size: sizeText(problem.size), max: sizeText(problem.max) });
+    case "tooManyFiles":
+      return fill("skinTooManyFiles", { count: String(problem.count), max: String(problem.max) });
+    case "fileTooLarge":
+      return fill("skinFileTooLarge", { file: problem.file, max: sizeText(problem.max) });
+    case "missing":
+      return fill("skinMissing", { file: problem.file });
+    case "newerFormat":
+      return i18n.t("skinNewerFormat");
+    case "broken":
+      return i18n.t("skinBroken");
+  }
+}
+
 function renderSkins(): void {
   skinSelect.replaceChildren(
     ...skinState.skins.map((skin) => {
       const option = document.createElement("option");
       option.value = skin.id;
+      option.disabled = !!skin.problem;
       const note = skin.builtIn ? i18n.t("skinBuiltIn") : skin.author;
-      option.textContent = note ? `${skin.name} (${note})` : skin.name;
+      if (skin.problem) option.textContent = `${skin.name} — ${skinProblemText(skin.problem)}`;
+      else option.textContent = note ? `${skin.name} (${note})` : skin.name;
       return option;
     })
   );
