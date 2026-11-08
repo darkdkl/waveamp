@@ -7,6 +7,15 @@ interface Subscription {
 
 const subscriptions: Subscription[] = [];
 const extraDocuments = new Set<Document>();
+const documentListeners: ((doc: Document) => void)[] = [];
+
+export function playerDocuments(): Document[] {
+  return [document, ...extraDocuments];
+}
+
+export function onPlayerDocumentAdded(listener: (doc: Document) => void): void {
+  documentListeners.push(listener);
+}
 
 export function onEveryDocument<K extends keyof DocumentEventMap>(type: K, listener: (event: DocumentEventMap[K]) => void): void {
   const subscription = { type, listener: listener as EventListener };
@@ -20,6 +29,7 @@ export function addPlayerDocument(doc: Document): void {
   extraDocuments.add(doc);
   subscriptions.forEach(({ type, listener }) => doc.addEventListener(type, listener));
   i18n.addDocument(doc);
+  documentListeners.forEach((listener) => listener(doc));
 }
 
 export function removePlayerDocument(doc: Document): void {

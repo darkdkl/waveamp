@@ -18,6 +18,8 @@ import { setStereoPseudo, setStereoRadio, setStereoStrength, setStereoTracks } f
 import { setPlayerClockEnabled } from "./clock";
 import { setPresetAutoSwitch, setPresetFolder, setPresetHardCuts } from "./presets/mode";
 import { loadSavedTracks } from "./radio/savedTracks";
+import { setSkin } from "./skins";
+import { DEFAULT_SKIN_ID } from "../../shared/skin";
 import { applyGlobalHotkeys } from "./playerHotkeys";
 import { setCoverArtEnabled } from "./coverArt";
 import { setTitleScroll, setTitleScrollSpeed } from "./titleScroll";
@@ -67,6 +69,8 @@ export async function restoreConfig(): Promise<void> {
   const savedTracksLoaded = loadSavedTracks();
   const config = await window.electronAPI.loadConfig();
   await savedTracksLoaded;
+  const skin = config?.settings?.skin;
+  await setSkin(typeof skin === "string" ? skin : DEFAULT_SKIN_ID, false);
   if (!config) return;
   const settings = config.settings;
 

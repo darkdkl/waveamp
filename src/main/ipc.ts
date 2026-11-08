@@ -62,6 +62,7 @@ import { openLicenseFile } from "./licenses";
 import { startNowPlaying, stopNowPlaying } from "./nowPlaying";
 import { loadSavedTracks, writeSavedTracks } from "./savedTracks";
 import { choosePresetFolder, listPresets, readPreset } from "./presets";
+import { listSkins, openSkinsFolder, readSkin } from "./skins";
 import type {
   AppConfig,
   DockLayout,
@@ -221,6 +222,10 @@ export function registerIpcHandlers(): void {
   ipcMain.handle("presets-list", (_event, folder: string) => listPresets(typeof folder === "string" ? folder : ""));
   ipcMain.handle("presets-read", (_event, index: number) => readPreset(Number(index)));
   ipcMain.handle("presets-choose-folder", (event) => choosePresetFolder(BrowserWindow.fromWebContents(event.sender)));
+
+  ipcMain.handle("skins-list", () => listSkins());
+  ipcMain.handle("skins-read", (_event, id: string) => readSkin(String(id)));
+  ipcMain.on("skins-open-folder", () => void openSkinsFolder());
 
   ipcMain.on("copy-text", (_event, text: string) => clipboard.writeText(String(text)));
 
