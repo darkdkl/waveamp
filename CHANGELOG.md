@@ -4,7 +4,7 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
-## [1.37.0] — 2026-11-06
+## [1.37.0] — 2026-11-08
 
 ### Added
 - Skins: Settings → Interface → Skin picks the look of the player from the
