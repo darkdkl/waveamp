@@ -18,12 +18,21 @@ export interface SkinToken {
   value: string;
 }
 
+export type SkinProblem =
+  | { kind: "tooLarge"; size: number; max: number }
+  | { kind: "tooManyFiles"; count: number; max: number }
+  | { kind: "fileTooLarge"; file: string; size: number; max: number }
+  | { kind: "missing"; file: string }
+  | { kind: "newerFormat" }
+  | { kind: "broken" };
+
 export interface SkinInfo {
   id: string;
   name: string;
   author: string;
   version: string;
   builtIn: boolean;
+  problem?: SkinProblem;
 }
 
 export const SKIN_IMAGE_SLOTS = ["body", "display", "button", "buttonHover", "buttonPressed", "buttonOn", "knob"] as const;
@@ -52,10 +61,33 @@ export const SKIN_ICON_SLOTS = [
   "more",
 ] as const;
 export const SKIN_FONT_SLOTS = ["display"] as const;
+export const SKIN_BUTTON_SLOTS = [
+  "previous",
+  "play",
+  "pause",
+  "stop",
+  "next",
+  "eq",
+  "radio",
+  "playlist",
+  "chords",
+  "reset",
+  "popout",
+  "search",
+  "folder",
+  "filter",
+  "add",
+  "favorites",
+  "saved",
+  "more",
+] as const;
+export const SKIN_BUTTON_STATES = ["hover", "pressed", "on"] as const;
 
 export type SkinImageSlot = (typeof SKIN_IMAGE_SLOTS)[number];
 export type SkinIconSlot = (typeof SKIN_ICON_SLOTS)[number];
 export type SkinFontSlot = (typeof SKIN_FONT_SLOTS)[number];
+export type SkinButtonSlot = (typeof SKIN_BUTTON_SLOTS)[number];
+export type SkinButtonState = (typeof SKIN_BUTTON_STATES)[number];
 
 export const SKIN_IMAGE_TYPES: Record<string, string> = {
   png: "image/png",
@@ -71,7 +103,7 @@ export const SKIN_FONT_TYPES: Record<string, string> = {
   otf: "font/otf",
 };
 
-export const SKIN_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+export const SKIN_IMAGE_MAX_BYTES = Math.floor(1.4 * 1024 * 1024);
 export const SKIN_ICON_MAX_BYTES = 256 * 1024;
 export const SKIN_FONT_MAX_BYTES = 2 * 1024 * 1024;
 export const SKIN_ASSETS_MAX_BYTES = 8 * 1024 * 1024;
@@ -87,19 +119,30 @@ export interface SkinImageRef {
 }
 
 export interface SkinImage extends Omit<SkinImageRef, "path"> {
-  url: string;
+  source: number;
+}
+
+export interface SkinButtonRef extends Partial<Record<SkinButtonState, string>> {
+  normal: SkinImageRef;
+}
+
+export interface SkinButton extends Partial<Record<SkinButtonState, number>> {
+  normal: SkinImage;
 }
 
 export interface SkinAssetRefs {
   images: Partial<Record<SkinImageSlot, SkinImageRef>>;
   icons: Partial<Record<SkinIconSlot, string>>;
   fonts: Partial<Record<SkinFontSlot, string>>;
+  buttons: Partial<Record<SkinButtonSlot, SkinButtonRef>>;
 }
 
 export interface SkinAssets {
+  sources: string[];
   images: Partial<Record<SkinImageSlot, SkinImage>>;
   icons: Partial<Record<SkinIconSlot, string>>;
   fonts: Partial<Record<SkinFontSlot, Uint8Array<ArrayBuffer>>>;
+  buttons: Partial<Record<SkinButtonSlot, SkinButton>>;
 }
 
 export interface SkinData extends SkinInfo {
@@ -117,7 +160,7 @@ export function skinEntries<K extends string, V>(record: Partial<Record<K, V>>):
   return Object.entries(record) as [K, V][];
 }
 
-export type SkinParseResult = { ok: true; skin: SkinData } | { ok: false; error: string };
+export type SkinParseResult = { ok: true; skin: SkinData } | { ok: false; error: string; problem: SkinProblem; name: string };
 
 type SkinSection = "colors" | "effects" | "visualizer";
 
@@ -248,8 +291,24 @@ function imageRef(value: unknown, slot: SkinImageSlot): SkinImageRef | null {
   };
 }
 
+function buttonRef(value: unknown, slot: SkinButtonSlot, skipped: string[]): SkinButtonRef | null {
+  const normal = isRecord(value) ? imageRef(value.normal, "button") : null;
+  if (!isRecord(value) || !normal) {
+    skipped.push(`buttons.${slot}`);
+    return null;
+  }
+  const ref: SkinButtonRef = { normal };
+  for (const state of SKIN_BUTTON_STATES) {
+    if (!Object.hasOwn(value, state)) continue;
+    const path = imageRef(value[state], "button")?.path;
+    if (path) ref[state] = path;
+    else skipped.push(`buttons.${slot}.${state}`);
+  }
+  return ref;
+}
+
 function assets(json: Record<string, unknown>, skipped: string[]): SkinAssetRefs {
-  const result: SkinAssetRefs = { images: {}, icons: {}, fonts: {} };
+  const result: SkinAssetRefs = { images: {}, icons: {}, fonts: {}, buttons: {} };
   const images = isRecord(json.images) ? json.images : {};
   for (const slot of SKIN_IMAGE_SLOTS) {
     if (!Object.hasOwn(images, slot)) continue;
@@ -268,6 +327,12 @@ function assets(json: Record<string, unknown>, skipped: string[]): SkinAssetRefs
     if (!Object.hasOwn(fonts, slot)) continue;
     if (isSkinAssetPath(fonts[slot], SKIN_FONT_TYPES)) result.fonts[slot] = fonts[slot];
     else skipped.push(`fonts.${slot}`);
+  }
+  const buttons = isRecord(json.buttons) ? json.buttons : {};
+  for (const slot of SKIN_BUTTON_SLOTS) {
+    if (!Object.hasOwn(buttons, slot)) continue;
+    const ref = buttonRef(buttons[slot], slot, skipped);
+    if (ref) result.buttons[slot] = ref;
   }
   return result;
 }
@@ -294,10 +359,13 @@ function accent(value: unknown): AccentColor | null {
 }
 
 export function parseSkin(id: string, json: unknown, builtIn: boolean): SkinParseResult {
-  if (!isRecord(json)) return { ok: false, error: "skin.json is not an object" };
-  if (json.format !== SKIN_FORMAT) return { ok: false, error: `unsupported format ${String(json.format)}` };
+  if (!isRecord(json)) return { ok: false, error: "skin.json is not an object", problem: { kind: "broken" }, name: "" };
   const name = text(json.name);
-  if (!name) return { ok: false, error: "skin has no name" };
+  if (typeof json.format === "number" && json.format > SKIN_FORMAT) {
+    return { ok: false, error: `format ${json.format} is newer than ${SKIN_FORMAT}`, problem: { kind: "newerFormat" }, name };
+  }
+  if (json.format !== SKIN_FORMAT) return { ok: false, error: `unsupported format ${String(json.format)}`, problem: { kind: "broken" }, name };
+  if (!name) return { ok: false, error: "skin has no name", problem: { kind: "broken" }, name };
   const tokens: SkinToken[] = [];
   const skipped: string[] = [];
   for (const section of Object.keys(SKIN_KEYS) as SkinSection[]) {

@@ -1,20 +1,22 @@
 import { app, shell } from "electron";
-import { unzipSync } from "fflate";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { watch, type FSWatcher } from "node:fs";
 import { writeLog } from "./logging";
 import { sendToMainWindow } from "./windows";
 import { errorMessage } from "../shared/errors";
-import { SKIN_ARCHIVE_EXTENSION, SKIN_ARCHIVE_MAX_BYTES, planSkinArchive, type ArchiveEntry } from "../shared/skinArchive";
+import {
+  SKIN_ARCHIVE_EXTENSION,
+  SKIN_ARCHIVE_MAX_BYTES,
+  openSkinArchive,
+  skinAssetFiles,
+  skinAssetProblem,
+  type SkinRefusal,
+} from "../shared/skinArchive";
 import {
   DEFAULT_SKIN_ID,
-  SKIN_ASSETS_MAX_BYTES,
+  SKIN_BUTTON_STATES,
   SKIN_FILE,
-  SKIN_FILE_MAX_BYTES,
-  SKIN_FONT_MAX_BYTES,
-  SKIN_ICON_MAX_BYTES,
-  SKIN_IMAGE_MAX_BYTES,
   SKIN_IMAGE_TYPES,
   isSkinId,
   parseSkin,
@@ -22,6 +24,7 @@ import {
   skinEntries,
   type LoadedSkin,
   type SkinAssets,
+  type SkinButton,
   type SkinData,
   type SkinInfo,
 } from "../shared/skin";
@@ -31,176 +34,138 @@ const SKINS_DIR = path.join(app.getPath("userData"), "skins");
 const WATCH_DELAY_MS = 300;
 
 interface SkinSource {
-  read(relative: string, maxBytes: number): Promise<Uint8Array | null>;
+  read(files: string[]): Promise<Map<string, Uint8Array>>;
 }
+
+type OpenedSkin = { ok: true; skin: SkinData; source: SkinSource } | { ok: false; info: SkinInfo };
+
+const listed = new Map<string, { stamp: string; info: SkinInfo }>();
 
 function isArchiveName(name: string): boolean {
   return name.toLowerCase().endsWith(`.${SKIN_ARCHIVE_EXTENSION}`);
 }
 
-function folderSource(dir: string, confined: boolean): SkinSource {
-  const root = path.resolve(dir);
+function folderSource(dir: string): SkinSource {
   return {
-    async read(relative, maxBytes) {
-      const file = path.resolve(root, relative);
-      if (!file.startsWith(root + path.sep)) return null;
-      const base = confined ? await fs.realpath(root) : root;
-      const real = confined ? await fs.realpath(file).catch(() => null) : file;
-      if (!real?.startsWith(base + path.sep)) return null;
-      const stat = await fs.stat(real).catch(() => null);
-      if (!stat?.isFile() || stat.size > maxBytes) return null;
-      return new Uint8Array(await fs.readFile(real));
-    },
+    read: async (files) => new Map(await Promise.all(files.map(async (file) => [file, new Uint8Array(await fs.readFile(path.join(dir, file)))] as const))),
   };
 }
 
-function entryName(name: string): string {
-  return name.replace(/\\/g, "/");
+function broken(detail: string): SkinRefusal {
+  return { problem: { kind: "broken" }, detail };
 }
 
-function listArchive(data: Uint8Array): ArchiveEntry[] {
-  const entries: ArchiveEntry[] = [];
-  unzipSync(data, {
-    filter: (file) => {
-      entries.push({ name: entryName(file.name), size: file.originalSize });
-      return false;
-    },
-  });
-  return entries;
+async function openArchive(file: string): Promise<{ source: SkinSource; sizes: Map<string, number> } | SkinRefusal> {
+  const stat = await fs.lstat(file);
+  if (!stat.isFile()) return broken("a skin has to be a real .waveskin file");
+  if (stat.size > SKIN_ARCHIVE_MAX_BYTES) return { problem: { kind: "tooLarge", size: stat.size, max: SKIN_ARCHIVE_MAX_BYTES } };
+  const opened = openSkinArchive(new Uint8Array(await fs.readFile(file)));
+  if (!opened.ok) return opened;
+  const { archive } = opened;
+  return { sizes: archive.sizes, source: { read: async (files) => archive.read(files) } };
 }
 
-async function archiveSource(file: string, id: string): Promise<SkinSource | null> {
-  const stat = await fs.stat(file);
-  if (stat.size > SKIN_ARCHIVE_MAX_BYTES) {
-    writeLog("warn", "skins", `"${id}" is larger than ${SKIN_ARCHIVE_MAX_BYTES} bytes`);
-    return null;
-  }
-  const data = new Uint8Array(await fs.readFile(file));
-  const entries = listArchive(data);
-  const plan = planSkinArchive(entries);
-  if (!plan.ok) {
-    writeLog("warn", "skins", `"${id}": archive refused (${plan.error})`);
-    return null;
-  }
-  const sizes = new Map(entries.map((entry) => [entry.name, entry.size]));
-  const files = new Set(plan.files);
-  return {
-    async read(relative, maxBytes) {
-      const name = plan.root + relative;
-      if (!files.has(relative) || (sizes.get(name) ?? Infinity) > maxBytes) return null;
-      const [content] = Object.values(unzipSync(data, { filter: (entry) => entryName(entry.name) === name }));
-      return content && content.length <= maxBytes ? content : null;
-    },
-  };
-}
-
-function skinPath(id: string): string | null {
-  if (id === DEFAULT_SKIN_ID) return BUILTIN_SKIN_DIR;
-  if (!isSkinId(id)) return null;
+function skinFile(id: string): string | null {
+  if (!isSkinId(id) || !isArchiveName(id)) return null;
   const target = path.join(SKINS_DIR, id);
   return path.dirname(target) === SKINS_DIR ? target : null;
-}
-
-async function openSource(id: string): Promise<SkinSource | null> {
-  const target = skinPath(id);
-  if (!target) return null;
-  if (id === DEFAULT_SKIN_ID) return folderSource(target, false);
-  if ((await fs.lstat(target)).isSymbolicLink()) {
-    writeLog("warn", "skins", `"${id}" is a link; a skin has to be a real folder or file`);
-    return null;
-  }
-  return isArchiveName(id) ? archiveSource(target, id) : folderSource(target, true);
-}
-
-async function parseFrom(id: string, source: SkinSource): Promise<SkinData | null> {
-  const manifest = await source.read(SKIN_FILE, SKIN_FILE_MAX_BYTES);
-  if (!manifest) {
-    writeLog("warn", "skins", `"${id}": no readable ${SKIN_FILE} up to ${SKIN_FILE_MAX_BYTES} bytes`);
-    return null;
-  }
-  const result = parseSkin(id, JSON.parse(new TextDecoder().decode(manifest)), id === DEFAULT_SKIN_ID);
-  if (result.ok) return result.skin;
-  writeLog("warn", "skins", `"${id}": ${result.error}`);
-  return null;
-}
-
-async function loadSkin(id: string): Promise<{ skin: SkinData; source: SkinSource } | null> {
-  try {
-    const source = await openSource(id);
-    const skin = source && (await parseFrom(id, source));
-    return skin && source ? { skin, source } : null;
-  } catch (err) {
-    writeLog("warn", "skins", `"${id}": ${errorMessage(err)}`);
-    return null;
-  }
 }
 
 function info({ id, name, author, version, builtIn }: SkinData): SkinInfo {
   return { id, name, author, version, builtIn };
 }
 
+function rejected(id: string, { problem, detail }: SkinRefusal, name = ""): OpenedSkin {
+  writeLog("warn", "skins", `"${id}" refused: ${detail ?? JSON.stringify(problem)}`);
+  return { ok: false, info: { id, name: name || id.replace(/\.[^.]+$/, ""), author: "", version: "", builtIn: id === DEFAULT_SKIN_ID, problem } };
+}
+
+async function openSkin(id: string): Promise<OpenedSkin> {
+  try {
+    let source = folderSource(BUILTIN_SKIN_DIR);
+    let sizes: Map<string, number> | null = null;
+    if (id !== DEFAULT_SKIN_ID) {
+      const file = skinFile(id);
+      if (!file) return rejected(id, broken("not a skin file name"));
+      const archive = await openArchive(file);
+      if ("problem" in archive) return rejected(id, archive);
+      ({ source, sizes } = archive);
+    }
+    const manifest = (await source.read([SKIN_FILE])).get(SKIN_FILE)!;
+    const result = parseSkin(id, JSON.parse(new TextDecoder().decode(manifest)), id === DEFAULT_SKIN_ID);
+    if (!result.ok) return rejected(id, { problem: result.problem, detail: result.error }, result.name);
+    const problem = sizes && skinAssetProblem(result.skin.assets, sizes);
+    if (problem) return rejected(id, { problem }, result.skin.name);
+    return { ok: true, skin: result.skin, source };
+  } catch (err) {
+    return rejected(id, broken(errorMessage(err)));
+  }
+}
+
+async function listedInfo(id: string): Promise<SkinInfo> {
+  const stat = id === DEFAULT_SKIN_ID ? null : await fs.lstat(path.join(SKINS_DIR, id)).catch(() => null);
+  const stamp = stat ? `${stat.ino}:${stat.size}:${stat.mtimeMs}` : "";
+  const cached = listed.get(id);
+  if (cached?.stamp === stamp) return cached.info;
+  const opened = await openSkin(id);
+  const result = opened.ok ? info(opened.skin) : opened.info;
+  listed.set(id, { stamp, info: result });
+  return result;
+}
+
 export async function listSkins(): Promise<SkinInfo[]> {
   let names: string[] = [];
   try {
     names = (await fs.readdir(SKINS_DIR, { withFileTypes: true }))
-      .filter((entry) => (entry.isDirectory() || (entry.isFile() && isArchiveName(entry.name))) && entry.name !== DEFAULT_SKIN_ID)
+      .filter((entry) => entry.isFile() && isArchiveName(entry.name))
       .map((entry) => entry.name)
       .filter(isSkinId);
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== "ENOENT") writeLog("warn", "skins", `Cannot read skins: ${errorMessage(err)}`);
   }
-  const loaded = await Promise.all([DEFAULT_SKIN_ID, ...names].map(loadSkin));
-  const [builtIn, ...skins] = loaded.map((entry) => entry?.skin ?? null);
-  const user = skins.filter((skin): skin is SkinData => !!skin).sort((a, b) => a.name.localeCompare(b.name));
-  return [...(builtIn ? [builtIn] : []), ...user].map(info);
+  const ids = [DEFAULT_SKIN_ID, ...names];
+  for (const id of listed.keys()) if (!ids.includes(id)) listed.delete(id);
+  const [builtIn, ...skins] = await Promise.all(ids.map(listedInfo));
+  return [builtIn, ...skins.sort((a, b) => a.name.localeCompare(b.name))];
 }
 
-class AssetBudget {
-  private used = 0;
-
-  take(bytes: number): boolean {
-    if (this.used + bytes > SKIN_ASSETS_MAX_BYTES) return false;
-    this.used += bytes;
-    return true;
-  }
+function dataUrl(relative: string, data: Uint8Array): string {
+  return `data:${SKIN_IMAGE_TYPES[skinAssetExtension(relative)]};base64,${Buffer.from(data).toString("base64")}`;
 }
 
-async function readAsset(id: string, source: SkinSource, relative: string, maxBytes: number, budget: AssetBudget): Promise<Buffer | null> {
-  try {
-    const data = await source.read(relative, maxBytes);
-    if (data && budget.take(data.length)) return Buffer.from(data);
-    writeLog("warn", "skins", `"${id}": ${relative} is missing or too large`);
-  } catch (err) {
-    writeLog("warn", "skins", `"${id}": ${relative}: ${errorMessage(err)}`);
-  }
-  return null;
-}
-
-function dataUrl(relative: string, data: Buffer): string {
-  return `data:${SKIN_IMAGE_TYPES[skinAssetExtension(relative)]};base64,${data.toString("base64")}`;
-}
-
-async function loadAssets(skin: SkinData, source: SkinSource): Promise<SkinAssets> {
-  const budget = new AssetBudget();
-  const loaded: SkinAssets = { images: {}, icons: {}, fonts: {} };
+function buildAssets(skin: SkinData, files: Map<string, Uint8Array>): SkinAssets {
+  const loaded: SkinAssets = { sources: [], images: {}, icons: {}, fonts: {}, buttons: {} };
+  const sources = new Map<string, number>();
+  const imageSource = (relative: string): number => {
+    if (!sources.has(relative)) sources.set(relative, loaded.sources.push(dataUrl(relative, files.get(relative)!)) - 1);
+    return sources.get(relative)!;
+  };
   for (const [slot, ref] of skinEntries(skin.assets.images)) {
-    const data = await readAsset(skin.id, source, ref.path, SKIN_IMAGE_MAX_BYTES, budget);
-    if (data) loaded.images[slot] = { url: dataUrl(ref.path, data), slice: ref.slice, width: ref.width, repeat: ref.repeat };
+    loaded.images[slot] = { source: imageSource(ref.path), slice: ref.slice, width: ref.width, repeat: ref.repeat };
   }
-  for (const [slot, relative] of skinEntries(skin.assets.icons)) {
-    const data = await readAsset(skin.id, source, relative, SKIN_ICON_MAX_BYTES, budget);
-    if (data) loaded.icons[slot] = dataUrl(relative, data);
-  }
-  for (const [slot, relative] of skinEntries(skin.assets.fonts)) {
-    const data = await readAsset(skin.id, source, relative, SKIN_FONT_MAX_BYTES, budget);
-    if (data) loaded.fonts[slot] = new Uint8Array(data);
+  for (const [slot, relative] of skinEntries(skin.assets.icons)) loaded.icons[slot] = dataUrl(relative, files.get(relative)!);
+  for (const [slot, relative] of skinEntries(skin.assets.fonts)) loaded.fonts[slot] = new Uint8Array(files.get(relative)!);
+  for (const [slot, ref] of skinEntries(skin.assets.buttons)) {
+    const button: SkinButton = { normal: { source: imageSource(ref.normal.path), slice: ref.normal.slice, width: ref.normal.width, repeat: false } };
+    for (const state of SKIN_BUTTON_STATES) {
+      const path = ref[state];
+      if (path) button[state] = imageSource(path);
+    }
+    loaded.buttons[slot] = button;
   }
   return loaded;
 }
 
 export async function readSkin(id: string): Promise<LoadedSkin | null> {
-  const loaded = await loadSkin(id);
-  return loaded ? { ...loaded.skin, assets: await loadAssets(loaded.skin, loaded.source) } : null;
+  const opened = await openSkin(id);
+  if (!opened.ok) return null;
+  try {
+    const files = await opened.source.read([...skinAssetFiles(opened.skin.assets).keys()]);
+    return { ...opened.skin, assets: buildAssets(opened.skin, files) };
+  } catch (err) {
+    writeLog("warn", "skins", `"${id}": ${errorMessage(err)}`);
+    return null;
+  }
 }
 
 export async function openSkinsFolder(): Promise<void> {
@@ -214,9 +179,8 @@ let watchTimer: ReturnType<typeof setTimeout> | undefined;
 let changedSkins: Set<string> | null = new Set();
 
 function noteChange(filename: string | null): void {
-  const name = filename?.split(/[\\/]/)[0];
-  if (!name) changedSkins = null;
-  else changedSkins?.add(name);
+  if (!filename) changedSkins = null;
+  else changedSkins?.add(filename);
   clearTimeout(watchTimer);
   watchTimer = setTimeout(() => {
     sendToMainWindow("skins-changed", changedSkins && [...changedSkins]);
@@ -229,7 +193,7 @@ export async function watchSkins(): Promise<void> {
   watcher = null;
   try {
     await fs.mkdir(SKINS_DIR, { recursive: true });
-    watcher = watch(SKINS_DIR, { recursive: true }, (_event, filename) => noteChange(filename));
+    watcher = watch(SKINS_DIR, (_event, filename) => noteChange(filename));
     watcher.on("error", (err) => {
       writeLog("warn", "skins", `Stopped watching skins: ${errorMessage(err)}`);
       watcher?.close();

@@ -1,5 +1,15 @@
+import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { SKIN_FONT_TYPES, SKIN_IMAGE_TYPES, isSkinAssetPath, isSkinColor, isSkinId, parseSkin } from "../../src/shared/skin";
+import {
+  SKIN_BUTTON_SLOTS,
+  SKIN_FONT_TYPES,
+  SKIN_ICON_SLOTS,
+  SKIN_IMAGE_TYPES,
+  isSkinAssetPath,
+  isSkinColor,
+  isSkinId,
+  parseSkin,
+} from "../../src/shared/skin";
 
 const base = { format: 1, name: "Carbon", author: "Someone", version: "1.0" };
 
@@ -73,7 +83,8 @@ describe("parseSkin", () => {
   });
 
   it("rejects a wrong format or a missing name", () => {
-    expect(parseSkin("x", { ...base, format: 2 }, false).ok).toBe(false);
+    expect(parseSkin("x", { ...base, format: 2 }, false)).toMatchObject({ ok: false, problem: { kind: "newerFormat" }, name: base.name });
+    expect(parseSkin("x", { ...base, format: 0 }, false)).toMatchObject({ ok: false, problem: { kind: "broken" } });
     expect(parseSkin("x", { ...base, format: "1" }, false).ok).toBe(false);
     expect(parseSkin("x", { ...base, name: "" }, false).ok).toBe(false);
     expect(parseSkin("x", [], false).ok).toBe(false);
@@ -120,7 +131,29 @@ describe("skin assets", () => {
       },
       icons: { play: "icons/play.svg" },
       fonts: { display: "fonts/lcd.woff2" },
+      buttons: {},
     });
+  });
+
+  it("reads a face of its own for a button, with optional states", () => {
+    const result = parseSkin(
+      "x",
+      {
+        ...base,
+        buttons: {
+          play: { normal: { src: "img/play.png", slice: 20, width: 10 }, hover: "img/play-hover.png", on: { src: "img/play-on.png", slice: 99 } },
+          stop: { normal: "img/stop.png", pressed: "../x.png" },
+          eq: { hover: "img/eq.png" },
+          volume: { normal: "img/volume.png" },
+        },
+      },
+      false
+    );
+    expect(result.ok && result.skin.assets.buttons).toEqual({
+      play: { normal: { path: "img/play.png", slice: 20, width: 10, repeat: false }, hover: "img/play-hover.png", on: "img/play-on.png" },
+      stop: { normal: { path: "img/stop.png", slice: 0, width: 0, repeat: false } },
+    });
+    expect(result.ok && result.skin.skipped).toEqual(["buttons.stop.pressed", "buttons.eq"]);
   });
 
   it("refuses paths outside the skin folder and unknown file types", () => {
@@ -134,7 +167,7 @@ describe("skin assets", () => {
       },
       false
     );
-    expect(result.ok && result.skin.assets).toEqual({ images: {}, icons: {}, fonts: {} });
+    expect(result.ok && result.skin.assets).toEqual({ images: {}, icons: {}, fonts: {}, buttons: {} });
     expect(result.ok && result.skin.skipped).toEqual(["images.body", "images.display", "images.button", "images.knob", "icons.play", "icons.pause", "icons.stop", "fonts.display"]);
   });
 
@@ -157,5 +190,20 @@ describe("isSkinAssetPath", () => {
       expect(isSkinAssetPath(name, SKIN_FONT_TYPES)).toBe(false);
       expect(isSkinAssetPath(name, SKIN_IMAGE_TYPES)).toBe(false);
     }
+  });
+});
+
+describe("slots in the player markup", () => {
+  const tags = fs.readFileSync(new URL("../../src/renderer/index.html", import.meta.url), "utf8").match(/<[a-z][^>]*>/g) ?? [];
+  const iconOf = (tag: string) => tag.match(/\bdata-icon="([^"]+)"/)?.[1];
+  const isButton = (tag: string) => (tag.match(/\bclass="([^"]*)"/)?.[1] ?? "").split(/\s+/).includes("btn");
+  const sorted = (values: (string | undefined)[]) => [...new Set(values.filter(Boolean))].sort();
+
+  it("has an icon slot for every element with an icon", () => {
+    expect(sorted(tags.map(iconOf))).toEqual([...SKIN_ICON_SLOTS].sort());
+  });
+
+  it("has a button slot for every button with an icon", () => {
+    expect(sorted(tags.filter(isButton).map(iconOf))).toEqual([...SKIN_BUTTON_SLOTS].sort());
   });
 });

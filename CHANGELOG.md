@@ -4,6 +4,20 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.38.0] — 2026-11-09
+
+### Added
+- Skins can give a button a face of its own, with its own hovered, pressed and
+  switched-on states, instead of the face shared by all buttons. The format is
+  described in docs/skins.md
+
+### Changed
+- A skin is now only a `.waveskin` file; folders in the skins folder are no
+  longer read
+- A skin that is over a size limit or misses a file is no longer loaded in
+  parts: it stays in the skins list with the reason and can't be picked
+- Skin images are limited to 1.4 MB each, so that every allowed image is shown
+
 ## [1.37.0] — 2026-11-08
 
 ### Added
