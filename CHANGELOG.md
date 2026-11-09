@@ -4,7 +4,7 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
-## [1.38.0] — 2026-11-08
+## [1.38.0] — 2026-11-09
 
 ### Added
 - Skins can give a button a face of its own, with its own hovered, pressed and
