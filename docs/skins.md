@@ -8,14 +8,23 @@ positions and proportions of the player belong to the program, so every skin
 works with the equalizer, the playlist, the radio, the chords, separate
 windows and any interface scale.
 
-## Where skins live
+## Installing
 
-Settings → Interface → Skin lists the built-in skin and every skin in the
-skins folder; **Open skins folder** opens it. A skin is a `.waveskin` file:
-`skin.json` and its files packed into a zip, with `skin.json` at the top of the
-archive or inside one folder. Just put the file into the skins folder, there
-is nothing to unpack. The player doesn't read folders or links in the skins
-folder.
+A skin is a `.waveskin` file: `skin.json` and its files packed into a zip,
+with `skin.json` at the top of the archive or inside one folder.
+
+To install a skin, open Settings → Interface → Skin, press **Install skin…**
+and pick the file. The player checks the skin, copies it and turns it on; you
+may delete the original file afterwards. If a skin with the same name (`name`
+in `skin.json`) is already installed, the player asks whether to replace it —
+that is how a new version of a skin goes in. A skin that fails the checks isn't
+installed, and the player tells why.
+
+The list shows the built-in skin and every installed one. Installed skins live
+in the player's skins folder; **Show skins folder** opens it. You rarely need
+it, but it helps skin authors: a file can be put there by hand too, and the
+skin editor puts a skin there with "Try in player". The player doesn't read
+folders or links in the skins folder.
 
 The list follows the folder by itself. While a skin is selected, replacing its
 file applies the change at once, so you can keep the player open next to your
@@ -28,7 +37,8 @@ read any more or is removed, the player switches to the built-in skin; pick
 the skin again once it is fixed. With logging on (Settings → System → Logging)
 the reason goes to the log.
 
-Every `.waveskin` is a separate skin, even if two of them carry the same name.
+Every file in the skins folder is a separate skin, even if two of them carry
+the same name inside; only installing replaces a skin with the same name.
 
 ## The color sliders
 

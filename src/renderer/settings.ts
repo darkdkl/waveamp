@@ -69,6 +69,7 @@ const accentTintInput = byId<HTMLInputElement>("accentTintInput");
 const accentResetBtn = byId<HTMLButtonElement>("accentResetBtn");
 const skinSelect = byId<HTMLSelectElement>("skinSelect");
 const skinFolderBtn = byId<HTMLButtonElement>("skinFolderBtn");
+const skinInstallBtn = byId<HTMLButtonElement>("skinInstallBtn");
 
 const settingsTabHotkeys = byId<HTMLButtonElement>("settingsTabHotkeys");
 const settingsHotkeysView = byId("settingsHotkeysView");
@@ -462,6 +463,29 @@ function renderSkins(): void {
 
 skinSelect.addEventListener("change", () => sendAction("setSkin", skinSelect.value));
 skinFolderBtn.addEventListener("click", () => window.electronAPI?.openSkinsFolder?.());
+
+async function installSkin(): Promise<void> {
+  const api = window.electronAPI;
+  if (!api?.pickSkin || !api.installPickedSkin) return;
+  const picked = await api.pickSkin();
+  if (!picked) return;
+  if (picked.problem) {
+    await api.alert(fill("skinNotInstalled", { name: picked.name, reason: skinProblemText(picked.problem) }), i18n.t("ok"));
+    return;
+  }
+  if (picked.replaces && !(await api.confirm(fill("skinReplaceConfirm", { name: picked.name }), i18n.t("skinReplace"), i18n.t("cancel")))) return;
+  const id = await api.installPickedSkin();
+  if (!id) {
+    await api.alert(fill("skinInstallFailed", { name: picked.name }), i18n.t("ok"));
+    return;
+  }
+  sendAction("setSkin", id);
+}
+
+skinInstallBtn.addEventListener("click", () => {
+  skinInstallBtn.disabled = true;
+  void installSkin().finally(() => (skinInstallBtn.disabled = false));
+});
 
 showAccentColor();
 
