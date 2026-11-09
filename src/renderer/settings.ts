@@ -5,6 +5,7 @@ import { accentColor as accentColorTheme } from "./theme";
 import { applySkinTokens } from "./skin";
 import { snapStereoStrength, STEREO_STRENGTH_DEFAULT } from "../shared/stereo";
 import { normalizeTitleScrollMode, normalizeTitleScrollSpeed, type TitleScrollMode } from "../shared/titleScroll";
+import { errorMessage } from "../shared/errors";
 import type { SkinProblem } from "../shared/skin";
 import type {
   AccentColor,
@@ -474,7 +475,7 @@ async function installSkin(): Promise<void> {
     return;
   }
   if (picked.replaces && !(await api.confirm(fill("skinReplaceConfirm", { name: picked.name }), i18n.t("skinReplace"), i18n.t("cancel")))) return;
-  const id = await api.installPickedSkin();
+  const id = await api.installPickedSkin().catch(() => null);
   if (!id) {
     await api.alert(fill("skinInstallFailed", { name: picked.name }), i18n.t("ok"));
     return;
@@ -484,7 +485,12 @@ async function installSkin(): Promise<void> {
 
 skinInstallBtn.addEventListener("click", () => {
   skinInstallBtn.disabled = true;
-  void installSkin().finally(() => (skinInstallBtn.disabled = false));
+  installSkin()
+    .catch(async (err) => {
+      window.electronAPI?.log?.("warn", "skin", `Install failed: ${errorMessage(err)}`);
+      await window.electronAPI?.alert?.(i18n.t("skinInstallError"), i18n.t("ok"));
+    })
+    .finally(() => (skinInstallBtn.disabled = false));
 });
 
 showAccentColor();

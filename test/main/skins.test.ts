@@ -132,6 +132,40 @@ describe("installing a skin", () => {
     expect(installed()).toEqual([]);
   });
 
+  it("turns on a skin picked from the skins folder without asking or copying", async () => {
+    const file = pack("Brass.waveskin", { format: 1, name: "Brass" });
+    choose(file);
+    expect(await pickSkin(null)).toEqual({ name: "Brass", replaces: false });
+    expect(await installPickedSkin()).toBe("Brass.waveskin");
+    expect(installed()).toEqual(["Brass.waveskin"]);
+  });
+
+  it("keeps file names Windows can write", async () => {
+    choose(pack("a.waveskin", { format: 1, name: "Con" }, {}, downloads));
+    await pickSkin(null);
+    expect(await installPickedSkin()).toBe("Con (skin).waveskin");
+    choose(pack("b.waveskin", { format: 1, name: "Brass..." }, {}, downloads));
+    await pickSkin(null);
+    expect(await installPickedSkin()).toBe("Brass.waveskin");
+  });
+
+  it("chooses the file name when copying, not when picking", async () => {
+    choose(pack("x.waveskin", { format: 1, name: "Brass" }, {}, downloads));
+    await pickSkin(null);
+    pack("Brass.waveskin", { format: 1, name: "Other" });
+    expect(await installPickedSkin()).toBe("Brass (2).waveskin");
+    expect(installed()).toEqual(["Brass (2).waveskin", "Brass.waveskin"]);
+  });
+
+  it("leaves nothing behind when the copy fails", async () => {
+    const file = pack("x.waveskin", { format: 1, name: "Brass" }, {}, downloads);
+    choose(file);
+    await pickSkin(null);
+    fs.rmSync(file);
+    expect(await installPickedSkin()).toBeNull();
+    expect(installed()).toEqual([]);
+  });
+
   it("does nothing when the dialog is closed", async () => {
     choose(null);
     expect(await pickSkin(null)).toBeNull();
