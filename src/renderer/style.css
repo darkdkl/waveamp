@@ -2506,6 +2506,18 @@ input[type="range"].settings-panel__range--tint::-webkit-slider-runnable-track {
   cursor: default;
 }
 
+.settings-panel__action-btn--quiet,
+.settings-panel__action-btn--quiet:hover:not(:disabled) {
+  flex: none;
+  background: none;
+  border-color: transparent;
+  color: var(--text-muted);
+}
+
+.settings-panel__action-btn--quiet:hover:not(:disabled) {
+  color: var(--text);
+}
+
 .dropzone {
   position: absolute;
   inset: 0;

@@ -4,6 +4,17 @@ All notable changes to WaveAMP are documented here. The project follows
 [Semantic Versioning](https://semver.org/): new features bump the minor
 version, fixes bump the patch version.
 
+## [1.39.0] — 2026-11-09
+
+### Added
+- Install skin… in Settings → Interface → Skin: pick a `.waveskin` file and the
+  player checks it, copies it and turns it on; a skin with the same name is
+  replaced after a question, and a skin that fails the checks is not installed
+
+### Changed
+- Open skins folder is now Show skins folder, a quieter button next to Install
+  skin…
+
 ## [1.38.0] — 2026-11-09
 
 ### Added

@@ -62,7 +62,7 @@ import { openLicenseFile } from "./licenses";
 import { startNowPlaying, stopNowPlaying } from "./nowPlaying";
 import { loadSavedTracks, writeSavedTracks } from "./savedTracks";
 import { choosePresetFolder, listPresets, readPreset } from "./presets";
-import { listSkins, openSkinsFolder, readSkin } from "./skins";
+import { installPickedSkin, listSkins, openSkinsFolder, pickSkin, readSkin } from "./skins";
 import type {
   AppConfig,
   DockLayout,
@@ -226,6 +226,8 @@ export function registerIpcHandlers(): void {
   ipcMain.handle("skins-list", () => listSkins());
   ipcMain.handle("skins-read", (_event, id: string) => readSkin(String(id)));
   ipcMain.on("skins-open-folder", () => void openSkinsFolder());
+  ipcMain.handle("skins-pick", (event) => pickSkin(BrowserWindow.fromWebContents(event.sender)));
+  ipcMain.handle("skins-install", () => installPickedSkin());
 
   ipcMain.on("copy-text", (_event, text: string) => clipboard.writeText(String(text)));
 
@@ -234,6 +236,12 @@ export function registerIpcHandlers(): void {
     const win = BrowserWindow.fromWebContents(event.sender);
     const { response } = await (win ? dialog.showMessageBox(win, options) : dialog.showMessageBox(options));
     return response === 0;
+  });
+
+  ipcMain.handle("alert", async (event, message: string, ok: string) => {
+    const options = { type: "warning" as const, message, buttons: [ok], noLink: true };
+    const win = BrowserWindow.fromWebContents(event.sender);
+    await (win ? dialog.showMessageBox(win, options) : dialog.showMessageBox(options));
   });
 
   ipcMain.on("apply-proxy-config", (_event, proxyConfig: ProxyConfig) => {

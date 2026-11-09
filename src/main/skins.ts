@@ -1,4 +1,4 @@
-import { app, shell } from "electron";
+import { app, dialog, shell, type BrowserWindow } from "electron";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { watch, type FSWatcher } from "node:fs";
@@ -26,6 +26,7 @@ import {
   type SkinAssets,
   type SkinButton,
   type SkinData,
+  type PickedSkin,
   type SkinInfo,
 } from "../shared/skin";
 
@@ -80,12 +81,12 @@ function rejected(id: string, { problem, detail }: SkinRefusal, name = ""): Open
   return { ok: false, info: { id, name: name || id.replace(/\.[^.]+$/, ""), author: "", version: "", builtIn: id === DEFAULT_SKIN_ID, problem } };
 }
 
-async function openSkin(id: string): Promise<OpenedSkin> {
+async function openSkin(id: string, picked?: string): Promise<OpenedSkin> {
   try {
     let source = folderSource(BUILTIN_SKIN_DIR);
     let sizes: Map<string, number> | null = null;
     if (id !== DEFAULT_SKIN_ID) {
-      const file = skinFile(id);
+      const file = picked ?? skinFile(id);
       if (!file) return rejected(id, broken("not a skin file name"));
       const archive = await openArchive(file);
       if ("problem" in archive) return rejected(id, archive);
@@ -164,6 +165,66 @@ export async function readSkin(id: string): Promise<LoadedSkin | null> {
     return { ...opened.skin, assets: buildAssets(opened.skin, files) };
   } catch (err) {
     writeLog("warn", "skins", `"${id}": ${errorMessage(err)}`);
+    return null;
+  }
+}
+
+let pending: { file: string; name: string; target: string | null } | null = null;
+
+const RESERVED_NAMES = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
+
+function sameName(a: string, b: string): boolean {
+  return a.toLowerCase() === b.toLowerCase();
+}
+
+async function freeFileName(name: string): Promise<string> {
+  const clean = name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").replace(/^[.\s]+|[.\s]+$/g, "") || "skin";
+  const base = RESERVED_NAMES.test(clean) ? `${clean} (skin)` : clean;
+  for (let n = 1; ; n++) {
+    const candidate = `${base}${n > 1 ? ` (${n})` : ""}.${SKIN_ARCHIVE_EXTENSION}`;
+    if (!(await fs.lstat(path.join(SKINS_DIR, candidate)).catch(() => null))) return candidate;
+  }
+}
+
+export async function pickSkin(parent: BrowserWindow | null): Promise<PickedSkin | null> {
+  pending = null;
+  const options: Electron.OpenDialogOptions = { properties: ["openFile"], filters: [{ name: "WaveAMP skin", extensions: [SKIN_ARCHIVE_EXTENSION] }] };
+  const result = await (parent ? dialog.showOpenDialog(parent, options) : dialog.showOpenDialog(options));
+  const chosen = result.canceled ? null : result.filePaths[0];
+  if (!chosen) return null;
+  const file = await fs.realpath(chosen).catch(() => chosen);
+  const id = path.basename(file);
+  const opened = isArchiveName(id) ? await openSkin(id, file) : rejected(id, broken("not a .waveskin file"));
+  if (!opened.ok) return { name: opened.info.name, problem: opened.info.problem, replaces: false };
+  const { name } = opened.skin;
+  if (path.dirname(file) === (await fs.realpath(SKINS_DIR).catch(() => SKINS_DIR))) {
+    pending = { file: path.join(SKINS_DIR, id), name, target: id };
+    return { name, replaces: false };
+  }
+  const installed = (await listSkins()).find((skin) => !skin.builtIn && sameName(skin.name, name));
+  pending = { file, name, target: installed?.id ?? null };
+  return { name, replaces: !!installed };
+}
+
+export async function installPickedSkin(): Promise<string | null> {
+  if (!pending) return null;
+  const { file, name } = pending;
+  let temporary: string | null = null;
+  try {
+    const target = pending.target ?? (await freeFileName(name));
+    pending = null;
+    const destination = path.join(SKINS_DIR, target);
+    if (file === destination) return target;
+    await fs.mkdir(SKINS_DIR, { recursive: true });
+    temporary = path.join(SKINS_DIR, `.${target}.${process.pid}.tmp`);
+    await fs.copyFile(file, temporary);
+    await fs.rename(temporary, destination);
+    writeLog("info", "skins", `Installed "${file}" as "${target}"`);
+    return target;
+  } catch (err) {
+    pending = null;
+    if (temporary) await fs.rm(temporary, { force: true });
+    writeLog("warn", "skins", `Cannot install "${file}": ${errorMessage(err)}`);
     return null;
   }
 }

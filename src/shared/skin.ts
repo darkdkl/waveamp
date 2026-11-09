@@ -26,6 +26,12 @@ export type SkinProblem =
   | { kind: "newerFormat" }
   | { kind: "broken" };
 
+export interface PickedSkin {
+  name: string;
+  problem?: SkinProblem;
+  replaces: boolean;
+}
+
 export interface SkinInfo {
   id: string;
   name: string;

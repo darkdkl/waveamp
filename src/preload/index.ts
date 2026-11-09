@@ -25,7 +25,7 @@ import type {
   UpdateCheckResult,
 } from "../shared/types";
 import type { AudioFormat } from "../shared/audioFormat";
-import type { LoadedSkin, SkinInfo } from "../shared/skin";
+import type { LoadedSkin, PickedSkin, SkinInfo } from "../shared/skin";
 
 // Sandboxed preload has no node:url; the drive-letter colon must stay unencoded.
 function pathToFileUrl(filePath: string): string {
@@ -101,8 +101,11 @@ const api = {
   listSkins: (): Promise<SkinInfo[]> => ipcRenderer.invoke("skins-list"),
   readSkin: (id: string): Promise<LoadedSkin | null> => ipcRenderer.invoke("skins-read", id),
   openSkinsFolder: (): void => ipcRenderer.send("skins-open-folder"),
+  pickSkin: (): Promise<PickedSkin | null> => ipcRenderer.invoke("skins-pick"),
+  installPickedSkin: (): Promise<string | null> => ipcRenderer.invoke("skins-install"),
   onSkinsChanged: (callback: (changed: string[] | null) => void) => ipcRenderer.on("skins-changed", (_event, changed) => callback(changed)),
   confirm: (message: string, yes: string, cancel: string): Promise<boolean> => ipcRenderer.invoke("confirm", message, yes, cancel),
+  alert: (message: string, ok: string): Promise<void> => ipcRenderer.invoke("alert", message, ok),
   applyProxyConfig: (config: ProxyConfig): void => ipcRenderer.send("apply-proxy-config", config),
   setLoggingEnabled: (enabled: boolean): void => ipcRenderer.send("set-logging-enabled", enabled),
   log: (level: LogLevel, scope: string, message: string): void => ipcRenderer.send("log", level, scope, message),
